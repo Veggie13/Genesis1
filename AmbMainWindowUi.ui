@@ -1,0 +1,214 @@
+<ui version="4.0" >
+ <class>AmbMainWindowUi</class>
+ <widget class="QMainWindow" name="AmbMainWindowUi" >
+  <property name="geometry" >
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>418</width>
+    <height>339</height>
+   </rect>
+  </property>
+  <property name="windowIcon" >
+   <iconset resource="ambience.qrc" >:/images/genesis_zoom_sm.png</iconset>
+  </property>
+  <widget class="QWidget" name="centralwidget" >
+   <property name="windowTitle" >
+    <string>Ambient Sound Studio</string>
+   </property>
+   <layout class="QGridLayout" >
+    <item row="0" column="0" colspan="3" >
+     <widget class="QFrame" name="m_mainWidgetFrm" >
+      <property name="sizePolicy" >
+       <sizepolicy vsizetype="Expanding" hsizetype="Expanding" >
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="frameShape" >
+       <enum>QFrame::NoFrame</enum>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="0" colspan="3" >
+     <widget class="Line" name="line" >
+      <property name="orientation" >
+       <enum>Qt::Horizontal</enum>
+      </property>
+     </widget>
+    </item>
+    <item row="2" column="0" >
+     <widget class="QLabel" name="label_2" >
+      <property name="sizePolicy" >
+       <sizepolicy vsizetype="Minimum" hsizetype="Preferred" >
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="text" >
+       <string>Scene:</string>
+      </property>
+     </widget>
+    </item>
+    <item row="2" column="1" >
+     <widget class="QLabel" name="label_3" >
+      <property name="sizePolicy" >
+       <sizepolicy vsizetype="Minimum" hsizetype="Preferred" >
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="text" >
+       <string>State:</string>
+      </property>
+     </widget>
+    </item>
+    <item rowspan="2" row="2" column="2" >
+     <widget class="QPushButton" name="m_switchBtn" >
+      <property name="sizePolicy" >
+       <sizepolicy vsizetype="Preferred" hsizetype="Minimum" >
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="text" >
+       <string>Switch</string>
+      </property>
+     </widget>
+    </item>
+    <item row="3" column="0" >
+     <widget class="QComboBox" name="m_sceneCbo" >
+      <property name="sizePolicy" >
+       <sizepolicy vsizetype="Fixed" hsizetype="MinimumExpanding" >
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+     </widget>
+    </item>
+    <item row="3" column="1" >
+     <widget class="QComboBox" name="m_stateCbo" >
+      <property name="sizePolicy" >
+       <sizepolicy vsizetype="Fixed" hsizetype="MinimumExpanding" >
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QMenuBar" name="menubar" >
+   <property name="geometry" >
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>418</width>
+     <height>19</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menuFile" >
+    <property name="title" >
+     <string>File</string>
+    </property>
+    <widget class="QMenu" name="m_recentFilesMenu" >
+     <property name="title" >
+      <string>Recent Files</string>
+     </property>
+    </widget>
+    <addaction name="m_newAction" />
+    <addaction name="m_openAction" />
+    <addaction name="m_saveAction" />
+    <addaction name="m_saveAsAction" />
+    <addaction name="separator" />
+    <addaction name="m_recentFilesMenu" />
+    <addaction name="separator" />
+    <addaction name="m_exitAction" />
+   </widget>
+   <widget class="QMenu" name="menuHelp" >
+    <property name="title" >
+     <string>Help</string>
+    </property>
+    <addaction name="m_aboutAction" />
+   </widget>
+   <widget class="QMenu" name="menuEdit" >
+    <property name="title" >
+     <string>Edit</string>
+    </property>
+    <addaction name="m_scenesAction" />
+    <addaction name="m_longAction" />
+    <addaction name="m_shortAction" />
+   </widget>
+   <addaction name="menuFile" />
+   <addaction name="menuEdit" />
+   <addaction name="menuHelp" />
+  </widget>
+  <widget class="QStatusBar" name="statusbar" />
+  <action name="m_exitAction" >
+   <property name="text" >
+    <string>Exit</string>
+   </property>
+  </action>
+  <action name="m_aboutAction" >
+   <property name="text" >
+    <string>About</string>
+   </property>
+  </action>
+  <action name="m_scenesAction" >
+   <property name="text" >
+    <string>Scenes &amp;&amp; States</string>
+   </property>
+  </action>
+  <action name="m_saveAction" >
+   <property name="text" >
+    <string>Save</string>
+   </property>
+  </action>
+  <action name="m_saveAsAction" >
+   <property name="text" >
+    <string>Save As</string>
+   </property>
+  </action>
+  <action name="m_openAction" >
+   <property name="text" >
+    <string>Open</string>
+   </property>
+  </action>
+  <action name="m_newAction" >
+   <property name="text" >
+    <string>New</string>
+   </property>
+  </action>
+  <action name="m_longAction" >
+   <property name="text" >
+    <string>Streamed Imports</string>
+   </property>
+  </action>
+  <action name="m_shortAction" >
+   <property name="text" >
+    <string>Sampled Imports</string>
+   </property>
+  </action>
+ </widget>
+ <resources>
+  <include location="ambience.qrc" />
+ </resources>
+ <connections>
+  <connection>
+   <sender>m_exitAction</sender>
+   <signal>activated()</signal>
+   <receiver>AmbMainWindowUi</receiver>
+   <slot>close()</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>399</x>
+     <y>299</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+</ui>

@@ -1,0 +1,56 @@
+<ui version="4.0" >
+ <class>OpenOptionsDlgUi</class>
+ <widget class="QDialog" name="OpenOptionsDlgUi" >
+  <property name="windowModality" >
+   <enum>Qt::WindowModal</enum>
+  </property>
+  <property name="geometry" >
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>279</width>
+    <height>304</height>
+   </rect>
+  </property>
+  <property name="windowTitle" >
+   <string>Startup Options</string>
+  </property>
+  <property name="windowIcon" >
+   <iconset resource="ambience.qrc" >:/images/genesis_zoom_ico.png</iconset>
+  </property>
+  <layout class="QVBoxLayout" >
+   <item>
+    <widget class="QListWidget" name="m_recentList" >
+     <property name="selectionBehavior" >
+      <enum>QAbstractItemView::SelectRows</enum>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QPushButton" name="m_openRecentBtn" >
+     <property name="text" >
+      <string>Open Recent</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QPushButton" name="m_openOtherBtn" >
+     <property name="text" >
+      <string>Open Other...</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QPushButton" name="m_newProjectBtn" >
+     <property name="text" >
+      <string>New Project</string>
+     </property>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <resources>
+  <include location="ambience.qrc" />
+ </resources>
+ <connections/>
+</ui>
