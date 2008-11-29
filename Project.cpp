@@ -50,6 +50,7 @@ bool Project::AddScene(const QString& sceneName, const QDomElement& scene)
     connect(newScene, SIGNAL( Modified() ), this, SIGNAL( Modified() ));
 
     m_scenes[sceneName] = newScene;
+    m_sceneModel.setStringMap(&m_scenes);
     emit Modified();
     return true;
 }
@@ -64,6 +65,7 @@ void Project::RemoveScene(const QString& sceneName)
     delete doomed;
 
     m_scenes.erase(it);
+    m_sceneModel.setStringMap(&m_scenes);
     emit Modified();
 }
 

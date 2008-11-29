@@ -101,6 +101,7 @@ void SceneEditorDlg::AddScene()
             continue;
         }
 
+        m_sceneCbo->setModel(m_project->Model());
         m_sceneCbo->setCurrentIndex(m_sceneCbo->findText(newName));
         break;
     }
@@ -188,6 +189,7 @@ void SceneEditorDlg::DeleteScene()
     if (dlg.exec() == QMessageBox::Yes)
     {
         m_project->RemoveScene(m_sceneCbo->currentText());
+        m_sceneCbo->setModel(m_project->Model());
     }
 
     UpdateStateList();

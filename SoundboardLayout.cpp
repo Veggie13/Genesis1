@@ -65,10 +65,12 @@ void SoundboardLayout::Associate(Soundboard* sndboard)
 
     m_sndboardVolumeSld->setValue(sndboard->GetVolume());
 
-    connect( this,     SIGNAL( VolumeChanged(int)   ),
-             sndboard, SLOT  ( SetVolume(int)       ) );
-    connect( this,     SIGNAL( SizeChanged(int,int) ),
-             sndboard, SLOT  ( Resize(int,int)      ) );
+    connect( this,     SIGNAL( VolumeChanged(int)      ),
+             sndboard, SLOT  ( SetVolume(int)          ) );
+    connect( this,     SIGNAL( SizeChanged(int,int)    ),
+             sndboard, SLOT  ( Resize(int,int)         ) );
+    connect( sndboard, SIGNAL( destroyed()             ),
+             this,     SLOT  ( OnSoundboardDestroyed() ) );
 }
 
 bool SoundboardLayout::AssignSoundToButton(
@@ -136,4 +138,9 @@ void SoundboardLayout::Resize(int rows, int cols)
     }
 
     emit SizeChanged(rows, cols);
+}
+
+void SoundboardLayout::OnSoundboardDestroyed()
+{
+    m_curBoard = NULL;
 }

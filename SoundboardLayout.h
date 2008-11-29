@@ -33,6 +33,9 @@ signals:
     void SizeChanged(int rows, int cols);
     void VolumeChanged(int vol);
 
+private slots:
+    void OnSoundboardDestroyed();
+
 private:
     typedef QVector<InstantCtrlButton*> ButtonRow;
     typedef QVector<ButtonRow> ButtonTable;
