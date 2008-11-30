@@ -15,3 +15,5 @@ Bug Fixes:
 
 New Features:
 - Right-clicking on an assigned button in the Sound Board now gives a context menu for reassignment.
+- The program now allows you to open a project file directly, and the installer associates the file
+  extension .assp with Ambience.
