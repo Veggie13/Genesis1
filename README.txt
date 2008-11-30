@@ -15,6 +15,3 @@ Bug Fixes:
 
 New Features:
 - Right-clicking on an assigned button in the Sound Board now gives a context menu for reassignment.
-
-Applying this revision:
-Simply copy the executable in this ZIP over the old executable in your Ambience program folder.
