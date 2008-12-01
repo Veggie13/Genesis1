@@ -4,9 +4,20 @@
 
 /-----------------------\
 | Ambience Sound Studio |
-| v1.1 rev02 beta       |
 \-----------------------/
 
+
+=== Version 1.1 ===
+
+Rev 03 Beta
+-----------
+
+Bug Fixes:
+- If you cancel during the naming phase of file import, it would import anyway.
+
+
+Rev 02 Beta
+-----------
 
 Bug Fixes:
 - When trying to delete multiple items in Background or Random, some items were not being deleted.

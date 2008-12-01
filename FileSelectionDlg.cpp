@@ -149,9 +149,15 @@ void FileSelectionDlg::ImportFiles()
     {
         QString title;
         QMap<QString, QString>::const_iterator checker;
+        bool import = true;
         while (true)
         {
-            title = GetTitleForFile(*fileIt);
+            if ( !GetTitleForFile(*fileIt, title) )
+            {
+                import = false;
+                break;
+            }
+
             checker = m_fileMap.find(title);
             if (checker == m_fileMap.end())
             {
@@ -164,7 +170,8 @@ void FileSelectionDlg::ImportFiles()
                 QString("That title is already in use.\nPlease choose another.") );
         }
 
-        emit ImportRequested(title, *fileIt);
+        if (import)
+            emit ImportRequested(title, *fileIt);
     }
 }
 
@@ -181,7 +188,7 @@ void FileSelectionDlg::DeleteSelectedFiles()
     }
 }
 
-QString FileSelectionDlg::GetTitleForFile(const QString& filename)
+bool FileSelectionDlg::GetTitleForFile(const QString& filename, QString& title)
 {
     Ui::TitleDlgUi dlgLayout;
     QDialog dlg;
@@ -190,10 +197,17 @@ QString FileSelectionDlg::GetTitleForFile(const QString& filename)
     QFileInfo fileInfo(filename);
     dlgLayout.m_filenameLbl->setText(fileInfo.fileName());
 
-    if ( !dlg.exec() || dlgLayout.m_titleEdit->text() == "" )
+    if ( !dlg.exec() )
     {
-        return fileInfo.absoluteFilePath();
+        return false;
     }
 
-    return dlgLayout.m_titleEdit->text();
+    if ( dlgLayout.m_titleEdit->text() == "" )
+    {
+        title = fileInfo.absoluteFilePath();
+        return true;
+    }
+
+    title = dlgLayout.m_titleEdit->text();
+    return true;
 }

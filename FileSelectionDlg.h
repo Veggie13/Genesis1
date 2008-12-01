@@ -38,7 +38,7 @@ private slots:
     void DeleteSelectedFiles();
 
 private:
-    QString GetTitleForFile(const QString& filename);
+    bool GetTitleForFile(const QString& filename, QString& title);
 
 
     QMap<QString, QString>      m_fileMap;
