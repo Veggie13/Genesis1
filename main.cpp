@@ -32,7 +32,7 @@ int main(int argc, char* argv[])
     QMainWindow* mainWindow = new AmbMainWindow(argc, argv);
     QDialog* splash = new AmbSplash();
     splash->exec();
-    mainWindow->show();
+    mainWindow->showMaximized();
 
     try
     {

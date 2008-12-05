@@ -9,6 +9,7 @@ namespace Ui
     class BackgroundCtrlUi;
     class MusicCtrlUi;
     class RandomCtrlUi;
+    class SidebarUi;
 }
 class SoundboardLayout;
 class State;
@@ -80,6 +81,7 @@ private slots:
     void OnCurrentStateDeletion();
 
 private:
+    Ui::SidebarUi*          m_sidebarObj;
     Ui::BackgroundCtrlUi*   m_backgroundObj;
     Ui::MusicCtrlUi*        m_musicObj;
     Ui::RandomCtrlUi*       m_randomObj;

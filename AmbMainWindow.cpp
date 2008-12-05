@@ -44,8 +44,6 @@ AmbMainWindow::AmbMainWindow(int argc, char* argv[], QWidget* parent)
     m_settings(NULL)
 {
     setupUi(this);
-    setWindowState(Qt::WindowMaximized);
-    setWindowFlags(windowFlags() & ~Qt::WindowMaximizeButtonHint);
 
     // Create all children.
     m_mainWidgetLayout = new QHBoxLayout;

@@ -1,5 +1,6 @@
 #include <QDomElement>
 #include <QMessageBox>
+#include <QScrollArea>
 #include <QTimer>
 
 #include <cmath>
@@ -13,6 +14,7 @@
 #include "RandomCtrl.h"
 #include "RandomCtrlUi.h"
 #include "RandomSound.h"
+#include "SidebarUi.h"
 #include "Soundboard.h"
 #include "SoundboardLayout.h"
 #include "State.h"
@@ -22,26 +24,30 @@
 
 AmbMainWidget::AmbMainWidget(QWidget* parent)
 :   QWidget(parent),
+    m_sidebarObj(NULL),
     m_backgroundObj(NULL),
     m_musicObj(NULL),
     m_randomObj(NULL),
     m_sndboardObj(NULL),
     m_curState(NULL)
 {
+    m_sidebarObj = new Ui::SidebarUi;
     m_backgroundObj = new Ui::BackgroundCtrlUi;
     m_musicObj = new Ui::MusicCtrlUi;
     m_randomObj = new Ui::RandomCtrlUi;
     m_sndboardObj = new SoundboardLayout;
 
     setupUi(this);
-    m_backgroundObj->setupUi(m_backgroundCtrl);
-    m_musicObj->setupUi(m_musicCtrl);
-    m_randomObj->setupUi(m_randomCtrl);
+
+    m_sidebar->setWidget(new QWidget);
+    m_sidebarObj->setupUi(m_sidebar->widget());
+
+    m_backgroundObj->setupUi(m_sidebarObj->m_backgroundCtrl);
+    m_musicObj->setupUi(m_sidebarObj->m_musicCtrl);
+    m_randomObj->setupUi(m_sidebarObj->m_randomCtrl);
     m_sndboardObj->setupUiWithButtons(m_sndboardCtrl);
 
-    m_musicCtrl->setEnabled(false);
-    m_backgroundCtrl->setEnabled(false);
-    m_randomCtrl->setEnabled(false);
+    m_sidebar->widget()->setEnabled(false);
     m_sndboardCtrl->setEnabled(false);
 
     // Connect the signals & slots.
@@ -112,6 +118,7 @@ AmbMainWidget::AmbMainWidget(QWidget* parent)
 
 AmbMainWidget::~AmbMainWidget()
 {
+    delete m_sidebarObj;
     delete m_backgroundObj;
     delete m_musicObj;
     delete m_randomObj;
@@ -126,9 +133,7 @@ void AmbMainWidget::Associate(State* newState)
     m_backgroundObj->m_effectList->clearSelection();
     m_randomObj->m_effectList->clearSelection();
 
-    m_musicCtrl->setEnabled(false);
-    m_backgroundCtrl->setEnabled(false);
-    m_randomCtrl->setEnabled(false);
+    m_sidebar->widget()->setEnabled(false);
     m_sndboardCtrl->setEnabled(false);
 
     if (m_curState)
@@ -229,9 +234,7 @@ void AmbMainWidget::Associate(State* newState)
 
         connect( newState, SIGNAL( destroyed() ), this, SLOT( OnCurrentStateDeletion() ));
 
-        m_musicCtrl->setEnabled(true);
-        m_backgroundCtrl->setEnabled(true);
-        m_randomCtrl->setEnabled(true);
+        m_sidebar->widget()->setEnabled(true);
         m_sndboardCtrl->setEnabled(true);
 
         newMusic->Resume(sharedMusic, curSong);
@@ -334,9 +337,7 @@ void AmbMainWidget::SelectSong(const QString& title)
 
 void AmbMainWidget::ExpandLeft(bool expand)
 {
-    m_backgroundGrp->setVisible(expand);
-    m_musicGrp->setVisible(expand);
-    m_randomGrp->setVisible(expand);
+    m_sidebar->setVisible(expand);
     m_leftExpandBtn->setText(expand?"<<":">>");
     m_leftExpandBtn->setChecked(expand);
 

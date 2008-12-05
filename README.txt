@@ -15,6 +15,10 @@ Rev 03 Beta
 Bug Fixes:
 - If you cancel during the naming phase of file import, it would import anyway.
 
+New Features:
+- The hidable sidebar now has vertical scroll. Accordingly, the application no longer enforces
+  maximization, allowing normal window resizing.
+
 
 Rev 02 Beta
 -----------
