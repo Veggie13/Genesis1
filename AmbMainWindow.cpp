@@ -25,7 +25,7 @@
 #include "AmbMainWindow.h"
 
 
-const unsigned int  AmbMainWindow::VERSION_CODE             = 0x01010201;
+const unsigned int  AmbMainWindow::VERSION_CODE             = 0x01010301;
 const char          AmbMainWindow::APP_NAME[]               = "Ambience Sound Studio";
 const char          AmbMainWindow::COMPANY_NAME[]           = "MeiCor Gaming";
 const int           AmbMainWindow::RECENT_FILES_LIST_MAX    = 4;
