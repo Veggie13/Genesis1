@@ -76,19 +76,23 @@ AmbMainWindow::AmbMainWindow(int argc, char* argv[], QWidget* parent)
             this,       SLOT  ( UpdateStateList()                   ));
     connect(m_switchBtn, SIGNAL( clicked() ), this, SLOT( SwitchSceneState() ));
 
-    connect( m_longFileDlg,  SIGNAL( ImportRequested(const QString&, const QString&)  ),
-             this,           SLOT  ( ImportStreamFile(const QString&, const QString&) ) );
-    connect( m_longFileDlg,  SIGNAL( DeleteRequested(const QString&)                  ),
-             this,           SLOT  ( CloseStreamFile(const QString&)                  ) );
-    connect( m_longFileDlg,  SIGNAL( RenameRequested(const QString&, const QString&)  ),
-             this,           SLOT  ( RenameStream(const QString&, const QString&)     ) );
+    connect( m_longFileDlg,  SIGNAL( ImportRequested(const QString&, const QString&)    ),
+             this,           SLOT  ( ImportStreamFile(const QString&, const QString&)   ) );
+    connect( m_longFileDlg,  SIGNAL( DeleteRequested(const QString&)                    ),
+             this,           SLOT  ( CloseStreamFile(const QString&)                    ) );
+    connect( m_longFileDlg,  SIGNAL( RenameRequested(const QString&, const QString&)    ),
+             this,           SLOT  ( RenameStream(const QString&, const QString&)       ) );
+    connect( m_longFileDlg,  SIGNAL( ReimportRequested(const QString&, const QString&)  ),
+             this,           SLOT  ( ReimportStream(const QString&, const QString&)     ) );
 
-    connect( m_shortFileDlg, SIGNAL( ImportRequested(const QString&, const QString&)  ),
-             this,           SLOT  ( ImportSampleFile(const QString&, const QString&) ) );
-    connect( m_shortFileDlg, SIGNAL( DeleteRequested(const QString&)                  ),
-             this,           SLOT  ( CloseSampleFile(const QString&)                  ) );
-    connect( m_shortFileDlg, SIGNAL( RenameRequested(const QString&, const QString&)  ),
-             this,           SLOT  ( RenameSample(const QString&, const QString&)     ) );
+    connect( m_shortFileDlg, SIGNAL( ImportRequested(const QString&, const QString&)    ),
+             this,           SLOT  ( ImportSampleFile(const QString&, const QString&)   ) );
+    connect( m_shortFileDlg, SIGNAL( DeleteRequested(const QString&)                    ),
+             this,           SLOT  ( CloseSampleFile(const QString&)                    ) );
+    connect( m_shortFileDlg, SIGNAL( RenameRequested(const QString&, const QString&)    ),
+             this,           SLOT  ( RenameSample(const QString&, const QString&)       ) );
+    connect( m_shortFileDlg, SIGNAL( ReimportRequested(const QString&, const QString&)  ),
+             this,           SLOT  ( ReimportSample(const QString&, const QString&)     ) );
 
     connect( m_sceneEditDlg, SIGNAL( accepted()        ),
              this,           SLOT  ( UpdateSceneList() ) );
@@ -460,8 +464,7 @@ void AmbMainWindow::RenameStream(const QString& title, const QString& newTitle)
 
     if (master.RenameStream(title, newTitle))
     {
-        m_longFileDlg->AddFile(newTitle, m_longFileDlg->GetFileMap()[title]);
-        m_longFileDlg->DeleteFile(title);
+        m_longFileDlg->RenameFile(title, newTitle);
         m_project->RenameStreamObjects(title, newTitle);
         SetModified();
     }
@@ -473,11 +476,32 @@ void AmbMainWindow::RenameSample(const QString& title, const QString& newTitle)
 
     if (master.RenameSample(title, newTitle))
     {
-        m_shortFileDlg->AddFile(newTitle, m_shortFileDlg->GetFileMap()[title]);
-        m_shortFileDlg->DeleteFile(title);
+        m_shortFileDlg->RenameFile(title, newTitle);
         m_project->RenameSampleObjects(title, newTitle);
         State* curState = m_mainWidget->CurrentState();
         m_mainWidget->Associate(curState);
+        SetModified();
+    }
+}
+
+void AmbMainWindow::ReimportStream(const QString& title, const QString& newFilename)
+{
+    SoundMaster& master = SoundMaster::Get();
+
+    if (master.ReimportStream(title, newFilename))
+    {
+        m_longFileDlg->ReimportFile(title, newFilename);
+        SetModified();
+    }
+}
+
+void AmbMainWindow::ReimportSample(const QString& title, const QString& newFilename)
+{
+    SoundMaster& master = SoundMaster::Get();
+
+    if (master.ReimportSample(title, newFilename))
+    {
+        m_shortFileDlg->ReimportFile(title, newFilename);
         SetModified();
     }
 }

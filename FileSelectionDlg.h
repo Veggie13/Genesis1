@@ -19,6 +19,8 @@ public:
 
     void AddFile(const QString& title, const QString& filename);
     void DeleteFile(const QString& title);
+    void RenameFile(const QString& title, const QString& newTitle);
+    void ReimportFile(const QString& title, const QString& newFilename);
 
     const QMap<QString, QString>& GetFileMap();
 
@@ -33,6 +35,10 @@ signals:
     void ImportRequested(const QString& title, const QString& filename);
     void DeleteRequested(const QString& title);
     void RenameRequested(const QString& title, const QString& newTitle);
+    void ReimportRequested(const QString& title, const QString& newFilename);
+
+protected:
+    virtual void showEvent(QShowEvent* evt);
 
 private slots:
     void ImportFiles();
@@ -40,8 +46,14 @@ private slots:
     void RenameSelectedFiles();
     void ReimportSelectedFiles();
 
+    void UpdateSelectionButtons();
+
 private:
+    void GetFileList(QStringList& fileList);
+    void GetFilename(QString& filename);
+    void FilterFileList(QStringList& fileList);
     bool GetTitleForFile(const QString& filename, QString& title);
+    bool ShowTitleDlg(const QString& filename, QString& title);
 
 
     QMap<QString, QString>      m_fileMap;

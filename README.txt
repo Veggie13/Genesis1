@@ -18,6 +18,8 @@ Bug Fixes:
 New Features:
 - The hidable sidebar now has vertical scroll. Accordingly, the application no longer enforces
   maximization, allowing normal window resizing.
+- Added Rename and Reimport options. Imported files can be given a new title, or current titles
+  can be reassigned to new import files.
 
 
 Rev 02 Beta

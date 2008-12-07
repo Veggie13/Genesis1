@@ -22,6 +22,11 @@ public:
     { return m_channel == other.m_channel; }
 
 protected:
+    friend class SoundMaster;
+
+    void Reassign(BASS::Channel* newChan)
+    { m_channel = newChan; }
+
     BASS::Channel* m_channel;
 
 };

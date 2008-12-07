@@ -35,3 +35,8 @@ bool InstantSound::Play(int vol)
 
     return true;
 }
+
+void InstantSound::Reassign(BASS::Channel* chan)
+{
+    m_channel = chan;
+}

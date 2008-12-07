@@ -251,12 +251,111 @@ bool SoundMaster::RenameSample(const QString& title, const QString& newTitle)
 
 bool SoundMaster::ReimportStream(const QString& title, const QString& newFilename)
 {
-    return false;
+    if (m_streamMap.find(title) == m_streamMap.end())
+        return false;
+
+
+    BASS::Stream* newStream;
+    try
+    {
+        newStream =
+            BASS::System::Get().LoadStreamFromFile(newFilename.toAscii().data(),0,0,0);
+    }
+    catch (std::exception e)
+    {
+        fprintf(stderr, "BASS Exception: %s\n", e.what());
+        return false;
+    }
+
+    SongMap::iterator songIt = m_songMap.find(title);
+    while ( (songIt != m_songMap.end()) &&
+            (songIt.key() == title) )
+    {
+        Song* changer = songIt.value();
+        bool cond = changer->IsActive();
+
+        if (cond)
+            changer->StopNoSignal();
+        changer->Reassign(newStream);
+        if (cond)
+            changer->Play();
+
+        songIt++;
+    }
+
+    BackgroundMap::iterator bgIt = m_bgMap.find(title);
+    while ( (bgIt != m_bgMap.end()) &&
+            (bgIt.key() == title) )
+    {
+        Background* changer = bgIt.value();
+        bool cond = changer->IsActive();
+
+        if (cond)
+            changer->Stop();
+        changer->Reassign(newStream);
+        if (cond)
+            changer->Play();
+
+        bgIt++;
+    }
+
+    delete m_streamMap[title];
+    m_streamMap[title] = newStream;
+
+    return true;
 }
 
 bool SoundMaster::ReimportSample(const QString& title, const QString& newFilename)
 {
-    return false;
+    if (m_sampleMap.find(title) == m_sampleMap.end())
+        return false;
+
+    QFile sampleFile(newFilename);
+    if (!sampleFile.open(QIODevice::ReadOnly))
+        return false;
+
+
+    QByteArray* newArray = new QByteArray( sampleFile.readAll() );
+    sampleFile.close();
+
+    BASS::Sample* newSample;
+    try
+    {
+        newSample =
+            BASS::System::Get().LoadSampleFromMemory(
+                newArray->data(),
+                newArray->length(),
+                2,
+                BASS_SAMPLE_OVER_POS );
+    }
+    catch (std::exception e)
+    {
+        fprintf(stderr, "BASS System Exception: %s\n", e.what());
+        delete newArray;
+        return false;
+    }
+
+    SampleMap::mapped_type& entry = m_sampleMap[title];
+    SampleMap::mapped_type newEntry = entry;
+    newEntry.first = newSample;
+    newEntry.second = newArray;
+    newEntry.third = newSample->GetChannel(false);
+
+    InstantMap::iterator instIt = m_instMap.find(title);
+    while ( (instIt != m_instMap.end()) &&
+            (instIt.key() == title) )
+    {
+        instIt.value()->Reassign(newEntry.third);
+        instIt++;
+    }
+
+    delete entry.third;
+    delete entry.first;
+    delete entry.second;
+
+    entry = newEntry;
+
+    return true;
 }
 
 BASS::Channel* SoundMaster::GetStreamInstance(const QString& title)

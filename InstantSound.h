@@ -20,6 +20,10 @@ public:
 public slots:
     bool Play(int vol);
 
+protected:
+    friend class SoundMaster;
+    void Reassign(BASS::Channel* newChan);
+
 private:
     BASS::Channel* m_channel;
 
