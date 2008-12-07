@@ -41,6 +41,7 @@ public slots:
 
     bool AddBackground(const QString& title, const QDomElement& sound = QDomElement());
     bool RemoveBackground(const QString& title);
+    void RenameBackground(const QString& title, const QString& newTitle);
 
 signals:
     void Modified();

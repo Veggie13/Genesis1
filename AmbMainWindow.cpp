@@ -80,11 +80,15 @@ AmbMainWindow::AmbMainWindow(int argc, char* argv[], QWidget* parent)
              this,           SLOT  ( ImportStreamFile(const QString&, const QString&) ) );
     connect( m_longFileDlg,  SIGNAL( DeleteRequested(const QString&)                  ),
              this,           SLOT  ( CloseStreamFile(const QString&)                  ) );
+    connect( m_longFileDlg,  SIGNAL( RenameRequested(const QString&, const QString&)  ),
+             this,           SLOT  ( RenameStream(const QString&, const QString&)     ) );
 
     connect( m_shortFileDlg, SIGNAL( ImportRequested(const QString&, const QString&)  ),
              this,           SLOT  ( ImportSampleFile(const QString&, const QString&) ) );
     connect( m_shortFileDlg, SIGNAL( DeleteRequested(const QString&)                  ),
              this,           SLOT  ( CloseSampleFile(const QString&)                  ) );
+    connect( m_shortFileDlg, SIGNAL( RenameRequested(const QString&, const QString&)  ),
+             this,           SLOT  ( RenameSample(const QString&, const QString&)     ) );
 
     connect( m_sceneEditDlg, SIGNAL( accepted()        ),
              this,           SLOT  ( UpdateSceneList() ) );
@@ -448,6 +452,34 @@ void AmbMainWindow::CloseSampleFile(const QString& title)
     master.CloseSample(title);
     m_shortFileDlg->DeleteFile(title);
     SetModified();
+}
+
+void AmbMainWindow::RenameStream(const QString& title, const QString& newTitle)
+{
+    SoundMaster& master = SoundMaster::Get();
+
+    if (master.RenameStream(title, newTitle))
+    {
+        m_longFileDlg->AddFile(newTitle, m_longFileDlg->GetFileMap()[title]);
+        m_longFileDlg->DeleteFile(title);
+        m_project->RenameStreamObjects(title, newTitle);
+        SetModified();
+    }
+}
+
+void AmbMainWindow::RenameSample(const QString& title, const QString& newTitle)
+{
+    SoundMaster& master = SoundMaster::Get();
+
+    if (master.RenameSample(title, newTitle))
+    {
+        m_shortFileDlg->AddFile(newTitle, m_shortFileDlg->GetFileMap()[title]);
+        m_shortFileDlg->DeleteFile(title);
+        m_project->RenameSampleObjects(title, newTitle);
+        State* curState = m_mainWidget->CurrentState();
+        m_mainWidget->Associate(curState);
+        SetModified();
+    }
 }
 
 void AmbMainWindow::SelectSong()

@@ -225,6 +225,17 @@ bool RandomCtrl::RemoveRandom(const QString& title)
     return true;
 }
 
+void RandomCtrl::RenameRandom(const QString& title, const QString& newTitle)
+{
+    RandomMap::iterator finder = m_randMap.find(title);
+    if (finder == m_randMap.end())
+        return;
+
+    RandomSound* renamed = finder.value();
+    RandomMap::iterator newEntry = m_randMap.insert(newTitle, renamed);
+    m_randMap.erase(finder);
+}
+
 void RandomCtrl::RemoveDeletedRandom()
 {
     RandomSound* doomed = reinterpret_cast<RandomSound*>(sender());

@@ -95,3 +95,15 @@ void State::WriteData(QDomElement& state)
     m_sndboard->WriteData(sndboard);
     state.appendChild(sndboard);
 }
+
+void State::RenameStreamObjects(const QString& title, const QString& newTitle)
+{
+    m_music->RenameSong(title, newTitle);
+    m_background->RenameBackground(title, newTitle);
+}
+
+void State::RenameSampleObjects(const QString& title, const QString& newTitle)
+{
+    m_random->RenameRandom(title, newTitle);
+    m_sndboard->RenameEntries(title, newTitle);
+}

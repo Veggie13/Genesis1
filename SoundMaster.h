@@ -24,6 +24,12 @@ public:
     void CloseStream(const QString& title);
     void CloseSample(const QString& title);
 
+    bool RenameStream(const QString& title, const QString& newTitle);
+    bool RenameSample(const QString& title, const QString& newTitle);
+
+    bool ReimportStream(const QString& title, const QString& newFilename);
+    bool ReimportSample(const QString& title, const QString& newFilename);
+
     Song*           CreateSong(const QString& title);
     Background*     CreateBackground(const QString& title);
     InstantSound*   CreateInstant(const QString& title);
@@ -41,7 +47,7 @@ private:
 
 
     typedef QMap<QString, BASS::Channel*> StreamMap;
-    typedef QMap<QString, QTriple<BASS::Sample*, QByteArray, BASS::Channel*> > SampleMap;
+    typedef QMap<QString, QTriple<BASS::Sample*, QByteArray*, BASS::Channel*> > SampleMap;
     typedef QMultiMap<QString, Song*> SongMap;
     typedef QMultiMap<QString, Background*> BackgroundMap;
     typedef QMultiMap<QString, InstantSound*> InstantMap;

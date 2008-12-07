@@ -39,6 +39,7 @@ public slots:
 
     bool AddRandom(const QString& title, const QDomElement& effect = QDomElement());
     bool RemoveRandom(const QString& title);
+    void RenameRandom(const QString& title, const QString& newTitle);
 
 signals:
     void Modified();

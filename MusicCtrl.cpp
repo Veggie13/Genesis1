@@ -212,6 +212,23 @@ bool MusicCtrl::RemoveSong(const QString& title)
     return true;
 }
 
+void MusicCtrl::RenameSong(const QString& title, const QString& newTitle)
+{
+    SongMap::iterator finder = m_songMap.find(title);
+    if (finder == m_songMap.end())
+        return;
+
+    Song* renamed = finder.value();
+    SongMap::iterator newEntry = m_songMap.insert(newTitle, renamed);
+    bool cond = (finder == m_curSong);
+    m_songMap.erase(finder);
+    if (cond)
+    {
+        m_curSong = newEntry;
+        emit SongSelected(newTitle);
+    }
+}
+
 void MusicCtrl::SelectRandomSong()
 {
     SongMap::iterator newIndex = m_curSong;

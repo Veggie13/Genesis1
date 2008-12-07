@@ -48,6 +48,9 @@ protected slots:
     void CloseStreamFile(const QString& title);
     void CloseSampleFile(const QString& title);
 
+    void RenameStream(const QString& title, const QString& newTitle);
+    void RenameSample(const QString& title, const QString& newTitle);
+
     void SelectSong();
     void SelectBackground();
     void SelectRandom();

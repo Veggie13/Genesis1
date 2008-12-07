@@ -25,6 +25,9 @@ public:
 
     void WriteData(QDomElement& state);
 
+    void RenameStreamObjects(const QString& title, const QString& newTitle);
+    void RenameSampleObjects(const QString& title, const QString& newTitle);
+
 signals:
     void Modified();
 

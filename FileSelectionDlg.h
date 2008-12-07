@@ -32,10 +32,13 @@ public slots:
 signals:
     void ImportRequested(const QString& title, const QString& filename);
     void DeleteRequested(const QString& title);
+    void RenameRequested(const QString& title, const QString& newTitle);
 
 private slots:
     void ImportFiles();
     void DeleteSelectedFiles();
+    void RenameSelectedFiles();
+    void ReimportSelectedFiles();
 
 private:
     bool GetTitleForFile(const QString& filename, QString& title);

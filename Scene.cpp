@@ -92,3 +92,21 @@ void Scene::WriteData(QDomElement& scene)
         scene.appendChild(state);
     }
 }
+
+void Scene::RenameStreamObjects(const QString& title, const QString& newTitle)
+{
+    StateMap::iterator it;
+    for (it = m_states.begin(); it != m_states.end(); it++)
+    {
+        it.value()->RenameStreamObjects(title, newTitle);
+    }
+}
+
+void Scene::RenameSampleObjects(const QString& title, const QString& newTitle)
+{
+    StateMap::iterator it;
+    for (it = m_states.begin(); it != m_states.end(); it++)
+    {
+        it.value()->RenameSampleObjects(title, newTitle);
+    }
+}

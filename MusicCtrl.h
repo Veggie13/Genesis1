@@ -44,6 +44,7 @@ public slots:
 
     bool AddSong(const QString& title);
     bool RemoveSong(const QString& title);
+    void RenameSong(const QString& title, const QString& newTitle);
 
     void SelectRandomSong();
 

@@ -20,6 +20,8 @@ FileSelectionDlg::FileSelectionDlg(QWidget* parent)
              this,        SLOT  ( ImportFiles()            ) );
     connect( m_deleteBtn, SIGNAL( clicked()                ),
              this,        SLOT  ( DeleteSelectedFiles()    ) );
+    connect( m_renameBtn, SIGNAL( clicked()                ),
+             this,        SLOT  ( RenameSelectedFiles()    ) );
 }
 
 FileSelectionDlg::~FileSelectionDlg()
@@ -186,6 +188,34 @@ void FileSelectionDlg::DeleteSelectedFiles()
     {
         emit DeleteRequested( (*it).data().toString() );
     }
+}
+
+void FileSelectionDlg::RenameSelectedFiles()
+{
+    QModelIndexList selected =
+        m_fileList->selectionModel()->selectedIndexes();
+
+    for ( QModelIndexList::iterator it = selected.begin();
+          it != selected.end();
+          it++ )
+    {
+        QString newTitle;
+        GetTitleForFile("", newTitle);
+        emit RenameRequested( (*it).data().toString(), newTitle );
+    }
+}
+
+void FileSelectionDlg::ReimportSelectedFiles()
+{/*
+    QModelIndexList selected =
+        m_fileList->selectionModel()->selectedIndexes();
+
+    for ( QModelIndexList::iterator it = selected.begin();
+          it != selected.end();
+          it++ )
+    {
+        emit DeleteRequested( (*it).data().toString() );
+    }*/
 }
 
 bool FileSelectionDlg::GetTitleForFile(const QString& filename, QString& title)

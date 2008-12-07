@@ -58,6 +58,7 @@ SoundMaster::~SoundMaster()
     {
         delete sampleIt.value().third;
         delete sampleIt.value().first;
+        delete sampleIt.value().second;
     }
 
     BASS::System::Free();
@@ -111,8 +112,8 @@ bool SoundMaster::ImportSample(const QString& filename, const QString& title)
     if (!sampleFile.open(QIODevice::ReadOnly))
         return false;
 
-    SampleMap::mapped_type& newEntry = m_sampleMap[title];
-    newEntry.second = sampleFile.readAll();
+
+    QByteArray* newArray = new QByteArray( sampleFile.readAll() );
     sampleFile.close();
 
     BASS::Sample* newSample;
@@ -120,19 +121,22 @@ bool SoundMaster::ImportSample(const QString& filename, const QString& title)
     {
         newSample =
             BASS::System::Get().LoadSampleFromMemory(
-                newEntry.second.data(),
-                newEntry.second.length(),
+                newArray->data(),
+                newArray->length(),
                 2,
                 BASS_SAMPLE_OVER_POS );
-
-        newEntry.first = newSample;
-        newEntry.third = newSample->GetChannel(false);
     }
     catch (std::exception e)
     {
         fprintf(stderr, "BASS System Exception: %s\n", e.what());
+        delete newArray;
         return false;
     }
+
+    SampleMap::mapped_type& newEntry = m_sampleMap[title];
+    newEntry.first = newSample;
+    newEntry.second = newArray;
+    newEntry.third = newSample->GetChannel(false);
 
     return true;
 }
@@ -179,7 +183,80 @@ void SoundMaster::CloseSample(const QString& title)
 
     delete doomed.value().third;
     delete doomed.value().first;
+    delete doomed.value().second;
     m_sampleMap.erase(doomed);
+}
+
+bool SoundMaster::RenameStream(const QString& title, const QString& newTitle)
+{
+    StreamMap::iterator oldStream = m_streamMap.find(title);
+    if (oldStream == m_streamMap.end())
+        return false;
+
+    if (title == newTitle)
+        return false;
+
+    StreamMap::iterator newChecker = m_streamMap.find(newTitle);
+    if (newChecker != m_streamMap.end())
+        return false;
+
+    SongMap::iterator songIt = m_songMap.find(title);
+    while ( (songIt != m_songMap.end()) &&
+            (songIt.key() == title) )
+    {
+        m_songMap.insert(newTitle, songIt.value());
+        m_songMap.erase(songIt);
+    }
+
+    BackgroundMap::iterator bgIt = m_bgMap.find(title);
+    while ( (bgIt != m_bgMap.end()) &&
+            (bgIt.key() == title) )
+    {
+        m_bgMap.insert(newTitle, bgIt.value());
+        m_bgMap.erase(bgIt);
+    }
+
+    m_streamMap[newTitle] = oldStream.value();
+    m_streamMap.erase(oldStream);
+
+    return true;
+}
+
+bool SoundMaster::RenameSample(const QString& title, const QString& newTitle)
+{
+    SampleMap::iterator oldSample = m_sampleMap.find(title);
+    if (oldSample == m_sampleMap.end())
+        return false;
+
+    if (title == newTitle)
+        return false;
+
+    SampleMap::iterator newChecker = m_sampleMap.find(newTitle);
+    if (newChecker != m_sampleMap.end())
+        return false;
+
+    InstantMap::iterator instIt = m_instMap.find(title);
+    while ( (instIt != m_instMap.end()) &&
+            (instIt.key() == title) )
+    {
+        m_instMap.insert(newTitle, instIt.value());
+        m_instMap.erase(instIt);
+    }
+
+    m_sampleMap[newTitle] = oldSample.value();
+    m_sampleMap.erase(oldSample);
+
+    return true;
+}
+
+bool SoundMaster::ReimportStream(const QString& title, const QString& newFilename)
+{
+    return false;
+}
+
+bool SoundMaster::ReimportSample(const QString& title, const QString& newFilename)
+{
+    return false;
 }
 
 BASS::Channel* SoundMaster::GetStreamInstance(const QString& title)

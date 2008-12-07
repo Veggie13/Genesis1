@@ -224,6 +224,17 @@ bool BackgroundCtrl::RemoveBackground(const QString& title)
     return true;
 }
 
+void BackgroundCtrl::RenameBackground(const QString& title, const QString& newTitle)
+{
+    BackgroundMap::iterator finder = m_bgMap.find(title);
+    if (finder == m_bgMap.end())
+        return;
+
+    Background* renamed = finder.value();
+    BackgroundMap::iterator newEntry = m_bgMap.insert(newTitle, renamed);
+    m_bgMap.erase(finder);
+}
+
 void BackgroundCtrl::RemoveDeletedBackground()
 {
     Background* doomed = reinterpret_cast<Background*>(sender());

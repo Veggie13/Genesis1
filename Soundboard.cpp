@@ -152,6 +152,19 @@ void Soundboard::RemoveEntries(const QString& title)
     }
 }
 
+void Soundboard::RenameEntries(const QString& title, const QString& newTitle)
+{
+    for ( SoundGrid::iterator it = m_soundGrid.begin();
+          it != m_soundGrid.end();
+          it++ )
+    {
+        if (it.value().first == title)
+        {
+            it.value().first = newTitle;
+        }
+    }
+}
+
 bool Soundboard::Resize(int rows, int cols)
 {
     if (rows < 0 || cols < 0)

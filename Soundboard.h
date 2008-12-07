@@ -35,6 +35,8 @@ public slots:
     void RemoveEntry(int row, int col);
     void RemoveEntries(const QString& title);
 
+    void RenameEntries(const QString& title, const QString& newTitle);
+
     bool Resize(int rows, int cols);
 
 signals:
