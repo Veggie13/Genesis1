@@ -91,7 +91,7 @@
        <item>
         <widget class="QCheckBox" name="m_selectionMuteChk" >
          <property name="text" >
-          <string>Mute Selection</string>
+          <string>Pause Selection</string>
          </property>
         </widget>
        </item>
@@ -213,7 +213,7 @@
      <item>
       <widget class="QCheckBox" name="m_backgroundGlobMute" >
        <property name="text" >
-        <string>Mute</string>
+        <string>Pause</string>
        </property>
       </widget>
      </item>

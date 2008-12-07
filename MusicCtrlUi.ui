@@ -91,7 +91,7 @@
    <item row="1" column="2" >
     <widget class="QCheckBox" name="m_musicMuteChk" >
      <property name="text" >
-      <string>Mute</string>
+      <string>Pause</string>
      </property>
     </widget>
    </item>
