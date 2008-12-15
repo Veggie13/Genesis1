@@ -87,22 +87,40 @@
         </widget>
        </item>
        <item>
-        <layout class="QHBoxLayout" >
+        <layout class="QVBoxLayout" >
          <item>
-          <widget class="QSlider" name="m_selectionPerSld" >
-           <property name="sizePolicy" >
-            <sizepolicy vsizetype="Expanding" hsizetype="Fixed" >
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
+          <widget class="QDoubleSpinBox" name="m_selectionPerValSpn" >
+           <property name="minimum" >
+            <double>1.000000000000000</double>
            </property>
-           <property name="maximum" >
-            <number>100</number>
-           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QComboBox" name="m_selectionPerTypeCbo" >
+           <item>
+            <property name="text" >
+             <string>mult</string>
+            </property>
+           </item>
+           <item>
+            <property name="text" >
+             <string>sec</string>
+            </property>
+           </item>
+          </widget>
+         </item>
+         <item>
+          <spacer>
            <property name="orientation" >
             <enum>Qt::Vertical</enum>
            </property>
-          </widget>
+           <property name="sizeHint" >
+            <size>
+             <width>20</width>
+             <height>40</height>
+            </size>
+           </property>
+          </spacer>
          </item>
         </layout>
        </item>

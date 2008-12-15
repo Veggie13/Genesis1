@@ -7,10 +7,17 @@
 #include "RandomSound.h"
 
 
+#define DOUBLES_EQUAL(x, y)  ( ((x)-(y)) * ((x)-(y)) < (1.0e-10) )
+
+
+const int RandomSound::PERIOD_TYPE_MULT = 0;
+const int RandomSound::PERIOD_TYPE_TIME = 1;
+
 RandomSound::RandomSound(InstantSound* snd, QObject* parent)
 :   QObject(parent),
     m_sound(snd),
-    m_period(100),
+    m_period(100.0),
+    m_periodType(PERIOD_TYPE_MULT),
     m_variance(100),
     m_masterVolume(100),
     m_instanceVolume(100),
@@ -111,9 +118,14 @@ bool RandomSound::IsInstanceActive()
     return m_instancePlaying;
 }
 
-int RandomSound::GetPeriod()
+double RandomSound::GetPeriod()
 {
     return m_period;
+}
+
+int RandomSound::GetPeriodType()
+{
+    return m_periodType;
 }
 
 int RandomSound::GetVariance()
@@ -131,14 +143,31 @@ int RandomSound::GetInstanceVolume()
     return m_instanceVolume;
 }
 
-bool RandomSound::SetPeriod(int per)
+bool RandomSound::SetPeriod(double per)
 {
-    if (per < 0 || per > 100)
+    if (!IsPeriodValid(per))
         return false;
-    if (m_period == per)
+    if (DOUBLES_EQUAL(m_period, per))
         return true;
 
     m_period = per;
+    m_timer->stop();
+    m_timer->start(TimerLength());
+    emit Modified();
+    return true;
+}
+
+bool RandomSound::SetPeriodType(int type)
+{
+    if (type < PERIOD_TYPE_MULT || type > PERIOD_TYPE_TIME)
+        return false;
+    if (m_periodType == type)
+        return true;
+
+    m_periodType = type;
+    if (!IsPeriodValid(m_period))
+        m_period = 1.0;
+
     m_timer->stop();
     m_timer->start(TimerLength());
     emit Modified();
@@ -192,10 +221,14 @@ void RandomSound::PlaySound()
     m_timer->start(TimerLength());
 }
 
+bool RandomSound::IsPeriodValid(double per)
+{
+    return (per >= 1.0 && per <= 100.0);
+}
+
 int RandomSound::TimerLength()
 {
-    double lenFactor = m_period / 100.0;
-    lenFactor = pow(60.0, lenFactor);
+    double lenFactor = m_period;
 
     double randFactor = std::rand() / (double)(RAND_MAX);
     randFactor *= 2.0f;
@@ -205,5 +238,13 @@ int RandomSound::TimerLength()
 
     double diffFactor = (1.8f * varFactor * asin(randFactor) / M_PI) + 1.0f;
 
-    return (int)(diffFactor * lenFactor * 1000.0f);
+    double result = diffFactor * lenFactor;
+    double soundLength = m_sound->Length();
+    if (m_periodType == PERIOD_TYPE_MULT)
+        result *= soundLength;
+
+    if (result < soundLength)
+        result = soundLength;
+
+    return (int)(result * 1000.0f);
 }

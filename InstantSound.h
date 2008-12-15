@@ -17,6 +17,8 @@ public:
     InstantSound(BASS::Channel* chan, QObject* parent=NULL);
     ~InstantSound();
 
+    double Length();
+
 public slots:
     bool Play(int vol);
 

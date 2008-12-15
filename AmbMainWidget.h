@@ -58,7 +58,8 @@ signals:
     void RandomVolumeChanged(int vol);
     void RandomInstanceMuteToggled(bool mute);
     void RandomInstanceVolumeChanged(int vol);
-    void RandomPeriodChanged(int per);
+    void RandomPeriodChanged(double per);
+    void RandomPeriodTypeChanged(int type);
     void RandomVarianceChanged(int var);
 
     void ExpandLeftToggled(bool expand);

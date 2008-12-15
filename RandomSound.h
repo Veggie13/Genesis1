@@ -26,7 +26,8 @@ public:
     bool IsMasterActive();
     bool IsInstanceActive();
 
-    int GetPeriod();
+    double GetPeriod();
+    int GetPeriodType();
     int GetVariance();
     int GetMasterVolume();
     int GetInstanceVolume();
@@ -36,7 +37,8 @@ signals:
     void ReadyForDeletion();
 
 public slots:
-    bool SetPeriod(int per);
+    bool SetPeriod(double per);
+    bool SetPeriodType(int type);
     bool SetVariance(int var);
     bool SetMasterVolume(int vol);
     bool SetInstanceVolume(int vol);
@@ -48,12 +50,14 @@ protected slots:
     void PlaySound();
 
 private:
+    bool IsPeriodValid(double per);
     int TimerLength();
 
 
     InstantSound* m_sound;
 
-    int m_period;
+    double m_period;
+    int m_periodType;
     int m_variance;
     int m_masterVolume;
     int m_instanceVolume;
@@ -64,6 +68,10 @@ private:
     bool m_halted;
 
     QTimer* m_timer;
+
+
+    static const int PERIOD_TYPE_MULT;
+    static const int PERIOD_TYPE_TIME;
 
 };
 

@@ -13,6 +13,14 @@ InstantSound::~InstantSound()
 {
 }
 
+double InstantSound::Length()
+{
+    if (!m_channel)
+        return -1.0;
+
+    return m_channel->Bytes2Seconds(m_channel->GetLength());
+}
+
 bool InstantSound::Play(int vol)
 {
     if (!m_channel)

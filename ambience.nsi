@@ -12,8 +12,8 @@
 ;General
 
   ;Name and file
-  Name "Ambience Sound Studio 1.1 rev 03 beta"
-  OutFile "bin\Installer\ambience_1_1_r03_b.exe"
+  Name "Ambience Sound Studio 1.1 rev 04 beta"
+  OutFile "bin\Installer\ambience_1_1_r04_b.exe"
 
   ;Default installation folder
   InstallDir "$PROGRAMFILES\MeiCor Gaming\Ambience Sound Studio"
@@ -44,10 +44,12 @@
   !define MUI_STARTMENUPAGE_REGISTRY_ROOT "HKCU"
   !define MUI_STARTMENUPAGE_REGISTRY_KEY "Software\MeiCor Gaming\Ambience Sound Studio"
   !define MUI_STARTMENUPAGE_REGISTRY_VALUENAME "MeiCor Gaming\Ambience Sound Studio"
-
   !insertmacro MUI_PAGE_STARTMENU Application $StartMenuFolder
 
   !insertmacro MUI_PAGE_INSTFILES
+
+  !define MUI_FINISHPAGE_SHOWREADME "$INSTDIR\README.txt"
+  !insertmacro MUI_PAGE_FINISH
 
 
 

@@ -80,9 +80,6 @@ bool RandomCtrl::IsMasterMuted()
 
 void RandomCtrl::Halt()
 {
-    if (m_muted)
-        return;
-
     for ( RandomMap::iterator it = m_randMap.begin();
           it != m_randMap.end();
           it++ )
@@ -93,9 +90,6 @@ void RandomCtrl::Halt()
 
 void RandomCtrl::Resume()
 {
-    if (m_muted)
-        return;
-
     for ( RandomMap::iterator it = m_randMap.begin();
           it != m_randMap.end();
           it++ )
@@ -125,6 +119,10 @@ void RandomCtrl::WriteData(QDomElement& random)
             "per",
             QString("%1")
                 .arg( effectIt.value()->GetPeriod() ) );
+        effect.setAttribute(
+            "perType",
+            QString("%1")
+                .arg( effectIt.value()->GetPeriodType() ) );
         effect.setAttribute(
             "var",
             QString("%1")
@@ -197,11 +195,13 @@ bool RandomCtrl::AddRandom(const QString& title, const QDomElement& effect)
     {
         QString effectVol = effect.attribute("vol", "0");
         QString effectPer = effect.attribute("per", "0");
+        QString effectPerType = effect.attribute("perType", "1");
         QString effectVar = effect.attribute("var", "0");
         QString effectMute = effect.attribute("mute", "0");
 
         newRand->SetInstanceVolume(effectVol.toInt());
-        newRand->SetPeriod(effectPer.toInt());
+        newRand->SetPeriod(effectPer.toDouble());
+        newRand->SetPeriodType(effectPerType.toInt());
         newRand->SetVariance(effectVar.toInt());
         newRand->SetInstanceInactive(effectMute.toInt());
 

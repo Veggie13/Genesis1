@@ -9,6 +9,18 @@
 
 === Version 1.1 ===
 
+Rev 04 Beta
+-----------
+
+Bug Fixes:
+- Pausing, saving, and reloading in the Random section was causing the sound to fail to start.
+- Selecting a period less than the random sound length could cause it to be cut off.
+
+New Features:
+- Implemented second sound mode for Random where you select a multiple of the base sound length
+  instead of a time in seconds.
+
+
 Rev 03 Beta
 -----------
 

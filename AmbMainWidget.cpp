@@ -84,26 +84,28 @@ AmbMainWidget::AmbMainWidget(QWidget* parent)
     connect( m_backgroundObj->m_backgroundGlobMute, SIGNAL( stateChanged(int)                    ),
              this,                                  SLOT  ( SetBackgroundMute()                  ) );
 
-    connect( m_randomObj->m_addBtn,           SIGNAL( clicked()                        ),
-             this,                            SLOT  ( AddRandom()                      ) );
-    connect( m_randomObj->m_deleteBtn,        SIGNAL( clicked()                        ),
-             this,                            SLOT  ( RemoveSelectedRandomEffects()    ) );
-    connect( m_randomObj->m_selectAllBtn,     SIGNAL( clicked()                        ),
-             m_randomObj->m_effectList,       SLOT  ( selectAll()                      ) );
-    connect( m_randomObj->m_deselectAllBtn,   SIGNAL( clicked()                        ),
-             m_randomObj->m_effectList,       SLOT  ( clearSelection()                 ) );
-    connect( m_randomObj->m_selectionVolSld,  SIGNAL( valueChanged(int)                ),
-             this,                            SIGNAL( RandomInstanceVolumeChanged(int) ) );
-    connect( m_randomObj->m_selectionPerSld,  SIGNAL( valueChanged(int)                ),
-             this,                            SIGNAL( RandomPeriodChanged(int)         ) );
-    connect( m_randomObj->m_selectionVarSld,  SIGNAL( valueChanged(int)                ),
-             this,                            SIGNAL( RandomVarianceChanged(int)       ) );
-    connect( m_randomObj->m_selectionMuteChk, SIGNAL( stateChanged(int)                ),
-             this,                            SLOT  ( SetRandomSelectionMute()         ) );
-    connect( m_randomObj->m_globalVolSld,     SIGNAL( valueChanged(int)                ),
-             this,                            SIGNAL( RandomVolumeChanged(int)         ) );
-    connect( m_randomObj->m_globalMuteChk,    SIGNAL( stateChanged(int)                ),
-             this,                            SLOT  ( SetRandomMute()                  ) );
+    connect( m_randomObj->m_addBtn,             SIGNAL( clicked()                        ),
+             this,                              SLOT  ( AddRandom()                      ) );
+    connect( m_randomObj->m_deleteBtn,          SIGNAL( clicked()                        ),
+             this,                              SLOT  ( RemoveSelectedRandomEffects()    ) );
+    connect( m_randomObj->m_selectAllBtn,       SIGNAL( clicked()                        ),
+             m_randomObj->m_effectList,         SLOT  ( selectAll()                      ) );
+    connect( m_randomObj->m_deselectAllBtn,     SIGNAL( clicked()                        ),
+             m_randomObj->m_effectList,         SLOT  ( clearSelection()                 ) );
+    connect( m_randomObj->m_selectionVolSld,    SIGNAL( valueChanged(int)                ),
+             this,                              SIGNAL( RandomInstanceVolumeChanged(int) ) );
+    connect( m_randomObj->m_selectionPerValSpn, SIGNAL( valueChanged(double)             ),
+             this,                              SIGNAL( RandomPeriodChanged(double)      ) );
+    connect( m_randomObj->m_selectionVarSld,    SIGNAL( valueChanged(int)                ),
+             this,                              SIGNAL( RandomVarianceChanged(int)       ) );
+    connect( m_randomObj->m_selectionPerTypeCbo,SIGNAL( currentIndexChanged(int)         ),
+             this,                              SIGNAL( RandomPeriodTypeChanged(int)     ) );
+    connect( m_randomObj->m_selectionMuteChk,   SIGNAL( stateChanged(int)                ),
+             this,                              SLOT  ( SetRandomSelectionMute()         ) );
+    connect( m_randomObj->m_globalVolSld,       SIGNAL( valueChanged(int)                ),
+             this,                              SIGNAL( RandomVolumeChanged(int)         ) );
+    connect( m_randomObj->m_globalMuteChk,      SIGNAL( stateChanged(int)                ),
+             this,                              SLOT  ( SetRandomMute()                  ) );
 
     connect( m_sndboardObj, SIGNAL( SoundRequested(int,int) ),
              this,          SLOT  ( AddInstant(int,int)     ) );
@@ -451,12 +453,14 @@ void AmbMainWidget::UpdateRandomControls()
     if (!m_randomObj->m_effectList->selectionModel())
     {
         m_randomObj->m_selectionVolSld->setValue(0);
-        m_randomObj->m_selectionPerSld->setValue(0);
+        m_randomObj->m_selectionPerValSpn->setValue(0.0);
+        m_randomObj->m_selectionPerTypeCbo->setEditText("");
         m_randomObj->m_selectionVarSld->setValue(0);
         m_randomObj->m_selectionMuteChk->setChecked(false);
 
         m_randomObj->m_selectionVolSld->setEnabled(false);
-        m_randomObj->m_selectionPerSld->setEnabled(false);
+        m_randomObj->m_selectionPerValSpn->setEnabled(false);
+        m_randomObj->m_selectionPerTypeCbo->setEnabled(false);
         m_randomObj->m_selectionVarSld->setEnabled(false);
         m_randomObj->m_selectionMuteChk->setEnabled(false);
 
@@ -468,25 +472,29 @@ void AmbMainWidget::UpdateRandomControls()
 
     disconnect(this, SIGNAL( RandomInstanceMuteToggled(bool) ), 0, 0);
     disconnect(this, SIGNAL( RandomInstanceVolumeChanged(int) ), 0, 0);
-    disconnect(this, SIGNAL( RandomPeriodChanged(int) ), 0, 0);
+    disconnect(this, SIGNAL( RandomPeriodChanged(double) ), 0, 0);
+    disconnect(this, SIGNAL( RandomPeriodTypeChanged(int) ), 0, 0);
     disconnect(this, SIGNAL( RandomVarianceChanged(int) ), 0, 0);
 
     if (selection.size() == 0)
     {
         m_randomObj->m_selectionVolSld->setValue(0);
-        m_randomObj->m_selectionPerSld->setValue(0);
+        m_randomObj->m_selectionPerValSpn->setValue(0.0);
+        m_randomObj->m_selectionPerTypeCbo->setEditText("");
         m_randomObj->m_selectionVarSld->setValue(0);
         m_randomObj->m_selectionMuteChk->setChecked(false);
 
         m_randomObj->m_selectionVolSld->setEnabled(false);
-        m_randomObj->m_selectionPerSld->setEnabled(false);
+        m_randomObj->m_selectionPerValSpn->setEnabled(false);
+        m_randomObj->m_selectionPerTypeCbo->setEnabled(false);
         m_randomObj->m_selectionVarSld->setEnabled(false);
         m_randomObj->m_selectionMuteChk->setEnabled(false);
     }
     else
     {
         m_randomObj->m_selectionVolSld->setEnabled(true);
-        m_randomObj->m_selectionPerSld->setEnabled(true);
+        m_randomObj->m_selectionPerValSpn->setEnabled(true);
+        m_randomObj->m_selectionPerTypeCbo->setEnabled(true);
         m_randomObj->m_selectionVarSld->setEnabled(true);
         m_randomObj->m_selectionMuteChk->setEnabled(true);
 
@@ -498,7 +506,8 @@ void AmbMainWidget::UpdateRandomControls()
             RandomSound* randSel = randCtrl->GetInstance(selection[0].data().toString());
 
             m_randomObj->m_selectionVolSld->setValue(randSel->GetInstanceVolume());
-            m_randomObj->m_selectionPerSld->setValue(randSel->GetPeriod());
+            m_randomObj->m_selectionPerValSpn->setValue(randSel->GetPeriod());
+            m_randomObj->m_selectionPerTypeCbo->setCurrentIndex(randSel->GetPeriodType());
             m_randomObj->m_selectionVarSld->setValue(randSel->GetVariance());
             m_randomObj->m_selectionMuteChk->setChecked(!randSel->IsInstanceActive());
         }
@@ -513,8 +522,10 @@ void AmbMainWidget::UpdateRandomControls()
                     randSel, SLOT  ( SetInstanceInactive(bool)        ) );
             connect(this,    SIGNAL( RandomInstanceVolumeChanged(int) ),
                     randSel, SLOT  ( SetInstanceVolume(int)           ) );
-            connect(this,    SIGNAL( RandomPeriodChanged(int)         ),
-                    randSel, SLOT  ( SetPeriod(int)                   ) );
+            connect(this,    SIGNAL( RandomPeriodChanged(double)      ),
+                    randSel, SLOT  ( SetPeriod(double)                ) );
+            connect(this,    SIGNAL( RandomPeriodTypeChanged(int)     ),
+                    randSel, SLOT  ( SetPeriodType(int)               ) );
             connect(this,    SIGNAL( RandomVarianceChanged(int)       ),
                     randSel, SLOT  ( SetVariance(int)                 ) );
         }
