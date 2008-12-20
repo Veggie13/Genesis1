@@ -236,7 +236,17 @@ void SceneEditorDlg::UpdateStateList()
 
     Scene* curScene = m_project->GetScene(m_sceneCbo->currentText());
     if (curScene)
+    {
+        m_statesGrp->setEnabled(true);
+        m_deleteSceneBtn->setEnabled(true);
         m_stateList->setModel(curScene->Model());
-
-    m_stateList->reset();
+        m_stateList->reset();
+    }
+    else
+    {
+        m_statesGrp->setEnabled(false);
+        m_deleteSceneBtn->setEnabled(false);
+        m_stateList->setModel(NULL);
+        m_stateList->reset();
+    }
 }
