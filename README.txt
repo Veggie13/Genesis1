@@ -15,6 +15,7 @@ Rev 05 Beta
 Bug Fixes:
 - On a new project, or whenever there are no scenes created, the user was able to try and make
   new states, or delete the current scene. A crash was occurring on this nonsense event.
+- Loading time was a little long.
 
 New Features:
 - Implemented a swapping feature to allow a user to move buttons around on the Sound Board.

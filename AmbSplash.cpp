@@ -14,5 +14,5 @@ AmbSplash::~AmbSplash()
 
 void AmbSplash::showEvent(QShowEvent* evt)
 {
-    QTimer::singleShot(5000, this, SLOT( accept() ));
+    QTimer::singleShot(2000, this, SLOT( accept() ));
 }
