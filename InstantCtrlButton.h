@@ -16,6 +16,9 @@ public:
     virtual ~InstantCtrlButton();
 
     void SetSound(const QString& title, InstantSound* sound);
+    InstantSound* GetSound();
+
+    void EnableSwapTarget(bool enable);
 
 public slots:
     void Reset();
@@ -25,6 +28,8 @@ signals:
     void PlaySound(int vol);
     void SoundRequested(int row, int col);
     void WasReset(int row, int col);
+    void SwapInitiated(int row, int col);
+    void SwapDestSelected(int row, int col);
 
 protected slots:
     virtual void mouseReleaseEvent(QMouseEvent* evt);
@@ -32,6 +37,7 @@ protected slots:
 private slots:
     void RequestSound();
     void SignalPlay();
+    void PerformSwap();
 
 private:
     int m_row;
@@ -42,6 +48,8 @@ private:
     InstantSound* m_assignment;
 
     InstantCtrlButtonMenu* m_popupMenu;
+
+    bool m_swapping;
 
 };
 

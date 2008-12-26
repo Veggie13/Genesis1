@@ -8,7 +8,9 @@
 SoundboardLayout::SoundboardLayout(QObject* parent)
 :   QObject(parent),
     m_resizeDlg(NULL),
-    m_curBoard(NULL)
+    m_curBoard(NULL),
+    m_swapRow(0),
+    m_swapCol(0)
 {
 }
 
@@ -69,6 +71,8 @@ void SoundboardLayout::Associate(Soundboard* sndboard)
              sndboard, SLOT  ( SetVolume(int)          ) );
     connect( this,     SIGNAL( SizeChanged(int,int)    ),
              sndboard, SLOT  ( Resize(int,int)         ) );
+    connect( this,     SIGNAL( SpecificSoundRequested(int,int,const QString&)   ),
+             sndboard, SLOT  ( AddEntry(int,int,const QString&)                 ) );
     connect( sndboard, SIGNAL( destroyed()             ),
              this,     SLOT  ( OnSoundboardDestroyed() ) );
 }
@@ -128,16 +132,58 @@ void SoundboardLayout::Resize(int rows, int cols)
 
             btn->SetVolume(m_sndboardVolumeSld->value());
 
-            connect( this, SIGNAL( VolumeChanged(int)      ),
-                     btn,  SLOT  ( SetVolume(int)          ) );
-            connect( btn,  SIGNAL( SoundRequested(int,int) ),
-                     this, SIGNAL( SoundRequested(int,int) ) );
-            connect( btn,  SIGNAL( WasReset(int,int)       ),
-                     this, SIGNAL( SoundRemoved(int,int)   ) );
+            connect( this, SIGNAL( VolumeChanged(int)           ),
+                     btn,  SLOT  ( SetVolume(int)               ) );
+            connect( btn,  SIGNAL( SoundRequested(int,int)      ),
+                     this, SIGNAL( SoundRequested(int,int)      ) );
+            connect( btn,  SIGNAL( WasReset(int,int)            ),
+                     this, SIGNAL( SoundRemoved(int,int)        ) );
+            connect( btn,  SIGNAL( SwapInitiated(int,int)       ),
+                     this, SLOT  ( InitiateSwap(int,int)        ) );
+            connect( btn,  SIGNAL( SwapDestSelected(int,int)    ),
+                     this, SLOT  ( CompleteSwap(int,int)        ) );
         }
     }
 
     emit SizeChanged(rows, cols);
+}
+
+void SoundboardLayout::InitiateSwap(int row, int col)
+{
+    m_swapRow = row;
+    m_swapCol = col;
+
+    for (int nRow = 0; nRow < m_buttons.size(); ++nRow)
+    for (int nCol = 0; nCol < m_buttons[nRow].size(); ++nCol)
+    {
+        m_buttons[nRow][nCol]->EnableSwapTarget(true);
+    }
+}
+
+void SoundboardLayout::CompleteSwap(int row, int col)
+{
+    for (int nRow = 0; nRow < m_buttons.size(); ++nRow)
+    for (int nCol = 0; nCol < m_buttons[nRow].size(); ++nCol)
+    {
+        m_buttons[nRow][nCol]->EnableSwapTarget(false);
+    }
+
+    if (m_swapRow == row && m_swapCol == col)
+        return;
+
+    QString srcTitle = m_buttons[m_swapRow][m_swapCol]->text();
+    QString destTitle = m_buttons[row][col]->text();
+
+    if (srcTitle == destTitle)
+        return;
+
+    emit SoundRemoved(m_swapRow, m_swapCol);
+    emit SoundRemoved(row, col);
+
+    emit SpecificSoundRequested(m_swapRow, m_swapCol, destTitle);
+    emit SpecificSoundRequested(row, col, srcTitle);
+
+    Associate(m_curBoard);
 }
 
 void SoundboardLayout::OnSoundboardDestroyed()

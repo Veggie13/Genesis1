@@ -30,10 +30,13 @@ public slots:
 signals:
     void SoundRemoved(int row, int col);
     void SoundRequested(int row, int col);
+    void SpecificSoundRequested(int row, int col, const QString& title);
     void SizeChanged(int rows, int cols);
     void VolumeChanged(int vol);
 
 private slots:
+    void InitiateSwap(int row, int col);
+    void CompleteSwap(int row, int col);
     void OnSoundboardDestroyed();
 
 private:
@@ -44,6 +47,9 @@ private:
     ResizeTableDlg* m_resizeDlg;
 
     Soundboard* m_curBoard;
+
+    int m_swapRow;
+    int m_swapCol;
 
 };
 

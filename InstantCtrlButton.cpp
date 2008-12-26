@@ -12,11 +12,14 @@ InstantCtrlButton::InstantCtrlButton(int row, int col, QWidget* parent)
     m_col(col),
     m_volume(100),
     m_assignment(NULL),
-    m_popupMenu(NULL)
+    m_popupMenu(NULL),
+    m_swapping(false)
 {
     connect(this, SIGNAL( clicked() ), this, SLOT( RequestSound() ));
 
     m_popupMenu = new InstantCtrlButtonMenu();
+    connect(m_popupMenu->MoveAction(),      SIGNAL( activated()    ),
+            this,                           SLOT  ( PerformSwap()  ) );
     connect(m_popupMenu->UnassignAction(),  SIGNAL( activated()    ),
             this,                           SLOT  ( Reset()        ) );
     connect(m_popupMenu->ReassignAction(),  SIGNAL( activated()    ),
@@ -43,6 +46,16 @@ void InstantCtrlButton::SetSound(const QString& title, InstantSound* sound)
     connect(this,  SIGNAL( PlaySound(int) ), sound, SLOT( Play(int)    ));
     connect(sound, SIGNAL( destroyed()    ), this,  SLOT( Reset()      ));
     m_assignment = sound;
+}
+
+InstantSound* InstantCtrlButton::GetSound()
+{
+    return m_assignment;
+}
+
+void InstantCtrlButton::EnableSwapTarget(bool enable)
+{
+    m_swapping = enable;
 }
 
 void InstantCtrlButton::Reset()
@@ -83,10 +96,24 @@ void InstantCtrlButton::mouseReleaseEvent(QMouseEvent* evt)
 
 void InstantCtrlButton::RequestSound()
 {
-    emit SoundRequested(m_row, m_col);
+    if (m_swapping)
+        emit SwapDestSelected(m_row, m_col);
+    else
+        emit SoundRequested(m_row, m_col);
 }
 
 void InstantCtrlButton::SignalPlay()
 {
-    emit PlaySound(m_volume * 100);
+    if (m_swapping)
+        emit SwapDestSelected(m_row, m_col);
+    else
+        emit PlaySound(m_volume * 100);
+}
+
+void InstantCtrlButton::PerformSwap()
+{
+    if (m_swapping)
+        emit SwapDestSelected(m_row, m_col);
+    else
+        emit SwapInitiated(m_row, m_col);
 }
