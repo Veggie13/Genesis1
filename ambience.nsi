@@ -12,8 +12,8 @@
 ;General
 
   ;Name and file
-  Name "Ambience Sound Studio 1.1 rev 04 beta"
-  OutFile "bin\Installer\ambience_1_1_r04_b.exe"
+  Name "Ambience Sound Studio 1.1 rev 05 beta"
+  OutFile "bin\Installer\ambience_1_1_r05_b.exe"
 
   ;Default installation folder
   InstallDir "$PROGRAMFILES\MeiCor Gaming\Ambience Sound Studio"
@@ -71,12 +71,12 @@ Section "Main Install" SecMain
   SetOutPath "$INSTDIR"
 
   ;ADD YOUR OWN FILES HERE...
-  File "bin\Release\ambience.exe"
-  File "bin\Release\bass.dll"
-  File "bin\Release\mingwm10.dll"
-  File "bin\Release\QtCore4.dll"
-  File "bin\Release\QtGui4.dll"
-  File "bin\Release\QtXml4.dll"
+  File "bin\win\Release\ambience.exe"
+  File "bin\win\Release\bass.dll"
+  File "bin\win\Release\mingwm10.dll"
+  File "bin\win\Release\QtCore4.dll"
+  File "bin\win\Release\QtGui4.dll"
+  File "bin\win\Release\QtXml4.dll"
   File "docs\ambience.pdf"
   File "README.txt"
 
