@@ -1,9 +1,9 @@
 #include <QPair>
 
-#include "InstantSound.h"
+#include "InstantSound.qoh"
 #include "SoundMaster.h"
 
-#include "Soundboard.h"
+#include "Soundboard.qoh"
 
 
 Soundboard::Soundboard(const QDomElement& sndboard, QObject* parent)

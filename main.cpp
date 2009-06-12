@@ -7,9 +7,9 @@
 #include <ctime>
 #include <exception>
 
-#include "AmbSplash.h"
+#include "AmbSplash.qoh"
 
-#include "AmbMainWindow.h"
+#include "AmbMainWindow.qoh"
 
 
 int main(int argc, char* argv[])

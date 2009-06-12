@@ -1,5 +1,5 @@
-#ifndef MUSICCTRL_H
-#define MUSICCTRL_H
+#ifndef MUSICCTRL_QOH
+#define MUSICCTRL_QOH
 
 #include <QDomElement>
 #include <QItemSelectionModel>

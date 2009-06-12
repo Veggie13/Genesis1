@@ -1,4 +1,4 @@
-#include "InstantCtrlButtonMenu.h"
+#include "InstantCtrlButtonMenu.qoh"
 
 
 InstantCtrlButtonMenu::InstantCtrlButtonMenu(QWidget* parent)

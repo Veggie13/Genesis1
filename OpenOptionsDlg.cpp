@@ -1,6 +1,6 @@
 #include <QStringList>
 
-#include "OpenOptionsDlg.h"
+#include "OpenOptionsDlg.qoh"
 
 
 OpenOptionsDlg::OpenOptionsDlg(const QStringList& recent, QWidget* parent)

@@ -5,6 +5,7 @@
 
 #include "bass_types.h"
 
+
 namespace BASS
 {
 

@@ -1,9 +1,9 @@
-#include "BackgroundCtrl.h"
-#include "MusicCtrl.h"
-#include "RandomCtrl.h"
-#include "Soundboard.h"
+#include "BackgroundCtrl.qoh"
+#include "MusicCtrl.qoh"
+#include "RandomCtrl.qoh"
+#include "Soundboard.qoh"
 
-#include "State.h"
+#include "State.qoh"
 
 
 State::State(const QDomElement& state, QObject* parent)

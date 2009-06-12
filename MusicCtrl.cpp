@@ -1,10 +1,10 @@
 #include <cmath>
 
 #include "QStringMapRefModel.hpp"
-#include "Song.h"
+#include "Song.qoh"
 #include "SoundMaster.h"
 
-#include "MusicCtrl.h"
+#include "MusicCtrl.qoh"
 
 
 MusicCtrl::MusicCtrl(const QDomElement& music, QObject* parent)

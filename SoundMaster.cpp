@@ -7,10 +7,10 @@
 #include <bass_sample.h>
 #include <bass_stream.h>
 
-#include "Background.h"
-#include "InstantSound.h"
+#include "Background.qoh"
+#include "InstantSound.qoh"
 #include "QTriple.hpp"
-#include "Song.h"
+#include "Song.qoh"
 
 #include "SoundMaster.h"
 

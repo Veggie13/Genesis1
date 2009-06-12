@@ -3,7 +3,7 @@
 #include <bass_channel.h>
 
 #include "SoundMaster.h"
-#include "Background.h"
+#include "Background.qoh"
 
 
 Background::Background(BASS::Channel* chan, QObject* parent)

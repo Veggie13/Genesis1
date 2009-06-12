@@ -1,5 +1,5 @@
-#ifndef SOUNDBOARDLAYOUT_H
-#define SOUNDBOARDLAYOUT_H
+#ifndef SOUNDBOARDLAYOUT_QOH
+#define SOUNDBOARDLAYOUT_QOH
 
 #include <QVector>
 

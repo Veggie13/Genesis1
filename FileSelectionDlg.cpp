@@ -4,7 +4,7 @@
 
 #include "TitleDlgUi.h"
 
-#include "FileSelectionDlg.h"
+#include "FileSelectionDlg.qoh"
 
 
 FileSelectionDlg::FileSelectionDlg(QWidget* parent)

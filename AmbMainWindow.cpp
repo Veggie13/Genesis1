@@ -9,23 +9,23 @@
 #include <QTimer>
 
 #include "AboutDlgUi.h"
-#include "AmbMainWidget.h"
-#include "BackgroundCtrl.h"
-#include "FileSelectionDlg.h"
-#include "MusicCtrl.h"
-#include "OpenOptionsDlg.h"
-#include "Project.h"
-#include "RandomCtrl.h"
-#include "Scene.h"
-#include "SceneEditorDlg.h"
-#include "Soundboard.h"
+#include "AmbMainWidget.qoh"
+#include "BackgroundCtrl.qoh"
+#include "FileSelectionDlg.qoh"
+#include "MusicCtrl.qoh"
+#include "OpenOptionsDlg.qoh"
+#include "Project.qoh"
+#include "RandomCtrl.qoh"
+#include "Scene.qoh"
+#include "SceneEditorDlg.qoh"
+#include "Soundboard.qoh"
 #include "SoundMaster.h"
-#include "State.h"
+#include "State.qoh"
 
-#include "AmbMainWindow.h"
+#include "AmbMainWindow.qoh"
 
 
-const unsigned int  AmbMainWindow::VERSION_CODE             = 0x01010401;
+const unsigned int  AmbMainWindow::VERSION_CODE             = 0x01010501;
 const char          AmbMainWindow::APP_NAME[]               = "Ambience Sound Studio";
 const char          AmbMainWindow::COMPANY_NAME[]           = "MeiCor Gaming";
 const int           AmbMainWindow::RECENT_FILES_LIST_MAX    = 4;

@@ -1,11 +1,11 @@
 #include <QStringList>
 
-#include "InstantSound.h"
+#include "InstantSound.qoh"
 #include "QStringMapRefModel.hpp"
-#include "RandomSound.h"
+#include "RandomSound.qoh"
 #include "SoundMaster.h"
 
-#include "RandomCtrl.h"
+#include "RandomCtrl.qoh"
 
 
 RandomCtrl::RandomCtrl(const QDomElement& random, QObject* parent)

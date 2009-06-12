@@ -1,5 +1,5 @@
-#ifndef RANDOMCTRL_H
-#define RANDOMCTRL_H
+#ifndef RANDOMCTRL_QOH
+#define RANDOMCTRL_QOH
 
 #include <QDomElement>
 #include <QItemSelectionModel>

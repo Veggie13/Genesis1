@@ -1,5 +1,5 @@
-#ifndef PROJECT_H
-#define PROJECT_H
+#ifndef PROJECT_QOH
+#define PROJECT_QOH
 
 #include <QDomElement>
 #include <QMap>

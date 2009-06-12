@@ -1,9 +1,9 @@
 #include <QStringList>
 
-#include "Background.h"
+#include "Background.qoh"
 #include "SoundMaster.h"
 
-#include "BackgroundCtrl.h"
+#include "BackgroundCtrl.qoh"
 
 
 BackgroundCtrl::BackgroundCtrl(const QDomElement& background, QObject* parent)

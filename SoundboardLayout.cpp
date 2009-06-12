@@ -1,8 +1,8 @@
-#include "InstantCtrlButton.h"
-#include "ResizeTableDlg.h"
-#include "Soundboard.h"
+#include "InstantCtrlButton.qoh"
+#include "ResizeTableDlg.qoh"
+#include "Soundboard.qoh"
 
-#include "SoundboardLayout.h"
+#include "SoundboardLayout.qoh"
 
 
 SoundboardLayout::SoundboardLayout(QObject* parent)

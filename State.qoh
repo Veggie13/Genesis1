@@ -1,5 +1,5 @@
-#ifndef STATE_H
-#define STATE_H
+#ifndef STATE_QOH
+#define STATE_QOH
 
 #include <QDomElement>
 #include <QObject>

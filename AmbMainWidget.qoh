@@ -1,5 +1,5 @@
-#ifndef AMBMAINWIDGET_H
-#define AMBMAINWIDGET_H
+#ifndef AMBMAINWIDGET_QOH
+#define AMBMAINWIDGET_QOH
 
 #include "AmbMainWidgetUi.h"
 

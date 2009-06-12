@@ -1,5 +1,5 @@
-#ifndef OPENOPTIONSDLG_H
-#define OPENOPTIONSDLG_H
+#ifndef OPENOPTIONSDLG_QOH
+#define OPENOPTIONSDLG_QOH
 
 #include <QDialog>
 

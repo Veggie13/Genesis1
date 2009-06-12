@@ -2,9 +2,9 @@
 
 #include <cmath>
 
-#include "InstantSound.h"
+#include "InstantSound.qoh"
 
-#include "RandomSound.h"
+#include "RandomSound.qoh"
 
 
 #define DOUBLES_EQUAL(x, y)  ( ((x)-(y)) * ((x)-(y)) < (1.0e-10) )

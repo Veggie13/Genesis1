@@ -1,6 +1,6 @@
 #include <QTimer>
 
-#include "AmbSplash.h"
+#include "AmbSplash.qoh"
 
 
 AmbSplash::AmbSplash()

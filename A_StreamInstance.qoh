@@ -1,5 +1,5 @@
-#ifndef A_STREAMINSTANCE_H
-#define A_STREAMINSTANCE_H
+#ifndef A_STREAMINSTANCE_QOH
+#define A_STREAMINSTANCE_QOH
 
 #include <QObject>
 

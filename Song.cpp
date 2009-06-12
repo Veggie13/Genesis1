@@ -1,7 +1,7 @@
 #include <bass_channel.h>
 
 #include "SoundMaster.h"
-#include "Song.h"
+#include "Song.qoh"
 
 
 const int Song::INTERVAL = 1000 /*ms*/;

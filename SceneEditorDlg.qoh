@@ -1,5 +1,5 @@
-#ifndef SCENEEDITORDLG_H
-#define SCENEEDITORDLG_H
+#ifndef SCENEEDITORDLG_QOH
+#define SCENEEDITORDLG_QOH
 
 #include <QDialog>
 

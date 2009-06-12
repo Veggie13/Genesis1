@@ -1,9 +1,9 @@
 #include <QMouseEvent>
 
-#include "InstantCtrlButtonMenu.h"
-#include "InstantSound.h"
+#include "InstantCtrlButtonMenu.qoh"
+#include "InstantSound.qoh"
 
-#include "InstantCtrlButton.h"
+#include "InstantCtrlButton.qoh"
 
 
 InstantCtrlButton::InstantCtrlButton(int row, int col, QWidget* parent)

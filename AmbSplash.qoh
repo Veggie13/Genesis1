@@ -1,5 +1,5 @@
-#ifndef AMBSPLASH_H
-#define AMBSPLASH_H
+#ifndef AMBSPLASH_QOH
+#define AMBSPLASH_QOH
 
 #include <QDialog>
 

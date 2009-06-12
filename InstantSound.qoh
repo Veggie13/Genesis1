@@ -1,5 +1,5 @@
-#ifndef INSTANTSOUND_H
-#define INSTANTSOUND_H
+#ifndef INSTANTSOUND_QOH
+#define INSTANTSOUND_QOH
 
 #include <QObject>
 

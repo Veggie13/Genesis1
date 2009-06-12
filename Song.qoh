@@ -1,9 +1,9 @@
-#ifndef SONG_H
-#define SONG_H
+#ifndef SONG_QOH
+#define SONG_QOH
 
 #include <QTimer>
 
-#include "A_StreamInstance.h"
+#include "A_StreamInstance.qoh"
 
 
 class Song : public A_StreamInstance

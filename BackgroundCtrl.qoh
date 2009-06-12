@@ -1,5 +1,5 @@
-#ifndef BACKGROUNDCTRL_H
-#define BACKGROUNDCTRL_H
+#ifndef BACKGROUNDCTRL_QOH
+#define BACKGROUNDCTRL_QOH
 
 #include <QDomElement>
 #include <QItemSelectionModel>

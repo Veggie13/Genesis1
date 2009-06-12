@@ -1,5 +1,5 @@
-#ifndef AMBMAINWINDOW_H
-#define AMBMAINWINDOW_H
+#ifndef AMBMAINWINDOW_QOH
+#define AMBMAINWINDOW_QOH
 
 #include <QMainWindow>
 #include <QMap>

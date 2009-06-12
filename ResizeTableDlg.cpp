@@ -1,4 +1,4 @@
-#include "ResizeTableDlg.h"
+#include "ResizeTableDlg.qoh"
 
 
 ResizeTableDlg::ResizeTableDlg(int rows, int cols, QWidget* parent)

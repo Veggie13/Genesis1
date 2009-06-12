@@ -1,5 +1,5 @@
-#ifndef FILESELECTIONDLG_H
-#define FILESELECTIONDLG_H
+#ifndef FILESELECTIONDLG_QOH
+#define FILESELECTIONDLG_QOH
 
 #include <QDialog>
 #include <QStringList>

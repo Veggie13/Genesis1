@@ -1,5 +1,5 @@
-#ifndef RESIZETABLEDLG_H
-#define RESIZETABLEDLG_H
+#ifndef RESIZETABLEDLG_QOH
+#define RESIZETABLEDLG_QOH
 
 #include <QDialog>
 

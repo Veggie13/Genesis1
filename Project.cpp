@@ -1,5 +1,5 @@
-#include "Scene.h"
-#include "Project.h"
+#include "Scene.qoh"
+#include "Project.qoh"
 
 
 Project::Project(const QDomElement& project, QObject* parent)

@@ -1,11 +1,11 @@
 #include <QMessageBox>
 
-#include "Project.h"
-#include "Scene.h"
+#include "Project.qoh"
+#include "Scene.qoh"
 #include "SceneNameDlgUi.h"
 #include "StateNameDlgUi.h"
 
-#include "SceneEditorDlg.h"
+#include "SceneEditorDlg.qoh"
 
 
 SceneEditorDlg::SceneEditorDlg(QWidget* parent)

@@ -6,20 +6,20 @@
 #include <cmath>
 #include <cstdlib>
 
-#include "Background.h"
-#include "BackgroundCtrl.h"
+#include "Background.qoh"
+#include "BackgroundCtrl.qoh"
 #include "BackgroundCtrlUi.h"
-#include "MusicCtrl.h"
+#include "MusicCtrl.qoh"
 #include "MusicCtrlUi.h"
-#include "RandomCtrl.h"
+#include "RandomCtrl.qoh"
 #include "RandomCtrlUi.h"
-#include "RandomSound.h"
+#include "RandomSound.qoh"
 #include "SidebarUi.h"
-#include "Soundboard.h"
-#include "SoundboardLayout.h"
-#include "State.h"
+#include "Soundboard.qoh"
+#include "SoundboardLayout.qoh"
+#include "State.qoh"
 
-#include "AmbMainWidget.h"
+#include "AmbMainWidget.qoh"
 
 
 AmbMainWidget::AmbMainWidget(QWidget* parent)

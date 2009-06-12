@@ -3,6 +3,11 @@
 
 #include <bass.h>
 
+#ifndef _WIN32
+typedef void *HWND;
+typedef void  GUID;
+#endif
+
 namespace BASS
 {
 

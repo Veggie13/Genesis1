@@ -1,5 +1,5 @@
-#ifndef RANDOMSOUND_H
-#define RANDOMSOUND_H
+#ifndef RANDOMSOUND_QOH
+#define RANDOMSOUND_QOH
 
 #include <QObject>
 

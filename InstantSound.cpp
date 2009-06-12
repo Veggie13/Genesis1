@@ -1,6 +1,6 @@
 #include <bass_channel.h>
 
-#include "InstantSound.h"
+#include "InstantSound.qoh"
 
 
 InstantSound::InstantSound(BASS::Channel* chan, QObject* parent)

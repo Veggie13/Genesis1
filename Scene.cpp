@@ -1,7 +1,7 @@
 #include <QString>
 
-#include "Scene.h"
-#include "State.h"
+#include "Scene.qoh"
+#include "State.qoh"
 
 
 Scene::Scene(const QDomElement& scene, QObject* parent)

@@ -52,7 +52,7 @@
 			<Add library="external\BASS_2.4\c\bass.lib" />
 			<Add directory="C:\Qt\4.3.0\lib" />
 		</Linker>
-		<Unit filename="A_StreamInstance.h">
+		<Unit filename="A_StreamInstance.qoh">
 			<Option compile="1" />
 		</Unit>
 		<Unit filename="AboutDlgUi.ui">
@@ -60,7 +60,7 @@
 			<Option weight="0" />
 		</Unit>
 		<Unit filename="AmbMainWidget.cpp" />
-		<Unit filename="AmbMainWidget.h">
+		<Unit filename="AmbMainWidget.qoh">
 			<Option compile="1" />
 		</Unit>
 		<Unit filename="AmbMainWidgetUi.ui">
@@ -68,7 +68,7 @@
 			<Option weight="0" />
 		</Unit>
 		<Unit filename="AmbMainWindow.cpp" />
-		<Unit filename="AmbMainWindow.h">
+		<Unit filename="AmbMainWindow.qoh">
 			<Option compile="1" />
 		</Unit>
 		<Unit filename="AmbMainWindowUi.ui">
@@ -76,7 +76,7 @@
 			<Option weight="0" />
 		</Unit>
 		<Unit filename="AmbSplash.cpp" />
-		<Unit filename="AmbSplash.h">
+		<Unit filename="AmbSplash.qoh">
 			<Option compile="1" />
 		</Unit>
 		<Unit filename="AmbSplashUi.ui">
@@ -84,11 +84,11 @@
 			<Option weight="0" />
 		</Unit>
 		<Unit filename="Background.cpp" />
-		<Unit filename="Background.h">
+		<Unit filename="Background.qoh">
 			<Option compile="1" />
 		</Unit>
 		<Unit filename="BackgroundCtrl.cpp" />
-		<Unit filename="BackgroundCtrl.h">
+		<Unit filename="BackgroundCtrl.qoh">
 			<Option compile="1" />
 		</Unit>
 		<Unit filename="BackgroundCtrlUi.ui">
@@ -96,7 +96,7 @@
 			<Option weight="0" />
 		</Unit>
 		<Unit filename="FileSelectionDlg.cpp" />
-		<Unit filename="FileSelectionDlg.h">
+		<Unit filename="FileSelectionDlg.qoh">
 			<Option compile="1" />
 		</Unit>
 		<Unit filename="FileSelectionDlgUi.ui">
@@ -104,19 +104,19 @@
 			<Option weight="0" />
 		</Unit>
 		<Unit filename="InstantCtrlButton.cpp" />
-		<Unit filename="InstantCtrlButton.h">
+		<Unit filename="InstantCtrlButton.qoh">
 			<Option compile="1" />
 		</Unit>
 		<Unit filename="InstantCtrlButtonMenu.cpp" />
-		<Unit filename="InstantCtrlButtonMenu.h">
+		<Unit filename="InstantCtrlButtonMenu.qoh">
 			<Option compile="1" />
 		</Unit>
 		<Unit filename="InstantSound.cpp" />
-		<Unit filename="InstantSound.h">
+		<Unit filename="InstantSound.qoh">
 			<Option compile="1" />
 		</Unit>
 		<Unit filename="MusicCtrl.cpp" />
-		<Unit filename="MusicCtrl.h">
+		<Unit filename="MusicCtrl.qoh">
 			<Option compile="1" />
 		</Unit>
 		<Unit filename="MusicCtrlUi.ui">
@@ -124,7 +124,7 @@
 			<Option weight="0" />
 		</Unit>
 		<Unit filename="OpenOptionsDlg.cpp" />
-		<Unit filename="OpenOptionsDlg.h">
+		<Unit filename="OpenOptionsDlg.qoh">
 			<Option compile="1" />
 		</Unit>
 		<Unit filename="OpenOptionsDlgUi.ui">
@@ -132,14 +132,14 @@
 			<Option weight="0" />
 		</Unit>
 		<Unit filename="Project.cpp" />
-		<Unit filename="Project.h">
+		<Unit filename="Project.qoh">
 			<Option compile="1" />
 		</Unit>
 		<Unit filename="QStringMapRefModel.hpp" />
 		<Unit filename="QTriple.hpp" />
 		<Unit filename="README.txt" />
 		<Unit filename="RandomCtrl.cpp" />
-		<Unit filename="RandomCtrl.h">
+		<Unit filename="RandomCtrl.qoh">
 			<Option compile="1" />
 		</Unit>
 		<Unit filename="RandomCtrlUi.ui">
@@ -147,11 +147,11 @@
 			<Option weight="0" />
 		</Unit>
 		<Unit filename="RandomSound.cpp" />
-		<Unit filename="RandomSound.h">
+		<Unit filename="RandomSound.qoh">
 			<Option compile="1" />
 		</Unit>
 		<Unit filename="ResizeTableDlg.cpp" />
-		<Unit filename="ResizeTableDlg.h">
+		<Unit filename="ResizeTableDlg.qoh">
 			<Option compile="1" />
 		</Unit>
 		<Unit filename="ResizeTableDlgUi.ui">
@@ -159,11 +159,11 @@
 			<Option weight="0" />
 		</Unit>
 		<Unit filename="Scene.cpp" />
-		<Unit filename="Scene.h">
+		<Unit filename="Scene.qoh">
 			<Option compile="1" />
 		</Unit>
 		<Unit filename="SceneEditorDlg.cpp" />
-		<Unit filename="SceneEditorDlg.h">
+		<Unit filename="SceneEditorDlg.qoh">
 			<Option compile="1" />
 		</Unit>
 		<Unit filename="SceneEditorDlgUi.ui">
@@ -179,7 +179,7 @@
 			<Option weight="0" />
 		</Unit>
 		<Unit filename="Song.cpp" />
-		<Unit filename="Song.h">
+		<Unit filename="Song.qoh">
 			<Option compile="1" />
 		</Unit>
 		<Unit filename="SoundMaster.cpp" />
@@ -187,11 +187,11 @@
 			<Option compile="1" />
 		</Unit>
 		<Unit filename="Soundboard.cpp" />
-		<Unit filename="Soundboard.h">
+		<Unit filename="Soundboard.qoh">
 			<Option compile="1" />
 		</Unit>
 		<Unit filename="SoundboardLayout.cpp" />
-		<Unit filename="SoundboardLayout.h">
+		<Unit filename="SoundboardLayout.qoh">
 			<Option compile="1" />
 		</Unit>
 		<Unit filename="SoundboardUi.ui">
@@ -199,7 +199,7 @@
 			<Option weight="0" />
 		</Unit>
 		<Unit filename="State.cpp" />
-		<Unit filename="State.h">
+		<Unit filename="State.qoh">
 			<Option compile="1" />
 		</Unit>
 		<Unit filename="StateNameDlgUi.ui">

@@ -1,5 +1,5 @@
-#ifndef SOUNDBOARD_H
-#define SOUNDBOARD_H
+#ifndef SOUNDBOARD_QOH
+#define SOUNDBOARD_QOH
 
 #include <QDomElement>
 #include <QMap>
