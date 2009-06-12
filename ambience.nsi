@@ -13,7 +13,7 @@
 
   ;Name and file
   Name "Ambience Sound Studio 1.1 rev 05 beta"
-  OutFile "bin\Installer\ambience_1_1_r05_b.exe"
+  OutFile "bin\win\Installer\ambience_1_1_r05_b.exe"
 
   ;Default installation folder
   InstallDir "$PROGRAMFILES\MeiCor Gaming\Ambience Sound Studio"
