@@ -18,6 +18,10 @@
 					<Add option="-g" />
 					<Add option="-D_DEBUG" />
 				</Compiler>
+				<Linker>
+					<Add library="external\bass_cpp\lib\win\libbass_cpp.a" />
+					<Add library="external\BASS_2.4\win\bass.lib" />
+				</Linker>
 			</Target>
 			<Target title="Release_win">
 				<Option platforms="Windows;" />
@@ -31,6 +35,8 @@
 				</Compiler>
 				<Linker>
 					<Add option="-s" />
+					<Add library="external\bass_cpp\lib\win\libbass_cpp.a" />
+					<Add library="external\BASS_2.4\win\bass.lib" />
 				</Linker>
 			</Target>
 		</Build>
@@ -44,11 +50,9 @@
 			<Add directory="external\BASS_2.4\c" />
 		</Compiler>
 		<Linker>
-			<Add library="external\bass_cpp\lib\win\libbass_cpp.a" />
 			<Add library="QtCore4" />
 			<Add library="QtGui4" />
 			<Add library="QtXml4" />
-			<Add library="external\BASS_2.4\c\bass.lib" />
 			<Add directory="C:\Qt\4.3.0\lib" />
 		</Linker>
 		<Unit filename="A_StreamInstance.qoh">
