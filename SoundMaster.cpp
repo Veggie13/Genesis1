@@ -113,7 +113,8 @@ bool SoundMaster::ImportSample(const QString& filename, const QString& title)
         return false;
 
 
-    QByteArray* newArray = new QByteArray( sampleFile.readAll() );
+    QByteArray* newArray = NULL; // avoid annoying warning
+    newArray = new QByteArray( sampleFile.readAll() );
     sampleFile.close();
 
     BASS::Sample* newSample;
@@ -315,7 +316,8 @@ bool SoundMaster::ReimportSample(const QString& title, const QString& newFilenam
         return false;
 
 
-    QByteArray* newArray = new QByteArray( sampleFile.readAll() );
+    QByteArray* newArray = NULL; // avoid annoying warning
+    newArray = new QByteArray( sampleFile.readAll() );
     sampleFile.close();
 
     BASS::Sample* newSample;
