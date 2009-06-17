@@ -21,7 +21,6 @@
 				<Environment>
 					<Variable name="platform" value="win" />
 					<Variable name="targetName" value="Debug" />
-					<Variable name="bassLib" value="bass.lib" />
 				</Environment>
 			</Target>
 			<Target title="Release_win">
@@ -36,12 +35,10 @@
 				</Compiler>
 				<Linker>
 					<Add option="-s" />
-					<Add library="$(bassLibDir)\$(bassLib)" />
 				</Linker>
 				<Environment>
 					<Variable name="platform" value="win" />
 					<Variable name="targetName" value="Release" />
-					<Variable name="bassLib" value="bass.lib" />
 				</Environment>
 			</Target>
 			<Target title="Debug_mac">
@@ -59,7 +56,6 @@
 				<Environment>
 					<Variable name="platform" value="mac" />
 					<Variable name="targetName" value="Debug" />
-					<Variable name="bassLib" value="libbass.dylib" />
 				</Environment>
 			</Target>
 			<Target title="Release_mac">
@@ -78,7 +74,6 @@
 				<Environment>
 					<Variable name="platform" value="mac" />
 					<Variable name="targetName" value="Release" />
-					<Variable name="bassLib" value="libbass.dylib" />
 				</Environment>
 			</Target>
 			<Environment>
@@ -100,7 +95,8 @@
 			<Add directory="$(bassInc)" />
 		</Compiler>
 		<Linker>
-			<Add library="libbass_cpp.a" />
+			<Add library="bass_cpp" />
+			<Add library="libbass" />
 			<Add library="$(#qt4.QtCoreLib)" />
 			<Add library="$(#qt4.QtGuiLib)" />
 			<Add library="$(#qt4.QtXmlLib)" />
