@@ -9,8 +9,8 @@
 
 === Version 1.1 ===
 
-Rev 05 Beta
------------
+Rev 05 Beta (r59)
+-----------------
 
 Bug Fixes:
 - On a new project, or whenever there are no scenes created, the user was able to try and make
@@ -21,8 +21,8 @@ New Features:
 - Implemented a swapping feature to allow a user to move buttons around on the Sound Board.
 
 
-Rev 04 Beta
------------
+Rev 04 Beta (r20)
+-----------------
 
 Bug Fixes:
 - Pausing, saving, and reloading in the Random section was causing the sound to fail to start.
@@ -33,8 +33,8 @@ New Features:
   instead of a time in seconds.
 
 
-Rev 03 Beta
------------
+Rev 03 Beta (r19)
+-----------------
 
 Bug Fixes:
 - If you cancel during the naming phase of file import, it would import anyway.
@@ -47,8 +47,8 @@ New Features:
 - Mute has been renamed to Pause on all controls to avoid confusion.
 
 
-Rev 02 Beta
------------
+Rev 02 Beta (r11)
+-----------------
 
 Bug Fixes:
 - When trying to delete multiple items in Background or Random, some items were not being deleted.
@@ -61,8 +61,8 @@ New Features:
   extension .assp with Ambience.
 
 
-Rev 01 Beta
------------
+Rev 01 Beta (r5)
+----------------
 
 Bug Fixes:
 - Changing scenes and states in the dialog does not update the main drop-down menus.
