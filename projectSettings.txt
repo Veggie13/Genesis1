@@ -1,0 +1,64 @@
+ _   _       _  _     _
+/ _ |_ |\ | |_ |_  | |_
+\_/ |_ | \| |_  _| |  _|
+
+/-----------------------\
+| Ambience Sound Studio |
+\-----------------------/
+
+
+=== Project Settings ===
+
+This file describes the project settings for building Ambience using the
+supplied Code::Blocks project file.
+
+Compiler
+--------
+
+On all platforms, Ambience is meant to be built with GCC. On Windows, the
+project has been built using MinGW 3.4.5 g++.
+
+3rd-Party SDKs
+--------------
+
+Ambience uses two external products: Qt by Trolltech, and BASS by Un4seen.
+It is targetted for Qt 4.x (4.3.0+) and BASS 2.4.x. Both are available
+for Windows and Mac targets.
+
+BASS is included as an external reference in the Subversion repository
+for Ambience, as well as a C++ wrapper library (bass_cpp, precompiled).
+Qt can be downloaded, but its paths must be stored as variables in the
+IDE.
+
+IDE
+---
+
+The project is supplied with a Code::Blocks project file. It has been
+preconfigured for Windows and Mac build platforms. The IDE will need to
+be set up with some environment settings for the project to find all
+necessary components.
+
+In Code::Blocks, go to Settings->Global Variables... and create a
+variable called "qt4". The base will be the root path to your Qt install.
+If there is no folder named "include" in your Qt install, it will also
+have to be entered. It should be referenced relative to the base if
+possible; the format is:
+
+$(#qt)/<include path>
+
+The same may need to be done for the library path if there is no "lib"
+folder.
+
+The following include and lib paths must be made as user-defined fields:
+
+qtcoredir - the path to the QtCore include folder
+            e.g. $(#qt4.include)/QtCore
+qtguidir  - the path to the QtGui include folder
+qtxmldir  - the path to the QtXml include folder
+qtcorelib - the name of the QtCore library
+            e.g. QtCore4
+qtguilib  - the name of the QtGui library
+qtxmllib  - the name of the QtXml library
+
+The project references these variables in order to generalize the
+project file to work on any system in either platform target.
