@@ -7,6 +7,18 @@
 \-----------------------/
 
 
+=== Version 1.2 ===
+
+Rev 00 Beta (???)
+-----------------
+
+New Features:
+- Implemented "Copy to Local" feature. Upon adding new imports, the user is prompted
+  appropriately to copy them to the project's local folder. These local files are saved
+  relatively in the project, so an entirely relative project can be easily ported to other
+  systems. This feature is activated by a checkable menu item under the Imports menus.
+
+
 === Version 1.1 ===
 
 Rev 05 Beta (r59)

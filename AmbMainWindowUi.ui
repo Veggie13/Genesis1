@@ -135,9 +135,23 @@
     <property name="title" >
      <string>Edit</string>
     </property>
+    <widget class="QMenu" name="m_longMenu" >
+     <property name="title" >
+      <string>Streamed Imports</string>
+     </property>
+     <addaction name="m_longAction" />
+     <addaction name="m_copyLongAction" />
+    </widget>
+    <widget class="QMenu" name="m_shortMenu" >
+     <property name="title" >
+      <string>Sampled Imports</string>
+     </property>
+     <addaction name="m_shortAction" />
+     <addaction name="m_copyShortAction" />
+    </widget>
     <addaction name="m_scenesAction" />
-    <addaction name="m_longAction" />
-    <addaction name="m_shortAction" />
+    <addaction name="m_longMenu" />
+    <addaction name="m_shortMenu" />
    </widget>
    <addaction name="menuFile" />
    <addaction name="menuEdit" />
@@ -181,12 +195,28 @@
   </action>
   <action name="m_longAction" >
    <property name="text" >
-    <string>Streamed Imports</string>
+    <string>Modify...</string>
    </property>
   </action>
   <action name="m_shortAction" >
    <property name="text" >
-    <string>Sampled Imports</string>
+    <string>Modify...</string>
+   </property>
+  </action>
+  <action name="m_copyLongAction" >
+   <property name="checkable" >
+    <bool>true</bool>
+   </property>
+   <property name="text" >
+    <string>Automate Local Copying</string>
+   </property>
+  </action>
+  <action name="m_copyShortAction" >
+   <property name="checkable" >
+    <bool>true</bool>
+   </property>
+   <property name="text" >
+    <string>Automate Local Copying</string>
    </property>
   </action>
  </widget>

@@ -10,7 +10,9 @@
 FileSelectionDlg::FileSelectionDlg(QWidget* parent)
 :   QDialog(parent),
     m_fileMap(),
-    m_fileMapModel(&m_fileMap)
+    m_fileMapModel(&m_fileMap),
+    m_copyLocal(false),
+    m_localPath("")
 {
     setupUi(this);
     m_fileList->setSelectionBehavior(QAbstractItemView::SelectRows);
@@ -67,6 +69,11 @@ void FileSelectionDlg::ReimportFile(const QString& title, const QString& newFile
 const QMap<QString, QString>& FileSelectionDlg::GetFileMap()
 {
     return m_fileMap;
+}
+
+void FileSelectionDlg::SetLocalPath(const QString& path)
+{
+    m_localPath = path;
 }
 
 QString FileSelectionDlg::ExecSingleSelection()
@@ -128,6 +135,58 @@ void FileSelectionDlg::reject()
     QDialog::reject();
 }
 
+void FileSelectionDlg::SetCopyLocal(bool copy)
+{
+    if (!m_copyLocal && copy)
+    {
+        QMessageBox::StandardButton result = QMessageBox::No;
+        QStringList externalFiles;
+        for ( QMap<QString,QString>::iterator it = m_fileMap.begin();
+              it != m_fileMap.end();
+              it++ )
+        {
+            QFileInfo fileInfo(*it);
+            if (fileInfo.isAbsolute())
+                externalFiles.append(it.key());
+        }
+
+        if (externalFiles.count() > 0)
+        {
+            result = QMessageBox::question(
+                this,
+                QString("Copy External"),
+                QString("Would you like to copy all current imports to "
+                        "the local folder?"),
+                ( QMessageBox::Yes | QMessageBox::No ),
+                QMessageBox::No );
+        }
+        if (result == QMessageBox::Yes)
+        {
+            for ( QStringList::iterator fileIt = externalFiles.begin();
+                  fileIt != externalFiles.end();
+                  fileIt++ )
+            {
+                QString newFilename;
+                if (!CopyFileToLocalPath(m_fileMap[*fileIt], newFilename))
+                {
+                    QMessageBox::warning(
+                        this,
+                        QString("Copy Failed"),
+                        (   QString("An error occurred and the file '") +
+                            (*fileIt) +
+                            QString("' was not copied.\n") ) );
+                }
+                else
+                {
+                    emit ReimportRequested(*fileIt, newFilename);
+                }
+            }
+        }
+    }
+
+    m_copyLocal = copy;
+}
+
 void FileSelectionDlg::showEvent(QShowEvent* evt)
 {
     UpdateSelectionButtons();
@@ -141,13 +200,60 @@ void FileSelectionDlg::ImportFiles()
     GetFileList(newFiles);
     FilterFileList(newFiles);
 
+    QMessageBox::StandardButton copyChoice = QMessageBox::NoButton;
     for ( QStringList::iterator fileIt = newFiles.begin();
           fileIt != newFiles.end();
           fileIt++ )
     {
         QString title;
         if (GetTitleForFile(*fileIt, title))
-            emit ImportRequested(title, *fileIt);
+        {
+            QString filename = *fileIt;
+            bool doCopy = (copyChoice == QMessageBox::YesToAll);
+
+            QFileInfo fileInfo(filename);
+            QDir localPath(m_localPath);
+            bool alreadyLocal =
+                filename == localPath.absoluteFilePath(fileInfo.fileName());
+
+            if (m_copyLocal && !alreadyLocal && copyChoice == QMessageBox::NoButton)
+            {
+                QMessageBox::StandardButton result =
+                    QMessageBox::question(
+                        this,
+                        QString("Copy Files"),
+                        QString("Do you wish to copy the file "
+                                "into the local project folder?"),
+                        (   QMessageBox::Yes |
+                            QMessageBox::No |
+                            QMessageBox::YesToAll |
+                            QMessageBox::NoToAll ),
+                        QMessageBox::No );
+
+                doCopy = result & (QMessageBox::Yes | QMessageBox::YesToAll);
+
+                if ( (result == QMessageBox::YesToAll) ||
+                     (result == QMessageBox::NoToAll) )
+                     copyChoice = result;
+            }
+
+            if (doCopy)
+            {
+                if (alreadyLocal)
+                {
+                    filename = fileInfo.fileName();
+                }
+                else if (!CopyFileToLocalPath(*fileIt, filename))
+                {
+                    QMessageBox::warning(
+                        this,
+                        QString("Copy Failed"),
+                        QString("An error occurred and the file was not copied.\n"
+                                "Importing from original location.") );
+                }
+            }
+            emit ImportRequested(title, filename);
+        }
     }
 }
 
@@ -236,7 +342,7 @@ void FileSelectionDlg::GetFileList(QStringList& fileList)
         QFileDialog::getOpenFileNames(
             this,
             QString("Import sounds"),
-            QString(),
+            m_localPath,
             QString("Sound files ("
                         "*.mp3;"
                         "*.mp2;"
@@ -332,5 +438,55 @@ bool FileSelectionDlg::ShowTitleDlg(const QString& filename, QString& title)
     }
 
     title = dlgLayout.m_titleEdit->text();
+    return true;
+}
+
+bool FileSelectionDlg::CopyFileToLocalPath(const QString& filename, QString& newFilename)
+{
+    if (m_localPath == "")
+        return false;
+
+    QDir localDir(m_localPath);
+    QFile target(filename);
+    QFileInfo fileInfo(target);
+    if (!fileInfo.exists())
+        return false;
+
+    QString newPath = localDir.absoluteFilePath(fileInfo.fileName());
+    if (newPath == filename)
+    {
+        newFilename = fileInfo.fileName();
+        return true;
+    }
+
+    QFileInfo newFileInfo(newPath);
+    if (newFileInfo.exists())
+    {
+        if ( QMessageBox::No ==
+             QMessageBox::question(
+                this,
+                QString("Overwrite file?"),
+                (   QString("'") +
+                    newPath +
+                    QString("' already exists.\n"
+                            "Do you want to overwrite it?") ),
+                ( QMessageBox::Yes | QMessageBox::No ),
+                QMessageBox::No ) )
+        {
+            newFilename = "";
+            return true;
+        }
+        else
+        {
+            QFile doomed(newPath);
+            if (!doomed.remove())
+                return false;
+        }
+    }
+    if (!target.copy(newPath))
+        return false;
+
+    emit RefreshRequested(newPath);
+    newFilename = fileInfo.fileName();
     return true;
 }

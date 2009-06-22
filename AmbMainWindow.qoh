@@ -67,6 +67,8 @@ protected slots:
 
     void ShowAboutDlg();
 
+    void SetCopyLocal(bool copy);
+
 private:
     void AddToRecentProjectList(const QString& filename);
     void PutRecentProjectListOnMenu();
@@ -74,6 +76,8 @@ private:
 
     void LoadStreamImportList(const QDomElement& longImports);
     void LoadSampleImportList(const QDomElement& shortImports);
+
+    void PersistLocalPath();
 
     bool CheckModified();
     void UpdateAppTitle();

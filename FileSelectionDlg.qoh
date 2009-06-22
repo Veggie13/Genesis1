@@ -24,6 +24,8 @@ public:
 
     const QMap<QString, QString>& GetFileMap();
 
+    void SetLocalPath(const QString& path);
+
 public slots:
     QString     ExecSingleSelection();
     QStringList ExecMultiSelection();
@@ -31,11 +33,14 @@ public slots:
 
     virtual void reject();
 
+    void SetCopyLocal(bool copy);
+
 signals:
     void ImportRequested(const QString& title, const QString& filename);
     void DeleteRequested(const QString& title);
     void RenameRequested(const QString& title, const QString& newTitle);
     void ReimportRequested(const QString& title, const QString& newFilename);
+    void RefreshRequested(const QString& filename);
 
 protected:
     virtual void showEvent(QShowEvent* evt);
@@ -54,10 +59,14 @@ private:
     void FilterFileList(QStringList& fileList);
     bool GetTitleForFile(const QString& filename, QString& title);
     bool ShowTitleDlg(const QString& filename, QString& title);
+    bool CopyFileToLocalPath(const QString& filename, QString& newFilename);
 
 
     QMap<QString, QString>      m_fileMap;
     QStringMapRefModel<QString> m_fileMapModel;
+
+    bool    m_copyLocal;
+    QString m_localPath;
 
 };
 

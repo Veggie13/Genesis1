@@ -70,10 +70,14 @@ AmbMainWindow::AmbMainWindow(int argc, char* argv[], QWidget* parent)
     connect(m_scenesAction, SIGNAL( activated() ), m_sceneEditDlg, SLOT( exec() ));
     connect(m_longAction, SIGNAL( activated() ), m_longFileDlg, SLOT( ExecNoSelection() ));
     connect(m_shortAction, SIGNAL( activated() ), m_shortFileDlg, SLOT( ExecNoSelection() ));
+    connect( m_copyLongAction,  SIGNAL( toggled(bool)      ),
+             this,              SLOT  ( SetCopyLocal(bool) ) );
+    connect( m_copyShortAction, SIGNAL( toggled(bool)      ),
+             this,              SLOT  ( SetCopyLocal(bool) ) );
     connect(m_aboutAction, SIGNAL( activated() ), this, SLOT( ShowAboutDlg() ));
 
-    connect(m_sceneCbo, SIGNAL( currentIndexChanged(const QString&) ),
-            this,       SLOT  ( UpdateStateList()                   ));
+    connect( m_sceneCbo, SIGNAL( currentIndexChanged(const QString&) ),
+             this,       SLOT  ( UpdateStateList()                   ) );
     connect(m_switchBtn, SIGNAL( clicked() ), this, SLOT( SwitchSceneState() ));
 
     connect( m_longFileDlg,  SIGNAL( ImportRequested(const QString&, const QString&)    ),
@@ -220,7 +224,15 @@ void AmbMainWindow::SaveAs()
     if (saveFilename != "")
     {
         SaveProject(saveFilename);
+        PersistLocalPath();
     }
+}
+
+void AmbMainWindow::PersistLocalPath()
+{
+    QFileInfo fileInfo(m_projectPath);
+    m_longFileDlg->SetLocalPath(fileInfo.dir().absolutePath());
+    m_shortFileDlg->SetLocalPath(fileInfo.dir().absolutePath());
 }
 
 void AmbMainWindow::NewProject()
@@ -317,6 +329,8 @@ void AmbMainWindow::LoadProject(const QString& filename)
     SoundMaster::Shutdown();
 
     // do these in THIS ORDER
+    m_projectPath = filename;
+    PersistLocalPath();
     LoadStreamImportList(longImports);
     LoadSampleImportList(shortImports);
     m_project = new Project(project);
@@ -325,7 +339,6 @@ void AmbMainWindow::LoadProject(const QString& filename)
     m_sceneCbo->setModel(m_project->Model());
     UpdateStateList();
     connect(m_project, SIGNAL( Modified() ), this, SLOT( SetModified() ));
-    m_projectPath = filename;
     ClearModified();
 
     AddToRecentProjectList(m_projectPath);
@@ -349,6 +362,7 @@ void AmbMainWindow::SaveProject(const QString& filename)
     doc.appendChild(root);
 
     QDomElement longImports = doc.createElement("limports");
+    longImports.setAttribute("copyLocal", (int)(m_copyLongAction->isChecked()));
     root.appendChild(longImports);
     const QMap<QString, QString>& longFileMap =
         m_longFileDlg->GetFileMap();
@@ -363,6 +377,7 @@ void AmbMainWindow::SaveProject(const QString& filename)
     }
 
     QDomElement shortImports = doc.createElement("simports");
+    shortImports.setAttribute("copyLocal", (int)(m_copyShortAction->isChecked()));
     root.appendChild(shortImports);
     const QMap<QString, QString>& shortFileMap =
         m_shortFileDlg->GetFileMap();
@@ -404,7 +419,18 @@ void AmbMainWindow::ImportStreamFile(const QString& title, const QString& filena
 {
     SoundMaster& master = SoundMaster::Get();
 
-    if (!master.ImportStream(filename, title))
+    QString finalFilename = filename;
+    QFileInfo fileInfo(filename);
+    if (fileInfo.isRelative())
+    {
+        if (m_projectPath == "")
+            return;
+
+        QFileInfo projInfo(m_projectPath);
+        finalFilename = projInfo.dir().absoluteFilePath(filename);
+    }
+
+    if (!master.ImportStream(finalFilename, title))
     {
         QMessageBox::critical(
             this,
@@ -424,7 +450,18 @@ void AmbMainWindow::ImportSampleFile(const QString& title, const QString& filena
 {
     SoundMaster& master = SoundMaster::Get();
 
-    if (!master.ImportSample(filename, title))
+    QString finalFilename = filename;
+    QFileInfo fileInfo(filename);
+    if (fileInfo.isRelative())
+    {
+        if (m_projectPath == "")
+            return;
+
+        QFileInfo projInfo(m_projectPath);
+        finalFilename = projInfo.dir().absoluteFilePath(filename);
+    }
+
+    if (!master.ImportSample(finalFilename, title))
     {
         QMessageBox::critical(
             this,
@@ -488,7 +525,18 @@ void AmbMainWindow::ReimportStream(const QString& title, const QString& newFilen
 {
     SoundMaster& master = SoundMaster::Get();
 
-    if (master.ReimportStream(title, newFilename))
+    QString finalFilename = newFilename;
+    QFileInfo fileInfo(newFilename);
+    if (fileInfo.isRelative())
+    {
+        if (m_projectPath == "")
+            return;
+
+        QFileInfo projInfo(m_projectPath);
+        finalFilename = projInfo.dir().absoluteFilePath(newFilename);
+    }
+
+    if (master.ReimportStream(title, finalFilename))
     {
         m_longFileDlg->ReimportFile(title, newFilename);
         SetModified();
@@ -499,7 +547,18 @@ void AmbMainWindow::ReimportSample(const QString& title, const QString& newFilen
 {
     SoundMaster& master = SoundMaster::Get();
 
-    if (master.ReimportSample(title, newFilename))
+    QString finalFilename = newFilename;
+    QFileInfo fileInfo(newFilename);
+    if (fileInfo.isRelative())
+    {
+        if (m_projectPath == "")
+            return;
+
+        QFileInfo projInfo(m_projectPath);
+        finalFilename = projInfo.dir().absoluteFilePath(newFilename);
+    }
+
+    if (master.ReimportSample(title, finalFilename))
     {
         m_shortFileDlg->ReimportFile(title, newFilename);
         SetModified();
@@ -618,6 +677,47 @@ void AmbMainWindow::ShowAboutDlg()
     dlg.exec();
 }
 
+void AmbMainWindow::SetCopyLocal(bool copy)
+{
+    QAction* activator = dynamic_cast<QAction*>(sender());
+    if (!activator)
+        return;
+
+    if (copy && m_projectPath == "")
+    {
+        QMessageBox::StandardButton result =
+            QMessageBox::question(
+                this,
+                QString("Save Project"),
+                QString("The project must be saved to activate this feature.\n"
+                        "Do you wish to save?"),
+                ( QMessageBox::Yes | QMessageBox::No ),
+                QMessageBox::Yes );
+
+        if (result == QMessageBox::No)
+        {
+            activator->setChecked(false);
+            return;
+        }
+
+        SaveAs();
+        if (m_projectPath == "")
+        {
+            activator->setChecked(false);
+            return;
+        }
+    }
+
+    FileSelectionDlg* fileDlg =
+        (activator == m_copyLongAction)?(m_longFileDlg):(
+        (activator == m_copyShortAction)?(m_shortFileDlg):(NULL) );
+    if (fileDlg)
+    {
+        fileDlg->SetCopyLocal(copy);
+        SetModified();
+    }
+}
+
 void AmbMainWindow::AddToRecentProjectList(const QString& filename)
 {
     QStringList::iterator it;
@@ -680,6 +780,9 @@ void AmbMainWindow::LoadAndApplySettings()
 
 void AmbMainWindow::LoadStreamImportList(const QDomElement& longImports)
 {
+    bool copyLocal = longImports.attribute("copyLocal", "0").toInt();
+    m_copyLongAction->setChecked(copyLocal);
+
     for( QDomNode n = longImports.firstChild();
          !n.isNull();
          n = n.nextSibling() )
@@ -697,6 +800,9 @@ void AmbMainWindow::LoadStreamImportList(const QDomElement& longImports)
 
 void AmbMainWindow::LoadSampleImportList(const QDomElement& shortImports)
 {
+    bool copyLocal = shortImports.attribute("copyLocal", "0").toInt();
+    m_copyShortAction->setChecked(copyLocal);
+
     for( QDomNode n = shortImports.firstChild();
          !n.isNull();
          n = n.nextSibling() )
