@@ -1,0 +1,84 @@
+#ifndef MAGNETICTOOLWINDOW_QOH
+#define MAGNETICTOOLWINDOW_QOH
+
+#include <QWidget>
+
+
+class MagneticToolWindow : public QWidget
+{
+    Q_OBJECT
+
+public:
+    enum Edges
+    {
+        NoEdges    = 0x0,
+        LeftEdge   = 0x1,
+        TopEdge    = 0x2,
+        RightEdge  = 0x4,
+        BottomEdge = 0x8,
+        AllEdges   = 0xf,
+        HorizEdges = 0xa,
+        VertEdges  = 0x5
+    };
+
+    MagneticToolWindow(QWidget* parent, Edges magEdges = AllEdges);
+    virtual ~MagneticToolWindow();
+
+    void setLeftRange(int range);
+    void setTopRange(int range);
+    void setRightRange(int range);
+    void setBottomRange(int range);
+
+    void setLeftBuffer(int buffer);
+    void setTopBuffer(int buffer);
+    void setRightBuffer(int buffer);
+    void setBottomBuffer(int buffer);
+
+    bool isLeftMagnetic();
+    bool isTopMagnetic();
+    bool isRightMagnetic();
+    bool isBottomMagnetic();
+
+protected:
+    virtual void moveEvent(QMoveEvent* event);
+    virtual bool eventFilter(QObject* obj, QEvent* event);
+
+private:
+    bool isInRange(int dist, int range);
+
+    int leftDistance();
+    int topDistance();
+    int rightDistance();
+    int bottomDistance();
+
+    void adjustPositionForLeft(QPoint& newPos);
+    void adjustPositionForTop(QPoint& newPos);
+    void adjustPositionForRight(QPoint& newPos);
+    void adjustPositionForBottom(QPoint& newPos);
+
+
+    QWidget* m_parent;
+    Edges m_edges;
+
+    int m_leftRange;
+    int m_topRange;
+    int m_rightRange;
+    int m_bottomRange;
+
+    int m_leftBuffer;
+    int m_topBuffer;
+    int m_rightBuffer;
+    int m_bottomBuffer;
+
+    bool m_leftMagged;
+    bool m_topMagged;
+    bool m_rightMagged;
+    bool m_bottomMagged;
+
+
+    static const int DEFAULT_RANGE;
+    static const int DEFAULT_BUFFER;
+
+};
+
+#endif

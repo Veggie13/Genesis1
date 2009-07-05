@@ -19,8 +19,8 @@
 					<Add option="-D_DEBUG" />
 				</Compiler>
 				<Environment>
-					<Variable name="platform" value="win" />
 					<Variable name="targetName" value="Debug" />
+					<Variable name="platform" value="win" />
 				</Environment>
 			</Target>
 			<Target title="Release_win">
@@ -37,8 +37,8 @@
 					<Add option="-s" />
 				</Linker>
 				<Environment>
-					<Variable name="platform" value="win" />
 					<Variable name="targetName" value="Release" />
+					<Variable name="platform" value="win" />
 				</Environment>
 			</Target>
 			<Target title="Debug_mac">
@@ -77,12 +77,12 @@
 				</Environment>
 			</Target>
 			<Environment>
-				<Variable name="outputDir" value="bin/$(platform)/$(targetName)/ambience" />
-				<Variable name="objectDir" value="obj/$(platform)/$(targetName)/" />
-				<Variable name="bassCppLibDir" value="external/bass_cpp/lib/$(platform)" />
-				<Variable name="bassLibDir" value="external/BASS_2.4/$(platform)" />
-				<Variable name="bassCppInc" value="external/bass_cpp/include" />
-				<Variable name="bassInc" value="external/BASS_2.4/c" />
+				<Variable name="bassLibDir" value="external\BASS_2.4\$(platform)" />
+				<Variable name="bassCppInc" value="external\bass_cpp\include" />
+				<Variable name="objectDir" value="obj\$(platform)\$(targetName)\" />
+				<Variable name="bassCppLibDir" value="external\bass_cpp\lib\$(platform)" />
+				<Variable name="bassInc" value="external\BASS_2.4\c" />
+				<Variable name="outputDir" value="bin\$(platform)\$(targetName)\ambience" />
 			</Environment>
 		</Build>
 		<Compiler>
@@ -165,6 +165,11 @@
 		</Unit>
 		<Unit filename="InstantSound.cpp" />
 		<Unit filename="InstantSound.qoh">
+			<Option compile="1" />
+		</Unit>
+		<Unit filename="MagneticToolWindow.cpp" />
+		<Unit filename="MagneticToolWindow.qoh">
+			<Option compilerVar="CC" />
 			<Option compile="1" />
 		</Unit>
 		<Unit filename="MusicCtrl.cpp" />
