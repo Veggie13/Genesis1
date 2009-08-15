@@ -29,9 +29,12 @@ int main(int argc, char* argv[])
         return 1;
     }
 
-    QMainWindow* mainWindow = new AmbMainWindow(argc, argv);
+    AmbMainWindow* mainWindow = new AmbMainWindow(argc, argv);
+#ifndef _DEBUG
     QDialog* splash = new AmbSplash();
     splash->exec();
+#endif
+
     mainWindow->showMaximized();
 
     try

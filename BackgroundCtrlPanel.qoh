@@ -1,0 +1,34 @@
+#ifndef BACKGROUNDCTRLPANEL_QOH
+#define BACKGROUNDCTRLPANEL_QOH
+
+#include <QLabel>
+
+#include "BackgroundCtrlUi.h"
+
+
+class BackgroundCtrl;
+
+class BackgroundCtrlPanel : public QLabel, private Ui::BackgroundCtrlUi
+{
+    Q_OBJECT
+
+public:
+    BackgroundCtrlPanel(QWidget* parent = NULL);
+
+    void Associate(BackgroundCtrl* ctrl);
+
+signals:
+    void AddSelected();
+    void DeleteSelected(const QString& bgTitle);
+
+protected slots:
+    void OnDeleteSelected();
+    void RemoveCtrl();
+    void UpdateSelectionControls();
+
+private:
+    BackgroundCtrl* m_bgCtrl;
+
+};
+
+#endif

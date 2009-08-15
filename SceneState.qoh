@@ -1,0 +1,32 @@
+#ifndef SCENESTATE_QOH
+#define SCENESTATE_QOH
+
+#include <QLabel>
+
+#include "SceneStateUi.h"
+
+
+class Project;
+
+class SceneState : public QLabel, private Ui::SceneStateUi
+{
+    Q_OBJECT
+
+public:
+    SceneState(QWidget* parent = NULL);
+
+    void Associate(Project* proj);
+
+signals:
+    void SceneStateSwitched(const QString& sceneName, const QString& stateName);
+
+protected slots:
+    void OnSwitchSelected();
+    void OnSceneChanged(const QString& sceneName);
+
+private:
+    Project* m_project;
+
+};
+
+#endif

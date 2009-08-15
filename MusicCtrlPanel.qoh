@@ -1,0 +1,37 @@
+#ifndef MUSICCTRLPANEL_QOH
+#define MUSICCTRLPANEL_QOH
+
+#include <QLabel>
+
+#include "MusicCtrlUi.h"
+
+
+class MusicCtrl;
+
+class MusicCtrlPanel : public QLabel, private Ui::MusicCtrlUi
+{
+    Q_OBJECT
+
+public:
+    MusicCtrlPanel(QWidget* parent = NULL);
+
+    void Associate(MusicCtrl* ctrl);
+
+public slots:
+    void SetSong(const QString& songTitle);
+
+signals:
+    void AddSelected();
+    void DeleteSelected(const QString& songTitle);
+    void SongChanged(const QString& songTitle);
+
+protected slots:
+    void OnDeleteSelected();
+    void RemoveCtrl();
+
+private:
+    MusicCtrl* m_musicCtrl;
+
+};
+
+#endif

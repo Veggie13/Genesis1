@@ -1,22 +1,28 @@
 #ifndef AMBMAINWINDOW_QOH
 #define AMBMAINWINDOW_QOH
 
-#include <QMainWindow>
 #include <QMap>
 #include <QStringList>
 
+#include "PopupToolMainWindow.qoh"
+
 #include "AmbMainWindowUi.h"
 
-class AmbMainWidget;
+
+class BackgroundCtrlPanel;
 class FileSelectionDlg;
+class MusicCtrlPanel;
 class QDomElement;
 class QHBoxLayout;
 class QSettings;
 class Project;
+class RandomCtrlPanel;
 class SceneEditorDlg;
+class SceneState;
+class SignallingLabel;
+class State;
 
-
-class AmbMainWindow : public QMainWindow, private Ui::AmbMainWindowUi
+class AmbMainWindow : public PopupToolMainWindow, private Ui::AmbMainWindowUi
 {
     Q_OBJECT
 
@@ -59,9 +65,7 @@ protected slots:
     void SelectRandom();
     void SelectInstant(int row, int col);
 
-    void UpdateSceneList();
-    void UpdateStateList();
-    void SwitchSceneState();
+    void SwitchSceneState(const QString& sceneName, const QString& stateName);
 
     void ApplyWidgetExpandLeftSetting(bool expand);
 
@@ -83,12 +87,18 @@ private:
     void UpdateAppTitle();
 
 
-    QHBoxLayout*    m_mainWidgetLayout;
-    AmbMainWidget*  m_mainWidget;
+    //QHBoxLayout*    m_mainWidgetLayout;
+    //AmbMainWidget*  m_mainWidget;
+    SceneState*             m_sceneState;
+    MusicCtrlPanel*         m_musicCtrl;
+    BackgroundCtrlPanel*    m_bgCtrl;
+    RandomCtrlPanel*        m_randCtrl;
 
     Project*    m_project;
     QString     m_projectPath;
     bool        m_modified;
+
+    State*  m_curState;
 
     SceneEditorDlg*     m_sceneEditDlg;
     FileSelectionDlg*   m_longFileDlg;
@@ -99,6 +109,8 @@ private:
     QSettings*              m_settings;
     QStringList             m_recentFilesList;
     QMap<QAction*, QString> m_recentFilesMap;
+
+    QWidget* m_tempFrame;
 
 
     static const unsigned int   VERSION_CODE;

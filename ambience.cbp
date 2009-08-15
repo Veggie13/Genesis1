@@ -111,14 +111,6 @@
 			<Option compile="1" />
 			<Option weight="0" />
 		</Unit>
-		<Unit filename="AmbMainWidget.cpp" />
-		<Unit filename="AmbMainWidget.qoh">
-			<Option compile="1" />
-		</Unit>
-		<Unit filename="AmbMainWidgetUi.ui">
-			<Option compile="1" />
-			<Option weight="0" />
-		</Unit>
 		<Unit filename="AmbMainWindow.cpp" />
 		<Unit filename="AmbMainWindow.qoh">
 			<Option compile="1" />
@@ -143,6 +135,10 @@
 		<Unit filename="BackgroundCtrl.qoh">
 			<Option compile="1" />
 		</Unit>
+		<Unit filename="BackgroundCtrlPanel.cpp" />
+		<Unit filename="BackgroundCtrlPanel.qoh">
+			<Option compile="1" />
+		</Unit>
 		<Unit filename="BackgroundCtrlUi.ui">
 			<Option compile="1" />
 			<Option weight="0" />
@@ -154,6 +150,10 @@
 		<Unit filename="FileSelectionDlgUi.ui">
 			<Option compile="1" />
 			<Option weight="0" />
+		</Unit>
+		<Unit filename="HoverLabel.cpp" />
+		<Unit filename="HoverLabel.qoh">
+			<Option compile="1" />
 		</Unit>
 		<Unit filename="InstantCtrlButton.cpp" />
 		<Unit filename="InstantCtrlButton.qoh">
@@ -167,13 +167,12 @@
 		<Unit filename="InstantSound.qoh">
 			<Option compile="1" />
 		</Unit>
-		<Unit filename="MagneticToolWindow.cpp" />
-		<Unit filename="MagneticToolWindow.qoh">
-			<Option compilerVar="CC" />
-			<Option compile="1" />
-		</Unit>
 		<Unit filename="MusicCtrl.cpp" />
 		<Unit filename="MusicCtrl.qoh">
+			<Option compile="1" />
+		</Unit>
+		<Unit filename="MusicCtrlPanel.cpp" />
+		<Unit filename="MusicCtrlPanel.qoh">
 			<Option compile="1" />
 		</Unit>
 		<Unit filename="MusicCtrlUi.ui">
@@ -188,6 +187,10 @@
 			<Option compile="1" />
 			<Option weight="0" />
 		</Unit>
+		<Unit filename="PopupToolMainWindow.cpp" />
+		<Unit filename="PopupToolMainWindow.qoh">
+			<Option compile="1" />
+		</Unit>
 		<Unit filename="Project.cpp" />
 		<Unit filename="Project.qoh">
 			<Option compile="1" />
@@ -197,6 +200,10 @@
 		<Unit filename="README.txt" />
 		<Unit filename="RandomCtrl.cpp" />
 		<Unit filename="RandomCtrl.qoh">
+			<Option compile="1" />
+		</Unit>
+		<Unit filename="RandomCtrlPanel.cpp" />
+		<Unit filename="RandomCtrlPanel.qoh">
 			<Option compile="1" />
 		</Unit>
 		<Unit filename="RandomCtrlUi.ui">
@@ -228,6 +235,14 @@
 			<Option weight="0" />
 		</Unit>
 		<Unit filename="SceneNameDlgUi.ui">
+			<Option compile="1" />
+			<Option weight="0" />
+		</Unit>
+		<Unit filename="SceneState.cpp" />
+		<Unit filename="SceneState.qoh">
+			<Option compile="1" />
+		</Unit>
+		<Unit filename="SceneStateUi.ui">
 			<Option compile="1" />
 			<Option weight="0" />
 		</Unit>

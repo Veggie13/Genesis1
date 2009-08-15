@@ -9,15 +9,18 @@
 #include <QTimer>
 
 #include "AboutDlgUi.h"
-#include "AmbMainWidget.qoh"
 #include "BackgroundCtrl.qoh"
+#include "BackgroundCtrlPanel.qoh"
 #include "FileSelectionDlg.qoh"
 #include "MusicCtrl.qoh"
+#include "MusicCtrlPanel.qoh"
 #include "OpenOptionsDlg.qoh"
 #include "Project.qoh"
 #include "RandomCtrl.qoh"
+#include "RandomCtrlPanel.qoh"
 #include "Scene.qoh"
 #include "SceneEditorDlg.qoh"
+#include "SceneState.qoh"
 #include "Soundboard.qoh"
 #include "SoundMaster.h"
 #include "State.qoh"
@@ -31,32 +34,39 @@ const char          AmbMainWindow::COMPANY_NAME[]           = "MeiCor Gaming";
 const int           AmbMainWindow::RECENT_FILES_LIST_MAX    = 8;
 
 AmbMainWindow::AmbMainWindow(int argc, char* argv[], QWidget* parent)
-:   QMainWindow(parent),
-    m_mainWidgetLayout(NULL),
-    m_mainWidget(NULL),
+:   PopupToolMainWindow(parent),
+    m_sceneState(NULL),
+    m_musicCtrl(NULL),
+    m_bgCtrl(NULL),
+    m_randCtrl(NULL),
     m_project(NULL),
     m_projectPath(""),
     m_modified(false),
+    m_curState(NULL),
     m_sceneEditDlg(NULL),
     m_longFileDlg(NULL),
     m_shortFileDlg(NULL),
     m_starting(true),
-    m_settings(NULL)
+    m_settings(NULL),
+    m_tempFrame(NULL)
 {
     setupUi(this);
+    setupPopupUi();
 
     // Create all children.
-    m_mainWidgetLayout = new QHBoxLayout;
-    m_mainWidget = new AmbMainWidget;
+    m_sceneState = new SceneState;
+    m_musicCtrl = new MusicCtrlPanel;
+    m_bgCtrl = new BackgroundCtrlPanel;
+    m_randCtrl = new RandomCtrlPanel;
     m_sceneEditDlg = new SceneEditorDlg(this);
     m_longFileDlg = new FileSelectionDlg(this);
     m_shortFileDlg = new FileSelectionDlg(this);
 
-    // Setup layout.
-    m_mainWidgetFrm->setLayout(m_mainWidgetLayout);
-
-    // Setup main widget.
-    m_mainWidgetLayout->addWidget(m_mainWidget);
+    // Add hover/popup widgets.
+    addPopupWidget("Scene/State", m_sceneState);
+    addPopupWidget("Music", m_musicCtrl);
+    addPopupWidget("Background", m_bgCtrl);
+    addPopupWidget("Random", m_randCtrl);
 
     // Setup file dialogs.
     m_longFileDlg->setWindowTitle("Streamed file Import");
@@ -76,9 +86,8 @@ AmbMainWindow::AmbMainWindow(int argc, char* argv[], QWidget* parent)
              this,              SLOT  ( SetCopyLocal(bool) ) );
     connect(m_aboutAction, SIGNAL( activated() ), this, SLOT( ShowAboutDlg() ));
 
-    connect( m_sceneCbo, SIGNAL( currentIndexChanged(const QString&) ),
-             this,       SLOT  ( UpdateStateList()                   ) );
-    connect(m_switchBtn, SIGNAL( clicked() ), this, SLOT( SwitchSceneState() ));
+    connect( m_sceneState,  SIGNAL( SceneStateSwitched(const QString&, const QString&) ),
+             this,          SLOT  ( SwitchSceneState(const QString&, const QString&)   ) );
 
     connect( m_longFileDlg,  SIGNAL( ImportRequested(const QString&, const QString&)    ),
              this,           SLOT  ( ImportStreamFile(const QString&, const QString&)   ) );
@@ -97,21 +106,21 @@ AmbMainWindow::AmbMainWindow(int argc, char* argv[], QWidget* parent)
              this,           SLOT  ( RenameSample(const QString&, const QString&)       ) );
     connect( m_shortFileDlg, SIGNAL( ReimportRequested(const QString&, const QString&)  ),
              this,           SLOT  ( ReimportSample(const QString&, const QString&)     ) );
-
+/*
     connect( m_sceneEditDlg, SIGNAL( accepted()        ),
              this,           SLOT  ( UpdateSceneList() ) );
-
-    connect( m_mainWidget,  SIGNAL( AddSongSelected()                   ),
+*/
+    connect( m_musicCtrl,   SIGNAL( AddSelected()                       ),
              this,          SLOT  ( SelectSong()                        ) );
-    connect( m_mainWidget,  SIGNAL( AddBackgroundSelected()             ),
+    connect( m_bgCtrl,      SIGNAL( AddSelected()                       ),
              this,          SLOT  ( SelectBackground()                  ) );
-    connect( m_mainWidget,  SIGNAL( AddRandomSelected()                 ),
+    connect( m_randCtrl,    SIGNAL( AddSelected()                       ),
              this,          SLOT  ( SelectRandom()                      ) );
-    connect( m_mainWidget,  SIGNAL( AddInstantSelected(int,int)         ),
+/*    connect( m_mainWidget,  SIGNAL( AddInstantSelected(int,int)         ),
              this,          SLOT  ( SelectInstant(int,int)              ) );
     connect( m_mainWidget,  SIGNAL( ExpandLeftToggled(bool)             ),
              this,          SLOT  ( ApplyWidgetExpandLeftSetting(bool)  ) );
-
+*/
     // Apply settings.
     m_settings = new QSettings(COMPANY_NAME, APP_NAME);
     LoadAndApplySettings();
@@ -151,8 +160,10 @@ void AmbMainWindow::showEvent(QShowEvent* evt)
         LoadProject(temp);
     }
 
+#ifndef _DEBUG
     if (m_projectPath == "")
         QTimer::singleShot(100, this, SLOT( OnStartup() ));
+#endif
 }
 
 void AmbMainWindow::OnStartup()
@@ -240,7 +251,7 @@ void AmbMainWindow::NewProject()
     if (!CheckModified())
         return;
 
-    m_mainWidget->Associate(NULL);
+    //m_mainWidget->Associate(NULL);
     m_sceneEditDlg->Associate(NULL);
 
     if (m_project)
@@ -252,8 +263,9 @@ void AmbMainWindow::NewProject()
 
     m_project = new Project;
     m_modified = false;
+    m_curState = NULL;
     m_sceneEditDlg->Associate(m_project);
-    m_sceneCbo->setModel(m_project->Model());
+    m_sceneState->Associate(m_project);
     connect(m_project, SIGNAL( Modified() ), this, SLOT( SetModified() ));
     UpdateAppTitle();
 
@@ -317,13 +329,13 @@ void AmbMainWindow::LoadProject(const QString& filename)
         return;
     }
 
-    m_mainWidget->Associate(NULL);
     m_sceneEditDlg->Associate(NULL);
 
     if (m_project)
     {
         delete m_project;
         m_project = NULL;
+        m_curState = NULL;
     }
 
     SoundMaster::Shutdown();
@@ -336,8 +348,7 @@ void AmbMainWindow::LoadProject(const QString& filename)
     m_project = new Project(project);
 
     m_sceneEditDlg->Associate(m_project);
-    m_sceneCbo->setModel(m_project->Model());
-    UpdateStateList();
+    m_sceneState->Associate(m_project);
     connect(m_project, SIGNAL( Modified() ), this, SLOT( SetModified() ));
     ClearModified();
 
@@ -515,8 +526,8 @@ void AmbMainWindow::RenameSample(const QString& title, const QString& newTitle)
     {
         m_shortFileDlg->RenameFile(title, newTitle);
         m_project->RenameSampleObjects(title, newTitle);
-        State* curState = m_mainWidget->CurrentState();
-        m_mainWidget->Associate(curState);
+        //State* curState = m_mainWidget->CurrentState();
+        //m_mainWidget->Associate(curState);
         SetModified();
     }
 }
@@ -568,18 +579,18 @@ void AmbMainWindow::ReimportSample(const QString& title, const QString& newFilen
 void AmbMainWindow::SelectSong()
 {
     QString songTitle = m_longFileDlg->ExecSingleSelection();
-
+/*
     if (songTitle != "" && m_mainWidget->CurrentState())
         m_mainWidget
             ->CurrentState()
             ->GetMusicController()
-            ->AddSong(songTitle);
+            ->AddSong(songTitle);*/
 }
 
 void AmbMainWindow::SelectBackground()
 {
     QStringList bgTitles = m_longFileDlg->ExecMultiSelection();
-
+/*
     for ( QStringList::iterator it = bgTitles.begin();
           it != bgTitles.end();
           it++ )
@@ -589,13 +600,13 @@ void AmbMainWindow::SelectBackground()
                 ->CurrentState()
                 ->GetBackgroundController()
                 ->AddBackground(*it);
-    }
+    }*/
 }
 
 void AmbMainWindow::SelectRandom()
 {
     QStringList randTitles = m_shortFileDlg->ExecMultiSelection();
-
+/*
     for ( QStringList::iterator it = randTitles.begin();
           it != randTitles.end();
           it++ )
@@ -605,53 +616,94 @@ void AmbMainWindow::SelectRandom()
                 ->CurrentState()
                 ->GetRandomController()
                 ->AddRandom(*it);
-    }
+    }*/
 }
 
 void AmbMainWindow::SelectInstant(int row, int col)
 {
     QString title = m_shortFileDlg->ExecSingleSelection();
-
+/*
     if (title != "" && m_mainWidget->CurrentState())
         m_mainWidget
             ->CurrentState()
             ->GetSoundboard()
-            ->AddEntry(row, col, title);
+            ->AddEntry(row, col, title);*/
 }
 
-void AmbMainWindow::UpdateSceneList()
+void AmbMainWindow::SwitchSceneState(const QString& sceneName, const QString& stateName)
 {
     if (!m_project)
+    {
+        m_curState = NULL;
+        m_musicCtrl->Associate(NULL);
+        m_bgCtrl->Associate(NULL);
+        m_randCtrl->Associate(NULL);
+        return;
+    }
+
+    Scene* newScene = m_project->GetScene(sceneName);
+    if (!newScene)
+    {
+        m_curState = NULL;
+        m_musicCtrl->Associate(NULL);
+        m_bgCtrl->Associate(NULL);
+        m_randCtrl->Associate(NULL);
+        return;
+    }
+
+    State* newState = newScene->GetState(stateName);
+    if (!newState)
+    {
+        m_curState = NULL;
+        m_musicCtrl->Associate(NULL);
+        m_bgCtrl->Associate(NULL);
+        m_randCtrl->Associate(NULL);
+        return;
+    }
+    if (newState == m_curState)
         return;
 
-   m_sceneCbo->setModel(m_project->Model());
-   UpdateStateList();
-}
+    bool sharedMusic = false;
+    QString curSong;
+    QStringList sharedBg;
+    if (m_curState)
+    {
+        MusicCtrl* curMusic = m_curState->GetMusicController();
+        BackgroundCtrl* curBg = m_curState->GetBackgroundController();
+        RandomCtrl* curRand = m_curState->GetRandomController();
 
-void AmbMainWindow::UpdateStateList()
-{
-    if (!m_project)
-        return;
+        if (newState)
+        {
+            MusicCtrl* newMusic = newState->GetMusicController();
+            BackgroundCtrl* newBg = newState->GetBackgroundController();
 
-    Scene* curScene = m_project->GetScene(m_sceneCbo->currentText());
-    if (curScene)
-        m_stateCbo->setModel(curScene->Model());
-}
+            sharedMusic = curMusic->SharesCurrentSongWith(*newMusic);
+            sharedBg = curBg->SharedWith(*newBg);
 
-void AmbMainWindow::SwitchSceneState()
-{
-    if (!m_project)
-        return;
+            if (sharedMusic)
+                curSong = curMusic->CurrentSong();
+        }
 
-    Scene* curScene = m_project->GetScene(m_sceneCbo->currentText());
-    if (!curScene)
-        return;
+        curMusic->Halt(sharedMusic);
+        curBg->Halt(sharedBg);
+        curRand->Halt();
+    }
 
-    State* curState = curScene->GetState(m_stateCbo->currentText());
-    if (!curState)
-        return;
+    MusicCtrl* newMusic = newState->GetMusicController();
+    BackgroundCtrl* newBg = newState->GetBackgroundController();
+    RandomCtrl* newRand = newState->GetRandomController();
+    //Soundboard* newBoard = newState->GetSoundboard();
 
-    m_mainWidget->Associate(curState);
+    m_musicCtrl->Associate(newMusic);
+    m_bgCtrl->Associate(newBg);
+    m_randCtrl->Associate(newRand);
+
+    newMusic->Resume(sharedMusic, curSong);
+    newBg->Resume();
+    newRand->Resume();
+    //m_sndboardObj->Associate(newBoard);
+
+    m_curState = newState;
 }
 
 void AmbMainWindow::ApplyWidgetExpandLeftSetting(bool expand)
@@ -769,7 +821,6 @@ void AmbMainWindow::LoadAndApplySettings()
         return;
 
     m_settings->beginGroup("MainWidget");
-    m_mainWidget->ExpandLeft(m_settings->value("ExpandLeft", (bool)false).toBool());
     m_settings->endGroup();
 
     m_settings->beginGroup("Application");

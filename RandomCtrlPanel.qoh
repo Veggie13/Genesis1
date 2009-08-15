@@ -1,0 +1,34 @@
+#ifndef RANDOMCTRLPANEL_QOH
+#define RANDOMCTRLPANEL_QOH
+
+#include <QLabel>
+
+#include "RandomCtrlUi.h"
+
+
+class RandomCtrl;
+
+class RandomCtrlPanel : public QLabel, private Ui::RandomCtrlUi
+{
+    Q_OBJECT
+
+public:
+    RandomCtrlPanel(QWidget* parent = NULL);
+
+    void Associate(RandomCtrl* ctrl);
+
+signals:
+    void AddSelected();
+    void DeleteSelected(const QString& randTitle);
+
+protected slots:
+    void OnDeleteSelected();
+    void RemoveCtrl();
+    void UpdateSelectionControls();
+
+private:
+    RandomCtrl* m_randCtrl;
+
+};
+
+#endif
