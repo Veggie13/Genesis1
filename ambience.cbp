@@ -26,8 +26,8 @@
 					<Add directory="$(#debug_help.lib)" />
 				</Linker>
 				<Environment>
-					<Variable name="targetName" value="Debug" />
 					<Variable name="platform" value="win" />
+					<Variable name="targetName" value="Debug" />
 				</Environment>
 			</Target>
 			<Target title="Release_win">
@@ -49,8 +49,8 @@
 					<Add directory="$(#debug_help.lib)" />
 				</Linker>
 				<Environment>
-					<Variable name="targetName" value="Release" />
 					<Variable name="platform" value="win" />
+					<Variable name="targetName" value="Release" />
 				</Environment>
 			</Target>
 			<Target title="Debug_mac">
@@ -90,11 +90,11 @@
 			</Target>
 			<Environment>
 				<Variable name="bassLibDir" value="external\BASS_2.4\$(platform)" />
-				<Variable name="bassCppInc" value="external\bass_cpp\include" />
 				<Variable name="objectDir" value="obj\$(platform)\$(targetName)\" />
+				<Variable name="bassCppInc" value="external\bass_cpp\include" />
+				<Variable name="outputDir" value="bin\$(platform)\$(targetName)\ambience" />
 				<Variable name="bassCppLibDir" value="external\bass_cpp\lib\$(platform)" />
 				<Variable name="bassInc" value="external\BASS_2.4\c" />
-				<Variable name="outputDir" value="bin\$(platform)\$(targetName)\ambience" />
 			</Environment>
 		</Build>
 		<Compiler>
@@ -226,7 +226,6 @@
 			<Option target="Debug_win" />
 			<Option target="Release_win" />
 		</Unit>
-		<Unit filename="QTriple.hpp" />
 		<Unit filename="README.txt" />
 		<Unit filename="RandomCtrlPanel.cpp" />
 		<Unit filename="RandomCtrlPanel.qoh">
