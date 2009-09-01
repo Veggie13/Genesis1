@@ -6,7 +6,8 @@
 #include "RandomCtrlUi.h"
 
 
-class RandomCtrl;
+class MasterCtrl;
+class TitleCarrierListModel;
 
 class RandomCtrlPanel : public QLabel, private Ui::RandomCtrlUi
 {
@@ -15,19 +16,20 @@ class RandomCtrlPanel : public QLabel, private Ui::RandomCtrlUi
 public:
     RandomCtrlPanel(QWidget* parent = NULL);
 
-    void Associate(RandomCtrl* ctrl);
+    void Associate(MasterCtrl* ctrl);
 
 signals:
     void AddSelected();
-    void DeleteSelected(const QString& randTitle);
 
 protected slots:
     void OnDeleteSelected();
     void RemoveCtrl();
     void UpdateSelectionControls();
+    void UpdateList();
 
 private:
-    RandomCtrl* m_randCtrl;
+    MasterCtrl*             m_randCtrl;
+    TitleCarrierListModel*  m_randListModel;
 
 };
 

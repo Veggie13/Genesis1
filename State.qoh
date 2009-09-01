@@ -1,41 +1,41 @@
 #ifndef STATE_QOH
 #define STATE_QOH
 
-#include <QDomElement>
 #include <QObject>
 
-class BackgroundCtrl;
+#include "I_TitleCarrier.h"
+
+
+class MasterCtrl;
 class MusicCtrl;
-class RandomCtrl;
 class Soundboard;
 
-
-class State : public QObject
+class State : public QObject, public I_TitleCarrier
 {
     Q_OBJECT
 
 public:
-    State(const QDomElement& state = QDomElement(), QObject* parent = NULL);
+    State(const QString& title, QObject* parent = NULL);
     ~State();
 
+    virtual const QString& Title();
+    void SetTitle(const QString& title);
+
     MusicCtrl*      GetMusicController();
-    BackgroundCtrl* GetBackgroundController();
-    RandomCtrl*     GetRandomController();
+    MasterCtrl*     GetBackgroundController();
+    MasterCtrl*     GetRandomController();
     Soundboard*     GetSoundboard();
-
-    void WriteData(QDomElement& state);
-
-    void RenameStreamObjects(const QString& title, const QString& newTitle);
-    void RenameSampleObjects(const QString& title, const QString& newTitle);
 
 signals:
     void Modified();
 
 private:
     MusicCtrl*      m_music;
-    BackgroundCtrl* m_background;
-    RandomCtrl*     m_random;
+    MasterCtrl*     m_background;
+    MasterCtrl*     m_random;
     Soundboard*     m_sndboard;
+
+    QString m_title;
 
 };
 

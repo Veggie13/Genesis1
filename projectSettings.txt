@@ -62,3 +62,14 @@ qtxmllib  - the name of the QtXml library
 
 The project references these variables in order to generalize the
 project file to work on any system in either platform target.
+
+On Windows, a further variable must exist called "debug_help". The
+base must point to a location such that the following exists:
+
+$(#debug_help.lib)\DbgHelp.Lib
+
+Add a path to debug_help called "name".
+
+name      - DbgHelp
+
+This should allow Windows linking.

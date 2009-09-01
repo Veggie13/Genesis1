@@ -1,43 +1,41 @@
 #ifndef PROJECT_QOH
 #define PROJECT_QOH
 
-#include <QDomElement>
-#include <QMap>
+#include <QList>
 #include <QObject>
-#include <QString>
 
-#include "QStringMapRefModel.hpp"
 
+class A_ImportManager;
+class SampleImportManager;
 class Scene;
-
+class StreamImportManager;
 
 class Project : public QObject
 {
     Q_OBJECT
 
 public:
-    Project(const QDomElement& project = QDomElement(), QObject* parent = NULL);
+    Project(QObject* parent = NULL);
     ~Project();
 
-    QAbstractItemModel* Model();
+    const QList<Scene*>& SceneList();
 
-    bool AddScene(const QString& sceneName, const QDomElement& scene = QDomElement());
-    void RemoveScene(const QString& sceneName);
+    A_ImportManager* StreamManager();
+    A_ImportManager* SampleManager();
 
-    Scene* GetScene(const QString& sceneName);
-
-    void WriteData(QDomElement& project);
-
-    void RenameStreamObjects(const QString& title, const QString& newTitle);
-    void RenameSampleObjects(const QString& title, const QString& newTitle);
+    void AddScene(Scene* newScene);
 
 signals:
     void Modified();
 
+private slots:
+    void RemoveDeletedScene();
+
 private:
-    typedef QMap<QString, Scene*> SceneMap;
-    SceneMap                    m_scenes;
-    QStringMapRefModel<Scene*>  m_sceneModel;
+    QList<Scene*> m_scenes;
+
+    StreamImportManager* m_streamMgr;
+    SampleImportManager* m_sampleMgr;
 
 };
 

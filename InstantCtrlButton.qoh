@@ -4,7 +4,7 @@
 #include <QPushButton>
 
 class InstantCtrlButtonMenu;
-class InstantSound;
+class SoundboardInstance;
 
 
 class InstantCtrlButton : public QPushButton
@@ -15,20 +15,19 @@ public:
     InstantCtrlButton(int row, int col, QWidget* parent=NULL);
     virtual ~InstantCtrlButton();
 
-    void SetSound(const QString& title, InstantSound* sound);
-    InstantSound* GetSound();
-
-    void EnableSwapTarget(bool enable);
+    void SetSound(SoundboardInstance* sound);
+    SoundboardInstance* Sound();
 
 public slots:
     void Reset();
-    void SetVolume(int vol);
+    void EnableSwapTarget();
+    void DisableSwapTarget();
 
 signals:
-    void PlaySound(int vol);
+    void PlaySound();
     void SoundRequested(int row, int col);
     void WasReset(int row, int col);
-    void SwapInitiated(int row, int col);
+    void SwapRequested(int row, int col);
     void SwapDestSelected(int row, int col);
 
 protected slots:
@@ -38,14 +37,13 @@ private slots:
     void RequestSound();
     void SignalPlay();
     void PerformSwap();
+    void UpdateTitle();
 
 private:
     int m_row;
     int m_col;
 
-    int m_volume;
-
-    InstantSound* m_assignment;
+    SoundboardInstance* m_assignment;
 
     InstantCtrlButtonMenu* m_popupMenu;
 

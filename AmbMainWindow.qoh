@@ -5,21 +5,31 @@
 #include <QStringList>
 
 #include "PopupToolMainWindow.qoh"
+#include "Soundboard.qoh"
 
 #include "AmbMainWindowUi.h"
 
 
+class A_ImportManager;
+class A_SoundImport;
+class A_SoundInstance;
 class BackgroundCtrlPanel;
 class FileSelectionDlg;
+class MasterCtrl;
+class MusicCtrl;
 class MusicCtrlPanel;
+class QDomDocument;
 class QDomElement;
 class QHBoxLayout;
 class QSettings;
 class Project;
 class RandomCtrlPanel;
+class RandomSound;
+class Scene;
 class SceneEditorDlg;
 class SceneState;
 class SignallingLabel;
+class SoundboardLayout;
 class State;
 
 class AmbMainWindow : public PopupToolMainWindow, private Ui::AmbMainWindowUi
@@ -30,7 +40,13 @@ public:
     AmbMainWindow(int argc, char* argv[], QWidget* parent=NULL);
     virtual ~AmbMainWindow();
 
+protected:
+    void Associate(Project* proj);
+
 protected slots:
+    void RemoveProject();
+    void RemoveCurrentState();
+
     virtual void closeEvent(QCloseEvent* evt);
     virtual void showEvent(QShowEvent* evt);
 
@@ -48,26 +64,12 @@ protected slots:
     void SetModified();
     void ClearModified();
 
-    void ImportStreamFile(const QString& title, const QString& filename);
-    void ImportSampleFile(const QString& title, const QString& filename);
-
-    void CloseStreamFile(const QString& title);
-    void CloseSampleFile(const QString& title);
-
-    void RenameStream(const QString& title, const QString& newTitle);
-    void RenameSample(const QString& title, const QString& newTitle);
-
-    void ReimportStream(const QString& title, const QString& newFilename);
-    void ReimportSample(const QString& title, const QString& newFilename);
-
     void SelectSong();
     void SelectBackground();
     void SelectRandom();
     void SelectInstant(int row, int col);
 
-    void SwitchSceneState(const QString& sceneName, const QString& stateName);
-
-    void ApplyWidgetExpandLeftSetting(bool expand);
+    void SwitchSceneState(Scene* newScene, State* newState);
 
     void ShowAboutDlg();
 
@@ -78,8 +80,38 @@ private:
     void PutRecentProjectListOnMenu();
     void LoadAndApplySettings();
 
-    void LoadStreamImportList(const QDomElement& longImports);
-    void LoadSampleImportList(const QDomElement& shortImports);
+    Project* LoadFromElement(const QString& filename, const QDomElement& root);
+    void LoadStreamImportList(Project* parent, const QDomElement& longImports);
+    void LoadSampleImportList(Project* parent, const QDomElement& shortImports);
+    void LoadProjectBody(Project* proj, const QDomElement& project);
+    void LoadScene(Project* proj, Scene* newScene, const QDomElement& scene);
+    void LoadState(Project* proj, State* newState, const QDomElement& state);
+    void LoadMusicData(Project* proj, State* parent, const QDomElement& musicData);
+    void LoadBackgroundData(Project* proj, State* parent, const QDomElement& bgData);
+    void LoadRandomData(Project* proj, State* parent, const QDomElement& randData);
+    void LoadSoundboardData(
+        Project* proj,
+        State* parent,
+        const QDomElement& sndboardData );
+
+    void SaveToElement(QDomDocument& doc, Project* proj);
+    void SaveStreamImportList(QDomElement& parent, A_ImportManager* mgr);
+    void SaveSampleImportList(QDomElement& parent, A_ImportManager* mgr);
+    void SaveImport(QDomElement& parent, A_SoundImport* import);
+    void SaveImportList(QDomElement& element, A_ImportManager* mgr);
+    void SaveProjectBody(QDomElement& parent, Project* proj);
+    void SaveScene(QDomElement& parent, Scene* scene);
+    void SaveState(QDomElement& parent, State* state);
+    void SaveMusicData(QDomElement& parent, MusicCtrl* musicCtrl);
+    void SaveBackgroundData(QDomElement& parent, MasterCtrl* bgCtrl);
+    void SaveRandomData(QDomElement& parent, MasterCtrl* randCtrl);
+    void SaveSoundboardData(QDomElement& parent, Soundboard* sndboard);
+    void SaveSong(QDomElement& parent, A_SoundInstance* instance);
+    void SaveBackground(QDomElement& parent, A_SoundInstance* instance);
+    void SaveRandomSound(QDomElement& parent, RandomSound* instance);
+    void SaveSoundboardEffect(
+        QDomElement& parent,
+        Soundboard::SoundGrid::const_iterator soundGridIt );
 
     void PersistLocalPath();
 
@@ -87,12 +119,11 @@ private:
     void UpdateAppTitle();
 
 
-    //QHBoxLayout*    m_mainWidgetLayout;
-    //AmbMainWidget*  m_mainWidget;
     SceneState*             m_sceneState;
     MusicCtrlPanel*         m_musicCtrl;
     BackgroundCtrlPanel*    m_bgCtrl;
     RandomCtrlPanel*        m_randCtrl;
+    SoundboardLayout*       m_sndboardObj;
 
     Project*    m_project;
     QString     m_projectPath;
@@ -113,6 +144,7 @@ private:
     QWidget* m_tempFrame;
 
 
+    static const char           VERSION_FORMAT[];
     static const unsigned int   VERSION_CODE;
     static const char           APP_NAME[];
     static const char           COMPANY_NAME[];

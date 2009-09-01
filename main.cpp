@@ -1,4 +1,3 @@
-#include <QApplication>
 #include <QFileInfo>
 #include <QMainWindow>
 #include <QMessageBox>
@@ -7,6 +6,7 @@
 #include <ctime>
 #include <exception>
 
+#include "AmbienceApplication.h"
 #include "AmbSplash.qoh"
 
 #include "AmbMainWindow.qoh"
@@ -16,7 +16,7 @@ int main(int argc, char* argv[])
 {
     std::srand( std::time(NULL) );
 
-    QApplication app(argc, argv);
+    AmbienceApplication app(argc, argv);
 
     if (argc > 2)
     {
@@ -37,18 +37,5 @@ int main(int argc, char* argv[])
 
     mainWindow->showMaximized();
 
-    try
-    {
-        return app.exec();
-    }
-    catch (std::exception e)
-    {
-        printf("Exception: %s\n", e.what());
-    }
-    catch (...)
-    {
-        printf("Exception occurred\n");
-    }
-
-    return 0;
+    return app.exec();
 }

@@ -1,20 +1,25 @@
 #include <QMessageBox>
 
-#include "RandomCtrl.qoh"
+#include "MasterCtrl.qoh"
 #include "RandomSound.qoh"
+#include "TitleCarrierListModel.hpp"
 
 #include "RandomCtrlPanel.qoh"
 
 
 RandomCtrlPanel::RandomCtrlPanel(QWidget* parent)
 :   QLabel(parent),
-    m_randCtrl(NULL)
+    m_randCtrl(NULL),
+    m_randListModel(NULL)
 {
     setupUi(this);
     setBackgroundRole(QPalette::Window);
     setFrameStyle(QFrame::WinPanel);
     setAutoFillBackground(true);
     setEnabled(false);
+
+    m_randListModel = new TitleCarrierListModel;
+    m_effectList->setModel(m_randListModel);
 
     connect( m_addBtn,          SIGNAL( clicked()           ),
              this,              SIGNAL( AddSelected()       ) );
@@ -24,9 +29,13 @@ RandomCtrlPanel::RandomCtrlPanel(QWidget* parent)
              m_effectList,      SLOT  ( selectAll()         ) );
     connect( m_deselectAllBtn,  SIGNAL( clicked()           ),
              m_effectList,      SLOT  ( clearSelection()    ) );
+    connect( m_effectList->selectionModel(),
+             SIGNAL( selectionChanged(const QItemSelection&, const QItemSelection&) ),
+             this,
+             SLOT( UpdateSelectionControls() ) );
 }
 
-void RandomCtrlPanel::Associate(RandomCtrl* ctrl)
+void RandomCtrlPanel::Associate(MasterCtrl* ctrl)
 {
     if (m_randCtrl == ctrl)
         return;
@@ -37,13 +46,12 @@ void RandomCtrlPanel::Associate(RandomCtrl* ctrl)
     {
         m_globalMuteChk->disconnect(m_randCtrl);
         m_globalVolSld->disconnect(m_randCtrl);
-        m_selectionMuteChk->disconnect(m_randCtrl);
-        m_selectionVolSld->disconnect(m_randCtrl);
-        m_selectionVarSld->disconnect(m_randCtrl);
-        m_selectionPerValSpn->disconnect(m_randCtrl);
-        m_selectionPerTypeCbo->disconnect(m_randCtrl);
-        m_randCtrl->disconnect(SIGNAL(destroyed(QObject*)), this);
-        m_randCtrl->SelectionModel()->disconnect(this);
+        m_selectionMuteChk->disconnect();
+        m_selectionVolSld->disconnect();
+        m_selectionVarSld->disconnect();
+        m_selectionPerValSpn->disconnect();
+        m_selectionPerTypeCbo->disconnect();
+        m_randCtrl->disconnect(SIGNAL(destroyed()), this);
     }
 
     m_randCtrl = ctrl;
@@ -61,24 +69,23 @@ void RandomCtrlPanel::Associate(RandomCtrl* ctrl)
     }
 
     setEnabled(true);
-    m_effectList->setModel(ctrl->Model());
-    m_effectList->setSelectionModel(ctrl->SelectionModel());
-    m_globalVolSld->setValue(ctrl->GetMasterVolume());
-    m_globalMuteChk->setChecked(ctrl->IsMasterMuted());
+    m_randListModel->setList(ctrl->Children());
+    m_globalVolSld->setValue(ctrl->Volume());
+    m_globalMuteChk->setChecked(ctrl->IsPaused());
     m_selectionVolSld->setValue(0);
     m_selectionVarSld->setValue(0);
     m_selectionPerValSpn->setValue(0.0);
     m_selectionPerTypeCbo->setEditText("");
     m_selectionMuteChk->setChecked(false);
 
-    connect( m_globalVolSld,    SIGNAL( valueChanged(int)       ),
-             ctrl,              SLOT  ( SetMasterVolume(int)    ) );
-    connect( m_globalMuteChk,   SIGNAL( toggled(bool)           ),
-             ctrl,              SLOT  ( SetMasterMuted(bool)    ) );
-    connect( ctrl->SelectionModel(),
-             SIGNAL( selectionChanged(const QItemSelection&, const QItemSelection&) ),
-             this,
-             SLOT( UpdateSelectionControls() ) );
+    connect( m_globalVolSld,    SIGNAL( valueChanged(int)   ),
+             ctrl,              SLOT  ( SetVolume(int)      ) );
+    connect( m_globalMuteChk,   SIGNAL( toggled(bool)       ),
+             ctrl,              SLOT  ( SetPaused(bool)     ) );
+    connect( ctrl,              SIGNAL( Modified()          ),
+             this,              SLOT  ( UpdateList()        ) );
+    connect( ctrl,              SIGNAL( destroyed()         ),
+             this,              SLOT  ( RemoveCtrl()        ) );
 }
 
 void RandomCtrlPanel::OnDeleteSelected()
@@ -98,13 +105,22 @@ void RandomCtrlPanel::OnDeleteSelected()
           it != selected.end();
           it++ )
     {
-        emit DeleteSelected( (*it).data().toString() );
+        delete (*it).data(Qt::UserRole).value<I_TitleCarrier*>();
     }
 }
 
 void RandomCtrlPanel::RemoveCtrl()
 {
     setEnabled(false);
+
+    m_globalMuteChk->disconnect(m_randCtrl);
+    m_globalVolSld->disconnect(m_randCtrl);
+    m_selectionMuteChk->disconnect();
+    m_selectionVolSld->disconnect();
+    m_selectionVarSld->disconnect();
+    m_selectionPerValSpn->disconnect();
+    m_selectionPerTypeCbo->disconnect();
+
     m_globalVolSld->setValue(0);
     m_globalMuteChk->setChecked(false);
     m_selectionVolSld->setValue(0);
@@ -151,25 +167,27 @@ void RandomCtrlPanel::UpdateSelectionControls()
 
         if (selection.size() == 1)
         {
-            RandomSound* randSel =
-                m_randCtrl->GetInstance(selection[0].data().toString());
+            RandomSound* randSel = dynamic_cast<RandomSound*>(
+                selection[0].data(Qt::UserRole).value<I_TitleCarrier*>()
+                );
 
-            m_selectionVolSld->setValue(randSel->GetInstanceVolume());
-            m_selectionMuteChk->setChecked(!randSel->IsInstanceActive());
-            m_selectionVarSld->setValue(randSel->GetVariance());
-            m_selectionPerValSpn->setValue(randSel->GetPeriod());
-            m_selectionPerTypeCbo->setCurrentIndex(randSel->GetPeriodType());
+            m_selectionVolSld->setValue(randSel->InstanceVolume());
+            m_selectionMuteChk->setChecked(randSel->IsInstancePaused());
+            m_selectionVarSld->setValue(randSel->Variance());
+            m_selectionPerValSpn->setValue(randSel->Period());
+            m_selectionPerTypeCbo->setCurrentIndex((int)randSel->GetPeriodType());
         }
 
         for ( QModelIndexList::iterator it = selection.begin();
               it != selection.end();
               it++ )
         {
-            RandomSound* randSel =
-                m_randCtrl->GetInstance((*it).data().toString());
+            RandomSound* randSel = dynamic_cast<RandomSound*>(
+                (*it).data(Qt::UserRole).value<I_TitleCarrier*>()
+                );
 
             connect(m_selectionMuteChk,     SIGNAL( toggled(bool)               ),
-                    randSel,                SLOT  ( SetInstanceInactive(bool)   ) );
+                    randSel,                SLOT  ( SetInstancePaused(bool)     ) );
             connect(m_selectionVolSld,      SIGNAL( valueChanged(int)           ),
                     randSel,                SLOT  ( SetInstanceVolume(int)      ) );
             connect(m_selectionVarSld,      SIGNAL( valueChanged(int)           ),
@@ -180,4 +198,9 @@ void RandomCtrlPanel::UpdateSelectionControls()
                     randSel,                SLOT  ( SetPeriodType(int)          ) );
         }
     }
+}
+
+void RandomCtrlPanel::UpdateList()
+{
+    m_randListModel->setList(m_randCtrl->Children());
 }

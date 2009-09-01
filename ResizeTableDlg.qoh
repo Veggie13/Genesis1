@@ -14,6 +14,8 @@ public:
     ResizeTableDlg(int rows, int cols, QWidget* parent=NULL);
     virtual ~ResizeTableDlg();
 
+    void SetDimensions(int rows, int cols);
+
 public slots:
     virtual void accept();
     virtual void reject();

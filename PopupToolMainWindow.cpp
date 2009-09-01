@@ -3,6 +3,7 @@
 #include <QVBoxLayout>
 
 #include "HoverLabel.qoh"
+#include "QException.h"
 
 #include "PopupToolMainWindow.qoh"
 
@@ -20,9 +21,11 @@ PopupToolMainWindow::PopupToolMainWindow(QWidget* parent, Qt::WindowFlags flags)
 void PopupToolMainWindow::addPopupWidget(const QString& name, QWidget* popup)
 {
     if (!popup)
-        return; //throw new std::exception("popup was null");
+        throw QException("Programming Error: "
+                         "Tried to add NULL popup widget!");
     if (m_popups.find(name) != m_popups.end())
-        return; //throw new std::exception("popup by that name already exists");
+        throw QException("Programming Error: "
+                         "Tried to add popup widget using existing name!");
 
     popup->setParent(this);
     popup->hide();
@@ -90,7 +93,8 @@ void PopupToolMainWindow::beginHover(const QString& name)
 {
     QMap<QString, QWidget*>::iterator finder = m_popups.find(name);
     if (finder == m_popups.end())
-        return; //throw new std::exception("invalid popup name");
+        throw QException("Programming Error: "
+                         "Began popup hover over invalid name!");
 
     HoverLabel* label = m_hovers[name];
     QWidget* popup = finder.value();
@@ -108,7 +112,8 @@ void PopupToolMainWindow::endHover(const QString& name)
 {
     QMap<QString, QWidget*>::iterator finder = m_popups.find(name);
     if (finder == m_popups.end())
-        return; //throw new std::exception("invalid popup name");
+        throw QException("Programming Error: "
+                         "Ended popup hover over invalid name!");
 
     QWidget* popup = finder.value();
     QPoint pt = mapFromGlobal(QCursor::pos());

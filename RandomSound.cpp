@@ -2,7 +2,8 @@
 
 #include <cmath>
 
-#include "InstantSound.qoh"
+#include "A_SoundImport.qoh"
+#include "QException.h"
 
 #include "RandomSound.qoh"
 
@@ -10,26 +11,15 @@
 #define DOUBLES_EQUAL(x, y)  ( ((x)-(y)) * ((x)-(y)) < (1.0e-10) )
 
 
-const int RandomSound::PERIOD_TYPE_MULT = 0;
-const int RandomSound::PERIOD_TYPE_TIME = 1;
+const RandomSound::PeriodType RandomSound::PeriodTypes[] = {MULT, TIME};
 
-RandomSound::RandomSound(InstantSound* snd, QObject* parent)
-:   QObject(parent),
-    m_sound(snd),
+RandomSound::RandomSound(A_SoundImport* import, QObject* parent)
+:   A_SoundInstance(import, parent),
     m_period(100.0),
-    m_periodType(PERIOD_TYPE_MULT),
+    m_periodType(MULT),
     m_variance(100),
-    m_masterVolume(100),
-    m_instanceVolume(100),
-    m_masterPlaying(false),
-    m_instancePlaying(false),
-    m_active(false),
-    m_halted(false),
     m_timer(NULL)
 {
-    if (m_sound)
-        connect(m_sound, SIGNAL( destroyed() ), this, SIGNAL( ReadyForDeletion() ));
-
     m_timer = new QTimer;
     m_timer->setSingleShot(true);
     connect(m_timer, SIGNAL( timeout() ), this, SLOT( PlaySound() ));
@@ -37,187 +27,100 @@ RandomSound::RandomSound(InstantSound* snd, QObject* parent)
 
 RandomSound::~RandomSound()
 {
-    Stop();
     delete m_timer;
 }
 
-InstantSound* RandomSound::GetSoundObject()
-{
-    return m_sound;
-}
-
-void RandomSound::SetMasterInactive(bool unplay)
-{
-    if (m_masterPlaying == !unplay)
-        return;
-
-    m_masterPlaying = !unplay;
-    emit Modified();
-
-    if (m_halted || !m_active)
-        return;
-    if (m_instancePlaying && m_masterPlaying)
-        m_timer->start(TimerLength());
-    else if (!m_masterPlaying)
-        m_timer->stop();
-}
-
-void RandomSound::SetInstanceInactive(bool unplay)
-{
-    if (m_instancePlaying == !unplay)
-        return;
-
-    m_instancePlaying = !unplay;
-    emit Modified();
-
-    if (m_halted || !m_active)
-        return;
-    if (m_instancePlaying && m_masterPlaying)
-        m_timer->start(TimerLength());
-    else if (!m_instancePlaying)
-        m_timer->stop();
-}
-
-void RandomSound::Start()
-{
-    m_active = true;
-    if (!m_timer->isActive() && !m_halted && m_masterPlaying && m_instancePlaying)
-        m_timer->start(TimerLength());
-}
-
-void RandomSound::Stop()
+void RandomSound::InternalSuspend()
 {
     if (m_timer->isActive())
         m_timer->stop();
 
-    m_active = false;
+    Import()->Stop();
 }
 
-void RandomSound::Halt()
+void RandomSound::InternalResume()
 {
-    if (m_timer->isActive())
-        m_timer->stop();
-
-    m_halted = true;
 }
 
-void RandomSound::Resume()
+void RandomSound::UpdateImportVolume()
 {
-    m_halted = false;
-    if (!m_timer->isActive() && m_active && m_masterPlaying && m_instancePlaying)
+    // we don't update the import for RandomSound; we do it before we play
+}
+
+void RandomSound::UpdateImportPause()
+{
+    // we don't update the import for RandomSound; pausing applies to the timer
+    if (!IsMasterPaused() && !IsInstancePaused())
         m_timer->start(TimerLength());
+    else if (m_timer->isActive())
+        m_timer->stop();
 }
 
-bool RandomSound::IsMasterActive()
-{
-    return m_masterPlaying;
-}
-
-bool RandomSound::IsInstanceActive()
-{
-    return m_instancePlaying;
-}
-
-double RandomSound::GetPeriod()
+double RandomSound::Period()
 {
     return m_period;
 }
 
-int RandomSound::GetPeriodType()
+RandomSound::PeriodType RandomSound::GetPeriodType()
 {
     return m_periodType;
 }
 
-int RandomSound::GetVariance()
+int RandomSound::Variance()
 {
     return m_variance;
 }
 
-int RandomSound::GetMasterVolume()
-{
-    return m_masterVolume;
-}
-
-int RandomSound::GetInstanceVolume()
-{
-    return m_instanceVolume;
-}
-
-bool RandomSound::SetPeriod(double per)
+void RandomSound::SetPeriod(double per)
 {
     if (!IsPeriodValid(per))
-        return false;
+        throw QException("Programming Error: "
+                         "Tried to set Period outside of valid range!");
     if (DOUBLES_EQUAL(m_period, per))
-        return true;
+        return;
 
     m_period = per;
-    m_timer->stop();
-    m_timer->start(TimerLength());
+    if (m_timer->isActive())
+    {
+        m_timer->stop();
+        m_timer->start(TimerLength());
+    }
     emit Modified();
-    return true;
 }
 
-bool RandomSound::SetPeriodType(int type)
+void RandomSound::SetPeriodType(RandomSound::PeriodType type)
 {
-    if (type < PERIOD_TYPE_MULT || type > PERIOD_TYPE_TIME)
-        return false;
     if (m_periodType == type)
-        return true;
+        return;
 
     m_periodType = type;
     if (!IsPeriodValid(m_period))
         m_period = 1.0;
 
-    m_timer->stop();
-    m_timer->start(TimerLength());
+    if (m_timer->isActive())
+    {
+        m_timer->stop();
+        m_timer->start(TimerLength());
+    }
     emit Modified();
-    return true;
 }
 
-bool RandomSound::SetVariance(int var)
+void RandomSound::SetVariance(int var)
 {
     if (var < 0 || var > 100)
-        return false;
+        throw QException("Programming Error: "
+                         "Tried to set variance outside of valid range!");
     if (m_variance == var)
-        return true;
+        return;
 
     m_variance = var;
     emit Modified();
-    return true;
-}
-
-bool RandomSound::SetMasterVolume(int vol)
-{
-    if (vol < 0 || vol > 100)
-        return false;
-    if (m_masterVolume == vol)
-        return true;
-
-    m_masterVolume = vol;
-    emit Modified();
-    return true;
-}
-
-bool RandomSound::SetInstanceVolume(int vol)
-{
-    if (vol < 0 || vol > 100)
-        return false;
-    if (m_instanceVolume == vol)
-        return true;
-
-    m_instanceVolume = vol;
-    emit Modified();
-    return true;
 }
 
 void RandomSound::PlaySound()
 {
-    if (m_halted || !m_masterPlaying || !m_instancePlaying)
-        return;
-
-    if (m_sound)
-        m_sound->Play(m_masterVolume * m_instanceVolume);
-
+    A_SoundInstance::UpdateImportVolume();
+    Import()->Play(true);
     m_timer->start(TimerLength());
 }
 
@@ -239,8 +142,8 @@ int RandomSound::TimerLength()
     double diffFactor = (1.8f * varFactor * asin(randFactor) / M_PI) + 1.0f;
 
     double result = diffFactor * lenFactor;
-    double soundLength = m_sound->Length();
-    if (m_periodType == PERIOD_TYPE_MULT)
+    double soundLength = Import()->Length();
+    if (m_periodType == MULT)
         result *= soundLength;
 
     if (result < soundLength)

@@ -1,112 +1,79 @@
+#include "ImportManagers.h"
+#include "QException.h"
 #include "Scene.qoh"
+
 #include "Project.qoh"
 
 
-Project::Project(const QDomElement& project, QObject* parent)
+Project::Project(QObject* parent)
 :   QObject(parent),
     m_scenes(),
-    m_sceneModel(&m_scenes)
+    m_streamMgr(NULL),
+    m_sampleMgr(NULL)
 {
-    if (project.isNull())
-        return;
+    m_streamMgr = new StreamImportManager;
+    m_sampleMgr = new SampleImportManager;
 
-    for( QDomNode n = project.firstChild();
-         !n.isNull();
-         n = n.nextSibling() )
-    {
-        QDomElement scene = n.toElement();
-        if ( scene.isNull() || scene.tagName() != "scene")
-            continue;
-
-        QString sceneTitle = scene.attribute("title", "");
-        AddScene(sceneTitle, scene);
-    }
+    connect(m_streamMgr, SIGNAL( Modified() ), this, SIGNAL( Modified() ));
+    connect(m_sampleMgr, SIGNAL( Modified() ), this, SIGNAL( Modified() ));
 }
 
 Project::~Project()
 {
-    SceneMap::iterator it;
+    QList<Scene*>::iterator it;
     for (it = m_scenes.begin(); it != m_scenes.end(); it++)
     {
+        (*it)->disconnect(this);
         delete (*it);
     }
+
+    delete m_streamMgr;
+    delete m_sampleMgr;
 }
 
-QAbstractItemModel* Project::Model()
+const QList<Scene*>& Project::SceneList()
 {
-    return &m_sceneModel;
+    return m_scenes;
 }
 
-bool Project::AddScene(const QString& sceneName, const QDomElement& scene)
+A_ImportManager* Project::StreamManager()
 {
-    SceneMap::const_iterator it = m_scenes.constFind(sceneName);
-    if (it != m_scenes.constEnd())
-        return false;
+    return m_streamMgr;
+}
 
-    Scene* newScene = new Scene(scene);
-    if (!newScene)
-        return false;
+A_ImportManager* Project::SampleManager()
+{
+    return m_sampleMgr;
+}
 
-    connect(newScene, SIGNAL( Modified() ), this, SIGNAL( Modified() ));
+void Project::AddScene(Scene* newScene)
+{
+    if (newScene == NULL)
+        throw QException("Programming Error: "
+                         "Tried to add NULL Scene!");
 
-    m_scenes[sceneName] = newScene;
-    m_sceneModel.setStringMap(&m_scenes);
+    int index = m_scenes.lastIndexOf(newScene);
+    if (-1 != index)
+        throw QException("Programming Error: "
+                         "Tried to add a Scene that was already present!");
+
+    connect(newScene, SIGNAL( Modified()  ), this, SIGNAL( Modified()           ));
+    connect(newScene, SIGNAL( destroyed() ), this, SLOT  ( RemoveDeletedScene() ));
+
+    m_scenes.append(newScene);
     emit Modified();
-    return true;
 }
 
-void Project::RemoveScene(const QString& sceneName)
+void Project::RemoveDeletedScene()
 {
-    SceneMap::iterator it = m_scenes.find(sceneName);
-    if (it == m_scenes.end())
+    Scene* doomed = reinterpret_cast<Scene*>(sender());
+    if (doomed == NULL)
         return;
 
-    Scene* doomed = (*it);
-    delete doomed;
+    int index = m_scenes.lastIndexOf(doomed);
+    if (-1 == index)
+        return;
 
-    m_scenes.erase(it);
-    m_sceneModel.setStringMap(&m_scenes);
+    m_scenes.removeAt(index);
     emit Modified();
-}
-
-Scene* Project::GetScene(const QString& sceneName)
-{
-    SceneMap::iterator it = m_scenes.find(sceneName);
-    if (it == m_scenes.end())
-        return NULL;
-
-    return (*it);
-}
-
-void Project::WriteData(QDomElement& project)
-{
-    QDomDocument doc = project.ownerDocument();
-
-    for ( SceneMap::iterator sceneIt = m_scenes.begin();
-          sceneIt != m_scenes.end();
-          sceneIt++ )
-    {
-        QDomElement scene = doc.createElement("scene");
-        scene.setAttribute("title", sceneIt.key());
-        sceneIt.value()->WriteData(scene);
-        project.appendChild(scene);
-    }
-}
-
-void Project::RenameStreamObjects(const QString& title, const QString& newTitle)
-{
-    SceneMap::iterator it;
-    for (it = m_scenes.begin(); it != m_scenes.end(); it++)
-    {
-        (*it)->RenameStreamObjects(title, newTitle);
-    }
-}
-
-void Project::RenameSampleObjects(const QString& title, const QString& newTitle)
-{
-    SceneMap::iterator it;
-    for (it = m_scenes.begin(); it != m_scenes.end(); it++)
-    {
-        (*it)->RenameSampleObjects(title, newTitle);
-    }
 }

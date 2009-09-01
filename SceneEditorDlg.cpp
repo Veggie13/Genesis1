@@ -3,16 +3,26 @@
 #include "Project.qoh"
 #include "Scene.qoh"
 #include "SceneNameDlgUi.h"
+#include "State.qoh"
 #include "StateNameDlgUi.h"
+#include "TitleCarrierListModel.hpp"
 
 #include "SceneEditorDlg.qoh"
 
 
 SceneEditorDlg::SceneEditorDlg(QWidget* parent)
 :   QDialog(parent),
-    m_project(NULL)
+    m_project(NULL),
+    m_sceneListModel(NULL),
+    m_stateListModel(NULL)
 {
     setupUi(this);
+
+    m_sceneListModel = new TitleCarrierListModel;
+    m_sceneCbo->setModel(m_sceneListModel);
+
+    m_stateListModel = new TitleCarrierListModel;
+    m_stateList->setModel(m_stateListModel);
 
     connect( m_newSceneBtn,    SIGNAL( clicked() ), this, SLOT( AddScene()     ) );
     connect( m_newStateBtn,    SIGNAL( clicked() ), this, SLOT( AddState()     ) );
@@ -33,6 +43,8 @@ SceneEditorDlg::SceneEditorDlg(QWidget* parent)
 
 SceneEditorDlg::~SceneEditorDlg()
 {
+    delete m_sceneListModel;
+    delete m_stateListModel;
 }
 
 void SceneEditorDlg::Associate(Project* proj)
@@ -49,7 +61,7 @@ void SceneEditorDlg::Associate(Project* proj)
 
     if (proj)
     {
-        m_sceneCbo->setModel(proj->Model());
+        m_sceneListModel->setList(proj->SceneList());
 
         m_newSceneBtn->setEnabled(true);
         m_newStateBtn->setEnabled(true);
@@ -92,16 +104,9 @@ void SceneEditorDlg::AddScene()
             continue;
         }
 
-        if (!m_project->AddScene(newName))
-        {
-            QMessageBox::critical(
-                this,
-                "Add Scene",
-                "Could not add the new scene." );
-            continue;
-        }
+        m_project->AddScene( new Scene(newName) );
 
-        m_sceneCbo->setModel(m_project->Model());
+        m_sceneListModel->setList(m_project->SceneList());
         m_sceneCbo->setCurrentIndex(m_sceneCbo->findText(newName));
         break;
     }
@@ -115,7 +120,10 @@ void SceneEditorDlg::AddState()
     Ui::StateNameDlgUi dlgLayout;
     dlgLayout.setupUi(&dlg);
 
-    Scene* curScene = m_project->GetScene(m_sceneCbo->currentText());
+    Scene* curScene = dynamic_cast<Scene*>(
+        m_sceneCbo->itemData(m_sceneCbo->currentIndex(), Qt::UserRole)
+            .value<I_TitleCarrier*>()
+        );
 
     QString newName;
     while (dlg.exec())
@@ -132,12 +140,12 @@ void SceneEditorDlg::AddState()
         }
 
         bool found = false;
-        for (int n = 0; !found && n < curScene->Model()->rowCount(); ++n)
+        const QList<State*>& stateList = curScene->StateList();
+        for ( QList<State*>::const_iterator it = stateList.begin();
+              !found && it != stateList.end();
+              it++ )
         {
-            QModelIndex i = curScene->Model()->index(n, 0);
-            QVariant    v = curScene->Model()->data(i);
-
-            found = (v.toString() == newName);
+            found = ((*it)->Title() == newName);
         }
 
         if (found)
@@ -149,26 +157,20 @@ void SceneEditorDlg::AddState()
             continue;
         }
 
-        if (!curScene->AddState(newName))
-        {
-            QMessageBox::critical(
-                this,
-                "Add State",
-                "Could not add the new state." );
-            continue;
-        }
+        curScene->AddState( new State(newName) );
 
         QModelIndex newItem;
         found = false;
-        for (int n = 0; !found && n < curScene->Model()->rowCount(); ++n)
+        for (int n = 0; !found && n < m_stateListModel->rowCount(); ++n)
         {
-            newItem = curScene->Model()->index(n, 0);
-            QVariant v = curScene->Model()->data(newItem);
+            newItem = m_stateListModel->index(n, 0);
+            QVariant v = m_stateListModel->data(newItem);
 
             found = (v.toString() == newName);
         }
 
-        m_stateList->setCurrentIndex(newItem);
+        if (found)
+            m_stateList->setCurrentIndex(newItem);
         break;
     }
 
@@ -188,8 +190,10 @@ void SceneEditorDlg::DeleteScene()
 
     if (dlg.exec() == QMessageBox::Yes)
     {
-        m_project->RemoveScene(m_sceneCbo->currentText());
-        m_sceneCbo->setModel(m_project->Model());
+        delete m_sceneCbo->itemData(m_sceneCbo->currentIndex(), Qt::UserRole)
+            .value<I_TitleCarrier*>();
+
+        m_sceneListModel->setList(m_project->SceneList());
     }
 
     UpdateStateList();
@@ -198,8 +202,6 @@ void SceneEditorDlg::DeleteScene()
 void SceneEditorDlg::DeleteStates()
 {
     QModelIndexList selected = m_stateList->selectionModel()->selectedIndexes();
-
-    Scene* curScene = m_project->GetScene(m_sceneCbo->currentText());
 
     for ( QModelIndexList::iterator it = selected.begin();
           it != selected.end();
@@ -216,7 +218,7 @@ void SceneEditorDlg::DeleteStates()
 
         if (dlg.exec() == QMessageBox::Yes)
         {
-            curScene->RemoveState((*it).data().toString());
+            delete (*it).data(Qt::UserRole).value<I_TitleCarrier*>();
         }
     }
 
@@ -234,19 +236,21 @@ void SceneEditorDlg::UpdateStateList()
     if (!m_project)
         return;
 
-    Scene* curScene = m_project->GetScene(m_sceneCbo->currentText());
-    if (curScene)
+    if (m_sceneCbo->currentIndex() != -1)
     {
+        Scene* curScene = dynamic_cast<Scene*>(
+            m_sceneCbo->itemData(m_sceneCbo->currentIndex(), Qt::UserRole)
+                .value<I_TitleCarrier*>()
+            );
+
         m_statesGrp->setEnabled(true);
         m_deleteSceneBtn->setEnabled(true);
-        m_stateList->setModel(curScene->Model());
-        m_stateList->reset();
+        m_stateListModel->setList(curScene->StateList());
     }
     else
     {
         m_statesGrp->setEnabled(false);
         m_deleteSceneBtn->setEnabled(false);
-        m_stateList->setModel(NULL);
-        m_stateList->reset();
+        m_stateListModel->setList( QList<I_TitleCarrier*>() );
     }
 }

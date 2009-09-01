@@ -5,8 +5,9 @@
 
 #include "SceneEditorDlgUi.h"
 
-class Project;
 
+class Project;
+class TitleCarrierListModel;
 
 class SceneEditorDlg : public QDialog, private Ui::SceneEditorDlgUi
 {
@@ -30,6 +31,9 @@ private slots:
 
 private:
     Project* m_project;
+
+    TitleCarrierListModel*  m_sceneListModel;
+    TitleCarrierListModel*  m_stateListModel;
 
 };
 

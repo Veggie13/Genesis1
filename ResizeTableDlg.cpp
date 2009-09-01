@@ -7,13 +7,17 @@ ResizeTableDlg::ResizeTableDlg(int rows, int cols, QWidget* parent)
     m_cols(cols)
 {
     setupUi(this);
-
-    m_rowSpin->setValue(m_rows);
-    m_colSpin->setValue(m_cols);
+    SetDimensions(m_rows, m_cols);
 }
 
 ResizeTableDlg::~ResizeTableDlg()
 {
+}
+
+void ResizeTableDlg::SetDimensions(int rows, int cols)
+{
+    m_rowSpin->setValue(rows);
+    m_colSpin->setValue(cols);
 }
 
 void ResizeTableDlg::accept()

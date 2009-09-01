@@ -2,6 +2,9 @@
 #include <QFileInfo>
 #include <QMessageBox>
 
+#include "A_ImportManager.qoh"
+#include "A_SoundImport.qoh"
+#include "TitleCarrierListModel.hpp"
 #include "TitleDlgUi.h"
 
 #include "FileSelectionDlg.qoh"
@@ -9,14 +12,15 @@
 
 FileSelectionDlg::FileSelectionDlg(QWidget* parent)
 :   QDialog(parent),
-    m_fileMap(),
-    m_fileMapModel(&m_fileMap),
-    m_copyLocal(false),
-    m_localPath("")
+    m_importMgr(NULL),
+    m_importListModel(NULL)
 {
     setupUi(this);
     m_fileList->setSelectionBehavior(QAbstractItemView::SelectRows);
-    m_fileList->setModel(&m_fileMapModel);
+    setEnabled(false);
+
+    m_importListModel = new TitleCarrierListModel;
+    m_fileList->setModel(m_importListModel);
 
     connect( m_newBtn,      SIGNAL( clicked()                ),
              this,          SLOT  ( ImportFiles()            ) );
@@ -36,47 +40,45 @@ FileSelectionDlg::FileSelectionDlg(QWidget* parent)
 
 FileSelectionDlg::~FileSelectionDlg()
 {
+    delete m_importListModel;
 }
 
-void FileSelectionDlg::AddFile(const QString& title, const QString& filename)
+void FileSelectionDlg::Associate(A_ImportManager* mgr)
 {
-    m_fileMap[title] = filename;
-    m_fileList->reset();
+    if (mgr == m_importMgr)
+        return;
+
+    if (m_importMgr)
+    {
+        disconnect(m_importMgr);
+        m_importMgr->disconnect(this);
+    }
+
+    m_importMgr = mgr;
+    if (!mgr)
+    {
+        setEnabled(false);
+        m_importListModel->setList( QList<A_SoundImport*>() );
+        return;
+    }
+
+    setEnabled(true);
+    m_importListModel->setList(mgr->ImportList());
+
+    connect( mgr,   SIGNAL( Modified()      ),
+             this,  SLOT  ( UpdateList()    ) );
+    connect( mgr,   SIGNAL( CopyLocalActivated(const QList<A_SoundImport*>&)    ),
+             this,  SLOT  ( RequestCopyLocal(const QList<A_SoundImport*>&)      ) );
+    connect( mgr,   SIGNAL( destroyed() ),
+             this,  SLOT  ( RemoveMgr() ) );
+
+    connect(this,
+            SIGNAL( ImportRequested(const QString&, const QString&) ),
+            mgr,
+            SLOT  ( ImportFile(const QString&, const QString&)      ) );
 }
 
-void FileSelectionDlg::DeleteFile(const QString& title)
-{
-    QMap<QString, QString>::iterator doomed =
-        m_fileMap.find(title);
-
-    if (doomed != m_fileMap.end())
-        m_fileMap.erase(doomed);
-
-    m_fileList->reset();
-}
-
-void FileSelectionDlg::RenameFile(const QString& title, const QString& newTitle)
-{
-    AddFile(newTitle, m_fileMap[title]);
-    DeleteFile(title);
-}
-
-void FileSelectionDlg::ReimportFile(const QString& title, const QString& newFilename)
-{
-    m_fileMap[title] = newFilename;
-}
-
-const QMap<QString, QString>& FileSelectionDlg::GetFileMap()
-{
-    return m_fileMap;
-}
-
-void FileSelectionDlg::SetLocalPath(const QString& path)
-{
-    m_localPath = path;
-}
-
-QString FileSelectionDlg::ExecSingleSelection()
+A_SoundImport* FileSelectionDlg::ExecSingleSelection()
 {
     m_fileList->setSelectionMode(QAbstractItemView::SingleSelection);
 
@@ -86,19 +88,21 @@ QString FileSelectionDlg::ExecSingleSelection()
             m_fileList->selectionModel()->selectedIndexes();
 
         if (selected.size() < 1)
-            return "";
+            return NULL;
         else
-            return selected[0].data().toString();
+            return dynamic_cast<A_SoundImport*>(
+                selected[0].data(Qt::UserRole).value<I_TitleCarrier*>()
+                );
     }
     else
-        return "";
+        return NULL;
 }
 
-QStringList FileSelectionDlg::ExecMultiSelection()
+QList<A_SoundImport*> FileSelectionDlg::ExecMultiSelection()
 {
     m_fileList->setSelectionMode(QAbstractItemView::ExtendedSelection);
 
-    QStringList retlist;
+    QList<A_SoundImport*> retlist;
     if (exec() == QDialog::Accepted)
     {
         QModelIndexList selected =
@@ -108,7 +112,11 @@ QStringList FileSelectionDlg::ExecMultiSelection()
               it != selected.end();
               it++ )
         {
-            retlist << (*it).data().toString();
+            A_SoundImport* addend = dynamic_cast<A_SoundImport*>(
+                (*it).data(Qt::UserRole).value<I_TitleCarrier*>()
+                );
+            if (addend)
+                retlist.append(addend);
         }
     }
 
@@ -135,56 +143,42 @@ void FileSelectionDlg::reject()
     QDialog::reject();
 }
 
-void FileSelectionDlg::SetCopyLocal(bool copy)
+void FileSelectionDlg::RequestCopyLocal(QList<A_SoundImport*> externalFiles)
 {
-    if (!m_copyLocal && copy)
-    {
-        QMessageBox::StandardButton result = QMessageBox::No;
-        QStringList externalFiles;
-        for ( QMap<QString,QString>::iterator it = m_fileMap.begin();
-              it != m_fileMap.end();
-              it++ )
-        {
-            QFileInfo fileInfo(*it);
-            if (fileInfo.isAbsolute())
-                externalFiles.append(it.key());
-        }
+    QMessageBox::StandardButton result = QMessageBox::No;
 
-        if (externalFiles.count() > 0)
+    if (externalFiles.count() > 0)
+    {
+        result = QMessageBox::question(
+            this,
+            QString("Copy External"),
+            QString("Would you like to copy all current imports to "
+                    "the local folder?"),
+            ( QMessageBox::Yes | QMessageBox::No ),
+            QMessageBox::No );
+    }
+    if (result == QMessageBox::Yes)
+    {
+        for ( QList<A_SoundImport*>::iterator fileIt = externalFiles.begin();
+              fileIt != externalFiles.end();
+              fileIt++ )
         {
-            result = QMessageBox::question(
-                this,
-                QString("Copy External"),
-                QString("Would you like to copy all current imports to "
-                        "the local folder?"),
-                ( QMessageBox::Yes | QMessageBox::No ),
-                QMessageBox::No );
-        }
-        if (result == QMessageBox::Yes)
-        {
-            for ( QStringList::iterator fileIt = externalFiles.begin();
-                  fileIt != externalFiles.end();
-                  fileIt++ )
+            QString newFilename;
+            if (!CopyFileToLocalPath((*fileIt)->Filename(), newFilename))
             {
-                QString newFilename;
-                if (!CopyFileToLocalPath(m_fileMap[*fileIt], newFilename))
-                {
-                    QMessageBox::warning(
-                        this,
-                        QString("Copy Failed"),
-                        (   QString("An error occurred and the file '") +
-                            (*fileIt) +
-                            QString("' was not copied.\n") ) );
-                }
-                else
-                {
-                    emit ReimportRequested(*fileIt, newFilename);
-                }
+                QMessageBox::warning(
+                    this,
+                    QString("Copy Failed"),
+                    (   QString("An error occurred and the file '") +
+                        (*fileIt)->Filename() +
+                        QString("' was not copied.\n") ) );
+            }
+            else
+            {
+                (*fileIt)->ReimportFrom(newFilename);
             }
         }
     }
-
-    m_copyLocal = copy;
 }
 
 void FileSelectionDlg::showEvent(QShowEvent* evt)
@@ -212,11 +206,13 @@ void FileSelectionDlg::ImportFiles()
             bool doCopy = (copyChoice == QMessageBox::YesToAll);
 
             QFileInfo fileInfo(filename);
-            QDir localPath(m_localPath);
+            QDir localPath(m_importMgr->ProjectPath());
             bool alreadyLocal =
                 filename == localPath.absoluteFilePath(fileInfo.fileName());
 
-            if (m_copyLocal && !alreadyLocal && copyChoice == QMessageBox::NoButton)
+            if ( m_importMgr->IsCopyLocalOn() &&
+                 !alreadyLocal &&
+                 (copyChoice == QMessageBox::NoButton) )
             {
                 QMessageBox::StandardButton result =
                     QMessageBox::question(
@@ -266,7 +262,7 @@ void FileSelectionDlg::DeleteSelectedFiles()
           it != selected.end();
           it++ )
     {
-        emit DeleteRequested( (*it).data().toString() );
+        delete (*it).data(Qt::UserRole).value<I_TitleCarrier*>();
     }
 }
 
@@ -281,7 +277,11 @@ void FileSelectionDlg::RenameSelectedFiles()
     {
         QString newTitle;
         GetTitleForFile("", newTitle);
-        emit RenameRequested( (*it).data().toString(), newTitle );
+        A_SoundImport* import = dynamic_cast<A_SoundImport*>(
+            (*it).data(Qt::UserRole).value<I_TitleCarrier*>()
+            );
+        if (import != NULL)
+            import->SetTitle(newTitle);
     }
 }
 
@@ -302,19 +302,20 @@ void FileSelectionDlg::ReimportSelectedFiles()
             GetFilename(filename);
 
             valid = true;
-            for ( QMap<QString, QString>::iterator it = m_fileMap.begin();
-                  it != m_fileMap.end();
-                  it++ )
+            const QList<A_SoundImport*>& importList = m_importMgr->ImportList();
+            for ( QList<A_SoundImport*>::const_iterator cIt = importList.begin();
+                  cIt != importList.end();
+                  cIt++ )
             {
-                if (it.value() == filename)
+                if ((*cIt)->Filename() == filename)
                 {
                     QMessageBox::information(
                         this,
                         QString("Duplicate import"),
                         QString("The file\n") +
-                            it.value() +
+                            (*cIt)->Filename() +
                             QString("\nhas already been imported as\n") +
-                            it.key() +
+                            (*cIt)->Title() +
                             QString("\nand must be rechosen.") );
 
                     valid = false;
@@ -323,7 +324,11 @@ void FileSelectionDlg::ReimportSelectedFiles()
             }
         } while (!valid);
 
-        emit ReimportRequested( (*it).data().toString(), filename );
+        A_SoundImport* import = dynamic_cast<A_SoundImport*>(
+            (*it).data(Qt::UserRole).value<I_TitleCarrier*>()
+            );
+        if (import != NULL)
+            import->ReimportFrom(filename);
     }
 }
 
@@ -336,13 +341,24 @@ void FileSelectionDlg::UpdateSelectionButtons()
     m_reimportBtn->setEnabled(!cond);
 }
 
+void FileSelectionDlg::UpdateList()
+{
+    m_importListModel->setList(m_importMgr->ImportList());
+}
+
+void FileSelectionDlg::RemoveMgr()
+{
+    setEnabled(false);
+    m_importMgr = NULL;
+}
+
 void FileSelectionDlg::GetFileList(QStringList& fileList)
 {
     fileList =
         QFileDialog::getOpenFileNames(
             this,
             QString("Import sounds"),
-            m_localPath,
+            m_importMgr->ProjectPath(),
             QString("Sound files ("
                         "*.mp3;"
                         "*.mp2;"
@@ -374,29 +390,30 @@ void FileSelectionDlg::GetFilename(QString& filename)
 
 void FileSelectionDlg::FilterFileList(QStringList& fileList)
 {
-    for ( QMap<QString, QString>::iterator it = m_fileMap.begin();
-          it != m_fileMap.end();
+    const QList<A_SoundImport*>& importList = m_importMgr->ImportList();
+    for ( QList<A_SoundImport*>::const_iterator it = importList.begin();
+          it != importList.end();
           it++ )
     {
-        if (fileList.contains(it.value()))
+        if (fileList.contains((*it)->Filename()))
         {
             QMessageBox::information(
                 this,
                 QString("Duplicate import"),
                 QString("The file\n") +
-                    it.value() +
+                    (*it)->Filename() +
                     QString("\nhas already been imported as\n") +
-                    it.key() +
+                    (*it)->Title() +
                     QString("\nand will be ignored.") );
 
-            fileList.removeAt(fileList.lastIndexOf( it.value() ));
+            fileList.removeAt(fileList.lastIndexOf( (*it)->Filename() ));
         }
     }
 }
 
 bool FileSelectionDlg::GetTitleForFile(const QString& filename, QString& title)
 {
-    QMap<QString, QString>::const_iterator checker;
+    const QStringList& titleList = m_importMgr->TitleList();
     while (true)
     {
         if ( !ShowTitleDlg(filename, title) )
@@ -404,8 +421,7 @@ bool FileSelectionDlg::GetTitleForFile(const QString& filename, QString& title)
             return false;
         }
 
-        checker = m_fileMap.find(title);
-        if (checker == m_fileMap.end())
+        if ( !titleList.contains(title) )
         {
             return true;
         }
@@ -443,10 +459,12 @@ bool FileSelectionDlg::ShowTitleDlg(const QString& filename, QString& title)
 
 bool FileSelectionDlg::CopyFileToLocalPath(const QString& filename, QString& newFilename)
 {
-    if (m_localPath == "")
+    const QString& localPath = m_importMgr->ProjectPath();
+
+    if (localPath == "")
         return false;
 
-    QDir localDir(m_localPath);
+    QDir localDir(localPath);
     QFile target(filename);
     QFileInfo fileInfo(target);
     if (!fileInfo.exists())
@@ -486,7 +504,6 @@ bool FileSelectionDlg::CopyFileToLocalPath(const QString& filename, QString& new
     if (!target.copy(newPath))
         return false;
 
-    emit RefreshRequested(newPath);
     newFilename = fileInfo.fileName();
     return true;
 }

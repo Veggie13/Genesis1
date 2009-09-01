@@ -1,20 +1,25 @@
 #include <QMessageBox>
 
-#include "Background.qoh"
-#include "BackgroundCtrl.qoh"
+#include "Background.h"
+#include "MasterCtrl.qoh"
+#include "TitleCarrierListModel.hpp"
 
 #include "BackgroundCtrlPanel.qoh"
 
 
 BackgroundCtrlPanel::BackgroundCtrlPanel(QWidget* parent)
 :   QLabel(parent),
-    m_bgCtrl(NULL)
+    m_bgCtrl(NULL),
+    m_bgListModel(NULL)
 {
     setupUi(this);
     setBackgroundRole(QPalette::Window);
     setFrameStyle(QFrame::WinPanel);
     setAutoFillBackground(true);
     setEnabled(false);
+
+    m_bgListModel = new TitleCarrierListModel;
+    m_effectList->setModel(m_bgListModel);
 
     connect( m_addBtn,          SIGNAL( clicked()           ),
              this,              SIGNAL( AddSelected()       ) );
@@ -24,9 +29,18 @@ BackgroundCtrlPanel::BackgroundCtrlPanel(QWidget* parent)
              m_effectList,      SLOT  ( selectAll()         ) );
     connect( m_deselectAllBtn,  SIGNAL( clicked()           ),
              m_effectList,      SLOT  ( clearSelection()    ) );
+    connect( m_effectList->selectionModel(),
+             SIGNAL( selectionChanged(const QItemSelection&, const QItemSelection&) ),
+             this,
+             SLOT( UpdateSelectionControls() ) );
 }
 
-void BackgroundCtrlPanel::Associate(BackgroundCtrl* ctrl)
+BackgroundCtrlPanel::~BackgroundCtrlPanel()
+{
+    delete m_bgListModel;
+}
+
+void BackgroundCtrlPanel::Associate(MasterCtrl* ctrl)
 {
     if (ctrl == m_bgCtrl)
         return;
@@ -37,10 +51,9 @@ void BackgroundCtrlPanel::Associate(BackgroundCtrl* ctrl)
     {
         m_backgroundGlobMute->disconnect(m_bgCtrl);
         m_globalVolSld->disconnect(m_bgCtrl);
-        m_selectionMuteChk->disconnect(m_bgCtrl);
-        m_selectionVolSld->disconnect(m_bgCtrl);
-        m_bgCtrl->disconnect(SIGNAL(destroyed(QObject*)), this);
-        m_bgCtrl->SelectionModel()->disconnect(this);
+        m_selectionMuteChk->disconnect();
+        m_selectionVolSld->disconnect();
+        m_bgCtrl->disconnect(SIGNAL(destroyed()), this);
     }
 
     m_bgCtrl = ctrl;
@@ -55,21 +68,20 @@ void BackgroundCtrlPanel::Associate(BackgroundCtrl* ctrl)
     }
 
     setEnabled(true);
-    m_effectList->setModel(ctrl->Model());
-    m_effectList->setSelectionModel(ctrl->SelectionModel());
-    m_globalVolSld->setValue(ctrl->GetMasterVolume());
-    m_backgroundGlobMute->setChecked(ctrl->IsMasterMuted());
+    m_bgListModel->setList(ctrl->Children());
+    m_globalVolSld->setValue(ctrl->Volume());
+    m_backgroundGlobMute->setChecked(ctrl->IsPaused());
     m_selectionVolSld->setValue(0);
     m_selectionMuteChk->setChecked(false);
 
-    connect( m_globalVolSld,        SIGNAL( valueChanged(int)       ),
-             ctrl,                  SLOT  ( SetMasterVolume(int)    ) );
-    connect( m_backgroundGlobMute,  SIGNAL( toggled(bool)           ),
-             ctrl,                  SLOT  ( SetMasterMuted(bool)    ) );
-    connect( ctrl->SelectionModel(),
-             SIGNAL( selectionChanged(const QItemSelection&, const QItemSelection&) ),
-             this,
-             SLOT( UpdateSelectionControls() ) );
+    connect( m_globalVolSld,        SIGNAL( valueChanged(int)   ),
+             ctrl,                  SLOT  ( SetVolume(int)      ) );
+    connect( m_backgroundGlobMute,  SIGNAL( toggled(bool)       ),
+             ctrl,                  SLOT  ( SetPaused(bool)     ) );
+    connect( ctrl,                  SIGNAL( Modified()          ),
+             this,                  SLOT  ( UpdateList()        ) );
+    connect( ctrl,                  SIGNAL( destroyed()         ),
+             this,                  SLOT  ( RemoveCtrl()        ) );
 }
 
 void BackgroundCtrlPanel::OnDeleteSelected()
@@ -88,13 +100,19 @@ void BackgroundCtrlPanel::OnDeleteSelected()
           it != selected.end();
           it++ )
     {
-        emit DeleteSelected( (*it).data().toString() );
+        delete (*it).data(Qt::UserRole).value<I_TitleCarrier*>();
     }
 }
 
 void BackgroundCtrlPanel::RemoveCtrl()
 {
     setEnabled(false);
+
+    m_backgroundGlobMute->disconnect(m_bgCtrl);
+    m_globalVolSld->disconnect(m_bgCtrl);
+    m_selectionMuteChk->disconnect();
+    m_selectionVolSld->disconnect();
+
     m_globalVolSld->setValue(0);
     m_backgroundGlobMute->setChecked(false);
     m_selectionVolSld->setValue(0);
@@ -129,9 +147,11 @@ void BackgroundCtrlPanel::UpdateSelectionControls()
 
         if (selection.size() == 1)
         {
-            Background* bgSel = m_bgCtrl->GetInstance(selection[0].data().toString());
+            Background* bgSel = dynamic_cast<Background*>(
+                selection[0].data(Qt::UserRole).value<I_TitleCarrier*>()
+                );
 
-            m_selectionVolSld->setValue(bgSel->GetInstanceVolume());
+            m_selectionVolSld->setValue(bgSel->InstanceVolume());
             m_selectionMuteChk->setChecked(bgSel->IsInstancePaused());
         }
 
@@ -139,7 +159,9 @@ void BackgroundCtrlPanel::UpdateSelectionControls()
               it != selection.end();
               it++ )
         {
-            Background* bgSel = m_bgCtrl->GetInstance((*it).data().toString());
+            Background* bgSel = dynamic_cast<Background*>(
+                (*it).data(Qt::UserRole).value<I_TitleCarrier*>()
+                );
 
             connect(m_selectionMuteChk, SIGNAL( toggled(bool)           ),
                     bgSel,              SLOT  ( SetInstancePaused(bool) ) );
@@ -147,4 +169,9 @@ void BackgroundCtrlPanel::UpdateSelectionControls()
                     bgSel,              SLOT  ( SetInstanceVolume(int)  ) );
         }
     }
+}
+
+void BackgroundCtrlPanel::UpdateList()
+{
+    m_bgListModel->setList(m_bgCtrl->Children());
 }

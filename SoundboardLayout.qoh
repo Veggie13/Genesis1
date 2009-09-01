@@ -5,11 +5,11 @@
 
 #include "SoundboardUi.h"
 
+
 class InstantCtrlButton;
-class InstantSound;
 class ResizeTableDlg;
 class Soundboard;
-
+class SoundboardInstance;
 
 class SoundboardLayout : public QObject, public Ui::SoundboardUi
 {
@@ -22,17 +22,18 @@ public:
 
     void Associate(Soundboard* sndboard);
 
-    bool AssignSoundToButton(int row, int col, const QString& title, InstantSound* sound);
-
 public slots:
     void Resize(int rows, int cols);
+    void AssignSoundToButton(int row, int col, SoundboardInstance* sound);
 
 signals:
     void SoundRemoved(int row, int col);
     void SoundRequested(int row, int col);
-    void SpecificSoundRequested(int row, int col, const QString& title);
+    void SpecificSoundRequested(int row, int col, SoundboardInstance* sound);
     void SizeChanged(int rows, int cols);
     void VolumeChanged(int vol);
+    void SwapInitiated();
+    void SwapCompleted();
 
 private slots:
     void InitiateSwap(int row, int col);
@@ -50,6 +51,8 @@ private:
 
     int m_swapRow;
     int m_swapCol;
+
+    QWidget* m_this;
 
 };
 

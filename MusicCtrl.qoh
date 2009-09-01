@@ -1,66 +1,35 @@
 #ifndef MUSICCTRL_QOH
 #define MUSICCTRL_QOH
 
-#include <QDomElement>
-#include <QItemSelectionModel>
-#include <QObject>
-#include <QMap>
-
-#include "QStringMapRefModel.hpp"
-
-class Song;
+#include "MasterCtrl.qoh"
 
 
-class MusicCtrl : public QObject
+class StartableSound;
+
+class MusicCtrl : public MasterCtrl
 {
     Q_OBJECT
 
 public:
-    MusicCtrl(const QDomElement& music = QDomElement(), QObject* parent = NULL);
-    ~MusicCtrl();
-
-    QAbstractItemModel* Model();
-    QItemSelectionModel* SelectionModel();
+    MusicCtrl(QObject* parent = NULL);
 
     bool SharesCurrentSongWith(const MusicCtrl& other);
-    QString CurrentSong();
-
-    int  GetVolume();
-    bool IsMuted();
-
-    bool Halt(bool keepCurrent=false);
-    void Resume(bool useSpecific=false, const QString& title=QString());
-
-    void WriteData(QDomElement& music);
+    StartableSound* CurrentSong();
 
 signals:
-    void Modified();
-    void SongSelected(const QString& title);
+    void SongSelected(StartableSound* song);
 
 public slots:
-    bool SetVolume(int vol);
-    bool SetMuted(bool mute=true);
-    bool SetSong(const QString& title);
-
-    bool AddSong(const QString& title);
-    bool RemoveSong(const QString& title);
-    void RenameSong(const QString& title, const QString& newTitle);
-
+    void SetCurrentSong(StartableSound* song);
     void SelectRandomSong();
 
-protected slots:
-    void RemoveDeletedSong();
+protected:
+    virtual void InternalResume();
+    virtual void InternalAddInstance(A_SoundInstance* newSound);
+    virtual void InternalRemoveDeletedInstance(A_SoundInstance* doomed);
 
 private:
-    int  m_volume;
-    bool m_muted;
-
-    typedef QMap<QString, Song*> SongMap;
-
-    SongMap                     m_songMap;
-    QStringMapRefModel<Song*>   m_songMapModel;
-    QItemSelectionModel         m_songMapSelModel;
-    SongMap::iterator           m_curSong;
+    StartableSound* m_curSong;
 
 };
 

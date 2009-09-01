@@ -1,45 +1,44 @@
 #ifndef SOUNDBOARD_QOH
 #define SOUNDBOARD_QOH
 
-#include <QDomElement>
 #include <QMap>
 #include <QObject>
 
-class InstantSound;
-template <typename T1, typename T2> class QPair;
 
+template <typename T1, typename T2> class QPair;
+class SoundboardInstance;
 
 class Soundboard : public QObject
 {
     Q_OBJECT
 
 public:
-    Soundboard(const QDomElement& sndboard = QDomElement(), QObject* parent = NULL);
+    typedef QPair<int,int>                          GridCoord;
+    typedef QMap<GridCoord, SoundboardInstance*>    SoundGrid;
+
+
+    Soundboard(QObject* parent = NULL);
     ~Soundboard();
 
-    int GetRowCount();
-    int GetColCount();
+    const SoundGrid& GetSoundGrid();
 
-    int GetVolume();
+    int RowCount();
+    int ColCount();
 
-    InstantSound*   GetEntry(int row, int col);
-    QString         GetTitle(int row, int col);
+    int Volume();
 
-    void WriteData(QDomElement& sndboard);
+    SoundboardInstance* Entry(int row, int col);
 
 public slots:
-    bool SetVolume(int vol);
+    void SetVolume(int vol);
 
-    bool AddEntry(int row, int col, const QString& title);
+    void AddEntry(int row, int col, SoundboardInstance* newSound);
 
-    void RemoveEntry(int row, int col);
-    void RemoveEntries(const QString& title);
-
-    void RenameEntries(const QString& title, const QString& newTitle);
-
-    bool Resize(int rows, int cols);
+    void Resize(int rows, int cols);
 
 signals:
+    void MasterVolumeChanged(int volume);
+    void EntryAdded(int row, int col, SoundboardInstance* sound);
     void EntryDeleted(int row, int col);
     void Modified();
 
@@ -47,10 +46,6 @@ private slots:
     void RemoveDeletedEntries();
 
 private:
-    typedef QPair<int,int>                  GridCoord;
-    typedef QPair<QString, InstantSound*>   NamedSound;
-    typedef QMap<GridCoord, NamedSound>     SoundGrid;
-
     SoundGrid m_soundGrid;
 
     int m_rowCount;

@@ -50,7 +50,7 @@
     </property>
     <addaction name="m_aboutAction" />
    </widget>
-   <widget class="QMenu" name="menuEdit" >
+   <widget class="QMenu" name="m_editMenu" >
     <property name="title" >
      <string>Edit</string>
     </property>
@@ -73,7 +73,7 @@
     <addaction name="m_shortMenu" />
    </widget>
    <addaction name="menuFile" />
-   <addaction name="menuEdit" />
+   <addaction name="m_editMenu" />
    <addaction name="menuHelp" />
   </widget>
   <widget class="QStatusBar" name="statusbar" />
@@ -145,7 +145,7 @@
  <connections>
   <connection>
    <sender>m_exitAction</sender>
-   <signal>activated()</signal>
+   <signal>triggered()</signal>
    <receiver>AmbMainWindowUi</receiver>
    <slot>close()</slot>
    <hints>

@@ -1,112 +1,72 @@
-#include <QString>
-
-#include "Scene.qoh"
+#include "QException.h"
 #include "State.qoh"
 
+#include "Scene.qoh"
 
-Scene::Scene(const QDomElement& scene, QObject* parent)
+
+Scene::Scene(const QString& title, QObject* parent)
 :   QObject(parent),
     m_states(),
-    m_stateModel(&m_states)
+    m_title(title)
 {
-    if (scene.isNull())
-        return;
-
-    for( QDomNode n = scene.firstChild();
-         !n.isNull();
-         n = n.nextSibling() )
-    {
-        QDomElement state = n.toElement();
-        if ( state.isNull() || state.tagName() != "state")
-            continue;
-
-        QString stateTitle = state.attribute("title", "");
-        AddState(stateTitle, state);
-    }
 }
 
 Scene::~Scene()
 {
-    StateMap::iterator it;
+    QList<State*>::iterator it;
     for (it = m_states.begin(); it != m_states.end(); it++)
     {
-        delete it.value();
+        (*it)->disconnect(this);
+        delete (*it);
     }
 }
 
-QAbstractItemModel* Scene::Model()
+const QString& Scene::Title()
 {
-    return &m_stateModel;
+    return m_title;
 }
 
-bool Scene::AddState(const QString& stateName, const QDomElement& state)
+void Scene::SetTitle(const QString& title)
 {
-    StateMap::const_iterator it = m_states.constFind(stateName);
-    if (it != m_states.constEnd())
-        return false;
-
-    State* newState = new State(state);
-    if (!newState)
-        return false;
-
-    connect(newState, SIGNAL( Modified() ), this, SIGNAL( Modified() ));
-
-    m_states[stateName] = newState;
+    m_title = title;
     emit Modified();
-    return true;
 }
 
-void Scene::RemoveState(const QString& stateName)
+const QList<State*>& Scene::StateList()
 {
-    StateMap::iterator it = m_states.find(stateName);
-    if (it == m_states.end())
+    return m_states;
+}
+
+void Scene::AddState(State* newState)
+{
+    if (newState == NULL)
+        throw QException("Programming Error: "
+                         "Tried to add a NULL State!");
+
+    int index = m_states.lastIndexOf(newState);
+    if (-1 != index)
+        throw QException("Programming Error: "
+                         "Tried to add a State that was already present!");
+
+    connect(newState, SIGNAL( Modified()  ), this, SIGNAL( Modified()           ));
+    connect(newState, SIGNAL( destroyed() ), this, SLOT  ( RemoveDeletedState() ));
+
+    m_states.append(newState);
+    emit Modified();
+}
+
+void Scene::RemoveDeletedState()
+{
+    State* doomed = reinterpret_cast<State*>(sender());
+    if (doomed == NULL)
         return;
 
-    State* doomed = (*it);
-    delete doomed;
+    int index = m_states.lastIndexOf(doomed);
+    if (-1 == index)
+        return;
 
-    m_states.erase(it);
+    int size = m_states.size();
+    m_states.removeAt(index);
+    size = m_states.size();
     emit Modified();
-}
-
-State* Scene::GetState(const QString& stateName)
-{
-    StateMap::iterator it = m_states.find(stateName);
-    if (it == m_states.end())
-        return NULL;
-
-    return (*it);
-}
-
-void Scene::WriteData(QDomElement& scene)
-{
-    QDomDocument doc = scene.ownerDocument();
-
-    for ( StateMap::iterator stateIt = m_states.begin();
-          stateIt != m_states.end();
-          stateIt++ )
-    {
-        QDomElement state = doc.createElement("state");
-        state.setAttribute("title", stateIt.key());
-        stateIt.value()->WriteData(state);
-        scene.appendChild(state);
-    }
-}
-
-void Scene::RenameStreamObjects(const QString& title, const QString& newTitle)
-{
-    StateMap::iterator it;
-    for (it = m_states.begin(); it != m_states.end(); it++)
-    {
-        it.value()->RenameStreamObjects(title, newTitle);
-    }
-}
-
-void Scene::RenameSampleObjects(const QString& title, const QString& newTitle)
-{
-    StateMap::iterator it;
-    for (it = m_states.begin(); it != m_states.end(); it++)
-    {
-        it.value()->RenameSampleObjects(title, newTitle);
-    }
 }

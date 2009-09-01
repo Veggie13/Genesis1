@@ -4,10 +4,12 @@
 #include <QDialog>
 #include <QStringList>
 
-#include "QStringMapRefModel.hpp"
-
 #include "FileSelectionDlgUi.h"
 
+
+class A_ImportManager;
+class A_SoundImport;
+class TitleCarrierListModel;
 
 class FileSelectionDlg : public QDialog, private Ui::FileSelectionDlgUi
 {
@@ -17,30 +19,19 @@ public:
     FileSelectionDlg(QWidget* parent=NULL);
     virtual ~FileSelectionDlg();
 
-    void AddFile(const QString& title, const QString& filename);
-    void DeleteFile(const QString& title);
-    void RenameFile(const QString& title, const QString& newTitle);
-    void ReimportFile(const QString& title, const QString& newFilename);
-
-    const QMap<QString, QString>& GetFileMap();
-
-    void SetLocalPath(const QString& path);
+    void Associate(A_ImportManager* importMgr);
 
 public slots:
-    QString     ExecSingleSelection();
-    QStringList ExecMultiSelection();
-    int         ExecNoSelection();
+    A_SoundImport*          ExecSingleSelection();
+    QList<A_SoundImport*>   ExecMultiSelection();
+    int                     ExecNoSelection();
 
     virtual void reject();
 
-    void SetCopyLocal(bool copy);
+    void RequestCopyLocal(QList<A_SoundImport*> externalFiles);
 
 signals:
     void ImportRequested(const QString& title, const QString& filename);
-    void DeleteRequested(const QString& title);
-    void RenameRequested(const QString& title, const QString& newTitle);
-    void ReimportRequested(const QString& title, const QString& newFilename);
-    void RefreshRequested(const QString& filename);
 
 protected:
     virtual void showEvent(QShowEvent* evt);
@@ -52,6 +43,8 @@ private slots:
     void ReimportSelectedFiles();
 
     void UpdateSelectionButtons();
+    void UpdateList();
+    void RemoveMgr();
 
 private:
     void GetFileList(QStringList& fileList);
@@ -62,11 +55,8 @@ private:
     bool CopyFileToLocalPath(const QString& filename, QString& newFilename);
 
 
-    QMap<QString, QString>      m_fileMap;
-    QStringMapRefModel<QString> m_fileMapModel;
-
-    bool    m_copyLocal;
-    QString m_localPath;
+    A_ImportManager*        m_importMgr;
+    TitleCarrierListModel*  m_importListModel;
 
 };
 

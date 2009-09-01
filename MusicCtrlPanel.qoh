@@ -7,6 +7,8 @@
 
 
 class MusicCtrl;
+class StartableSound;
+class TitleCarrierListModel;
 
 class MusicCtrlPanel : public QLabel, private Ui::MusicCtrlUi
 {
@@ -18,19 +20,21 @@ public:
     void Associate(MusicCtrl* ctrl);
 
 public slots:
-    void SetSong(const QString& songTitle);
+    void SetSong(StartableSound* song);
 
 signals:
     void AddSelected();
-    void DeleteSelected(const QString& songTitle);
-    void SongChanged(const QString& songTitle);
+    void SongSelected(StartableSound* song);
 
 protected slots:
     void OnDeleteSelected();
     void RemoveCtrl();
+    void ChangeSong(int index);
+    void UpdateList();
 
 private:
-    MusicCtrl* m_musicCtrl;
+    MusicCtrl*              m_musicCtrl;
+    TitleCarrierListModel*  m_musicListModel;
 
 };
 

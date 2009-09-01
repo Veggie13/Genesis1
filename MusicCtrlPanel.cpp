@@ -1,13 +1,17 @@
 #include <QMessageBox>
 
 #include "MusicCtrl.qoh"
+#include "QException.h"
+#include "StartableSound.qoh"
+#include "TitleCarrierListModel.hpp"
 
 #include "MusicCtrlPanel.qoh"
 
 
 MusicCtrlPanel::MusicCtrlPanel(QWidget* parent)
 :   QLabel(parent),
-    m_musicCtrl(NULL)
+    m_musicCtrl(NULL),
+    m_musicListModel(NULL)
 {
     setupUi(this);
     setBackgroundRole(QPalette::Window);
@@ -15,14 +19,15 @@ MusicCtrlPanel::MusicCtrlPanel(QWidget* parent)
     setAutoFillBackground(true);
     setEnabled(false);
 
+    m_musicListModel = new TitleCarrierListModel;
+    m_playlistCbo->setModel(m_musicListModel);
+
     connect( m_addBtn,      SIGNAL( clicked()           ),
              this,          SIGNAL( AddSelected()       ) );
     connect( m_deleteBtn,   SIGNAL( clicked()           ),
              this,          SLOT  ( OnDeleteSelected()  ) );
-    connect( m_playlistCbo, SIGNAL( currentIndexChanged(const QString&) ),
-             this,          SIGNAL( SongChanged(const QString&)         ) );
-    connect( m_playlistCbo, SIGNAL( editTextChanged(const QString&)     ),
-             this,          SIGNAL( SongChanged(const QString&)         ) );
+    connect( m_playlistCbo, SIGNAL( currentIndexChanged(int) ),
+             this,          SLOT  ( ChangeSong(int)          ) );
 }
 
 void MusicCtrlPanel::Associate(MusicCtrl* ctrl)
@@ -35,7 +40,7 @@ void MusicCtrlPanel::Associate(MusicCtrl* ctrl)
         disconnect(m_musicCtrl);
         m_musicVolumeSld->disconnect(m_musicCtrl);
         m_musicMuteChk->disconnect(m_musicCtrl);
-        m_musicCtrl->disconnect(SIGNAL(destroyed(QObject*)), this);
+        m_musicCtrl->disconnect(this);
     }
 
     m_musicCtrl = ctrl;
@@ -46,45 +51,39 @@ void MusicCtrlPanel::Associate(MusicCtrl* ctrl)
     }
 
     setEnabled(true);
-    m_playlistCbo->setModel(ctrl->Model());
+    m_musicListModel->setList(ctrl->Children());
 
-    QString curSong = ctrl->CurrentSong();
-    for (int i = 0; i < m_playlistCbo->count(); ++i)
-    {
-        if (curSong == m_playlistCbo->itemText(i))
-        {
-            m_playlistCbo->setCurrentIndex(i);
-            break;
-        }
-    }
-    m_musicVolumeSld->setValue(ctrl->GetVolume());
-    m_musicMuteChk->setChecked(ctrl->IsMuted());
+    m_musicVolumeSld->setValue(ctrl->Volume());
+    m_musicMuteChk->setChecked(ctrl->IsPaused());
 
     connect( m_musicVolumeSld,  SIGNAL( valueChanged(int) ),
              ctrl,              SLOT  ( SetVolume(int)    ) );
     connect( m_musicMuteChk,    SIGNAL( toggled(bool)     ),
-             ctrl,              SLOT  ( SetMuted(bool)    ) );
-    connect( this,              SIGNAL( SongChanged(const QString&) ),
-             ctrl,              SLOT  ( SetSong(const QString&)     ) );
-    connect( this,              SIGNAL( DeleteSelected(const QString&)  ),
-             ctrl,              SLOT  ( RemoveSong(const QString&)      ) );
+             ctrl,              SLOT  ( SetPaused(bool)   ) );
 
-    connect( ctrl,              SIGNAL( destroyed(QObject*) ),
+    connect( this,              SIGNAL( SongSelected(StartableSound*)   ),
+             ctrl,              SLOT  ( SetCurrentSong(StartableSound*) ) );
+    connect( ctrl,              SIGNAL( destroyed()         ),
              this,              SLOT  ( RemoveCtrl()        ) );
-    connect( ctrl,              SIGNAL( SongSelected(const QString&) ),
-             this,              SLOT  ( SetSong(const QString&)      ) );
+    connect( ctrl,              SIGNAL( SongSelected(StartableSound*) ),
+             this,              SLOT  ( SetSong(StartableSound*)      ) );
+    connect( ctrl,              SIGNAL( Modified()      ),
+             this,              SLOT  ( UpdateList()    ) );
+
+    SetSong(ctrl->CurrentSong());
 }
 
-void MusicCtrlPanel::SetSong(const QString& songTitle)
+void MusicCtrlPanel::SetSong(StartableSound* song)
 {
-    int songIndex = m_playlistCbo->findData(songTitle, Qt::DisplayRole);
-    if (songIndex < 0)
+    if (song == NULL)
         return;
 
-    if (m_playlistCbo->currentIndex() == songIndex)
-        emit SongChanged(songTitle);
-    else
-        m_playlistCbo->setCurrentIndex(songIndex);
+    int songIndex = m_playlistCbo->findData(song->Title(), Qt::DisplayRole);
+    if (songIndex < 0)
+        throw QException("Programming Error: "
+                         "Tried to set song to one not in the playlist!");
+
+    m_playlistCbo->setCurrentIndex(songIndex);
 }
 
 void MusicCtrlPanel::OnDeleteSelected()
@@ -96,11 +95,43 @@ void MusicCtrlPanel::OnDeleteSelected()
             "Are you sure you want to remove the song from the playlist?",
             QMessageBox::Yes | QMessageBox::No );
     if (result == QMessageBox::Yes)
-        emit DeleteSelected(m_playlistCbo->currentText());
+        delete m_playlistCbo->itemData(m_playlistCbo->currentIndex())
+            .value<I_TitleCarrier*>();
 }
 
 void MusicCtrlPanel::RemoveCtrl()
 {
-    m_musicCtrl = NULL;
     setEnabled(false);
+
+    disconnect(m_musicCtrl);
+    m_musicVolumeSld->disconnect(m_musicCtrl);
+    m_musicMuteChk->disconnect(m_musicCtrl);
+
+    m_musicVolumeSld->setValue(0);
+    m_musicMuteChk->setChecked(false);
+    m_musicCtrl = NULL;
+}
+
+void MusicCtrlPanel::ChangeSong(int index)
+{
+    StartableSound* selection = dynamic_cast<StartableSound*>(
+        m_musicListModel->list().at(index)
+        );
+
+    emit SongSelected(selection);
+}
+
+void MusicCtrlPanel::UpdateList()
+{
+    const QList<A_SoundInstance*>& children = m_musicCtrl->Children();
+    QList<I_TitleCarrier*> titleChildren;
+    for ( QList<A_SoundInstance*>::const_iterator it = children.begin();
+          it != children.end();
+          it++ )
+    {
+        titleChildren.append(*it);
+    }
+
+    if (m_musicListModel->list() != titleChildren)
+        m_musicListModel->setList(children);
 }

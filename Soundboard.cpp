@@ -1,40 +1,17 @@
 #include <QPair>
 
-#include "InstantSound.qoh"
-#include "SoundMaster.h"
+#include "QException.h"
+#include "SoundboardInstance.h"
 
 #include "Soundboard.qoh"
 
 
-Soundboard::Soundboard(const QDomElement& sndboard, QObject* parent)
+Soundboard::Soundboard(QObject* parent)
 :   QObject(parent),
     m_rowCount(16),
     m_colCount(8),
     m_volume(100)
 {
-    if (sndboard.isNull())
-        return;
-
-    QString vol = sndboard.attribute("vol", "0");
-    QString rows = sndboard.attribute("rows", "1");
-    QString cols = sndboard.attribute("cols", "1");
-
-    SetVolume(vol.toInt());
-    Resize(rows.toInt(), cols.toInt());
-    for( QDomNode n = sndboard.firstChild();
-         !n.isNull();
-         n = n.nextSibling() )
-    {
-        QDomElement effect = n.toElement();
-        if ( effect.isNull() || effect.tagName() != "effect" )
-            continue;
-
-        QString effectTitle = effect.attribute("title", "");
-        QString effectRow = effect.attribute("row", "-1");
-        QString effectCol = effect.attribute("col", "-1");
-
-        AddEntry(effectRow.toInt(), effectCol.toInt(), effectTitle);
-    }
 }
 
 Soundboard::~Soundboard()
@@ -43,164 +20,121 @@ Soundboard::~Soundboard()
           it != m_soundGrid.end();
           it++ )
     {
-        it.value().second->disconnect(this);
-        SoundMaster::Get().ReturnInstant(it.value().second);
+        it.value()->disconnect(this);
+        delete it.value();
     }
 }
 
-int Soundboard::GetRowCount()
+const Soundboard::SoundGrid& Soundboard::GetSoundGrid()
+{
+    return m_soundGrid;
+}
+
+int Soundboard::RowCount()
 {
     return m_rowCount;
 }
 
-int Soundboard::GetColCount()
+int Soundboard::ColCount()
 {
     return m_colCount;
 }
 
-int Soundboard::GetVolume()
+int Soundboard::Volume()
 {
     return m_volume;
 }
 
-InstantSound* Soundboard::GetEntry(int row, int col)
+SoundboardInstance* Soundboard::Entry(int row, int col)
 {
     SoundGrid::iterator finder = m_soundGrid.find( GridCoord(row,col) );
     if (finder == m_soundGrid.end())
         return NULL;
 
-    return finder.value().second;
+    return finder.value();
 }
 
-QString Soundboard::GetTitle(int row, int col)
-{
-    SoundGrid::iterator finder = m_soundGrid.find( GridCoord(row,col) );
-    if (finder == m_soundGrid.end())
-        return "";
-
-    return finder.value().first;
-}
-
-void Soundboard::WriteData(QDomElement& sndboard)
-{
-    QDomDocument doc = sndboard.ownerDocument();
-
-    sndboard.setAttribute("vol", QString("%1").arg( m_volume ) );
-    sndboard.setAttribute("rows", QString("%1").arg( m_rowCount ) );
-    sndboard.setAttribute("cols", QString("%1").arg( m_colCount ) );
-    for ( SoundGrid::iterator effectIt = m_soundGrid.begin();
-          effectIt != m_soundGrid.end();
-          effectIt++ )
-    {
-        QString effectTitle = effectIt.value().first;
-        QDomElement effect = doc.createElement("effect");
-        effect.setAttribute("row", QString("%1").arg(effectIt.key().first) );
-        effect.setAttribute("col", QString("%1").arg(effectIt.key().second) );
-        effect.setAttribute("title", effectTitle);
-        sndboard.appendChild(effect);
-    }
-}
-
-bool Soundboard::SetVolume(int vol)
+void Soundboard::SetVolume(int vol)
 {
     if (vol < 0 || vol > 100)
-        return false;
+        throw QException("Programming Error: "
+                         "Tried to set volume outside the valid range!");
 
     m_volume = vol;
+    emit MasterVolumeChanged(m_volume);
     emit Modified();
-    return true;
 }
 
-bool Soundboard::AddEntry(int row, int col, const QString& title)
+void Soundboard::AddEntry(int row, int col, SoundboardInstance* newSound)
 {
     if (row < 0 || row >= m_rowCount || col < 0 || col >= m_colCount)
-        return false;
+        throw QException("Programming Error: "
+                         "Tried to add sound outside valid dimensions!");
 
     SoundGrid::iterator finder = m_soundGrid.find( GridCoord(row,col) );
     if (finder != m_soundGrid.end())
-        return false;
+        throw QException("Programming Error: "
+                         "Tried to add sound to occupied button!");
 
-    InstantSound* newSound = SoundMaster::Get().CreateInstant(title);
-    if (!newSound)
-        return false;
+    if (newSound == NULL)
+        throw QException("Programming Error: "
+                         "Tried to add NULL sound to Soundboard!");
 
     connect(newSound, SIGNAL( destroyed() ), this, SLOT( RemoveDeletedEntries() ));
 
-    m_soundGrid[GridCoord(row,col)] = NamedSound(title, newSound);
+    connect( this,      SIGNAL( MasterVolumeChanged(int) ),
+             newSound,  SLOT  ( SetMasterVolume(int)     ) );
+
+    m_soundGrid[GridCoord(row,col)] = newSound;
+    newSound->SetMasterVolume(m_volume);
+    newSound->Resume();
+    emit EntryAdded(row, col, newSound);
     emit Modified();
-    return true;
 }
 
-void Soundboard::RemoveEntry(int row, int col)
-{
-    if (row < 0 || row >= m_rowCount || col < 0 || col >= m_colCount)
-        return;
-
-    SoundGrid::iterator finder = m_soundGrid.find( GridCoord(row,col) );
-    if (finder != m_soundGrid.end())
-        SoundMaster::Get().ReturnInstant(finder.value().second);
-}
-
-void Soundboard::RemoveEntries(const QString& title)
-{
-    for ( SoundGrid::iterator it = m_soundGrid.begin();
-          it != m_soundGrid.end();
-          it++ )
-    {
-        if (it.value().first == title)
-            SoundMaster::Get().ReturnInstant(it.value().second);
-    }
-}
-
-void Soundboard::RenameEntries(const QString& title, const QString& newTitle)
-{
-    for ( SoundGrid::iterator it = m_soundGrid.begin();
-          it != m_soundGrid.end();
-          it++ )
-    {
-        if (it.value().first == title)
-        {
-            it.value().first = newTitle;
-        }
-    }
-}
-
-bool Soundboard::Resize(int rows, int cols)
+void Soundboard::Resize(int rows, int cols)
 {
     if (rows < 0 || cols < 0)
-        return false;
+        throw QException("Programming Error: "
+                         "Tried to resize to invalid dimensions!");
 
     if (rows < m_rowCount || cols < m_colCount)
     {
+        QList<SoundboardInstance*> doomedList;
         for ( SoundGrid::iterator it = m_soundGrid.begin();
               it != m_soundGrid.end();
               it++ )
         {
             if (it.key().first >= rows || it.key().second >= cols)
-                SoundMaster::Get().ReturnInstant(it.value().second);
+                doomedList.append(it.value());
+        }
+        for ( QList<SoundboardInstance*>::const_iterator lIt = doomedList.begin();
+              lIt != doomedList.end();
+              lIt++ )
+        {
+            delete (*lIt);
         }
     }
 
     m_rowCount = rows;
     m_colCount = cols;
     emit Modified();
-    return true;
 }
 
 void Soundboard::RemoveDeletedEntries()
 {
-    InstantSound* doomed = reinterpret_cast<InstantSound*>(sender());
-    if (!doomed)
+    SoundboardInstance* doomed = reinterpret_cast<SoundboardInstance*>(sender());
+    if (doomed == NULL)
         return;
 
     for ( SoundGrid::iterator it = m_soundGrid.begin();
           it != m_soundGrid.end();
           it++ )
     {
-        if (it.value().second == doomed)
+        if (it.value() == doomed)
         {
             emit EntryDeleted(it.key().first, it.key().second);
-            it = m_soundGrid.erase(it)--;
+            m_soundGrid.erase(it);
         }
     }
 

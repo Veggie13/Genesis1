@@ -1,7 +1,7 @@
 #include <QMouseEvent>
 
 #include "InstantCtrlButtonMenu.qoh"
-#include "InstantSound.qoh"
+#include "SoundboardInstance.h"
 
 #include "InstantCtrlButton.qoh"
 
@@ -10,7 +10,6 @@ InstantCtrlButton::InstantCtrlButton(int row, int col, QWidget* parent)
 :   QPushButton(parent),
     m_row(row),
     m_col(col),
-    m_volume(100),
     m_assignment(NULL),
     m_popupMenu(NULL),
     m_swapping(false)
@@ -18,11 +17,11 @@ InstantCtrlButton::InstantCtrlButton(int row, int col, QWidget* parent)
     connect(this, SIGNAL( clicked() ), this, SLOT( RequestSound() ));
 
     m_popupMenu = new InstantCtrlButtonMenu();
-    connect(m_popupMenu->MoveAction(),      SIGNAL( activated()    ),
+    connect(m_popupMenu->MoveAction(),      SIGNAL( triggered()    ),
             this,                           SLOT  ( PerformSwap()  ) );
-    connect(m_popupMenu->UnassignAction(),  SIGNAL( activated()    ),
+    connect(m_popupMenu->UnassignAction(),  SIGNAL( triggered()    ),
             this,                           SLOT  ( Reset()        ) );
-    connect(m_popupMenu->ReassignAction(),  SIGNAL( activated()    ),
+    connect(m_popupMenu->ReassignAction(),  SIGNAL( triggered()    ),
             this,                           SLOT  ( RequestSound() ) );
 }
 
@@ -31,55 +30,52 @@ InstantCtrlButton::~InstantCtrlButton()
     delete m_popupMenu;
 }
 
-void InstantCtrlButton::SetSound(const QString& title, InstantSound* sound)
+void InstantCtrlButton::SetSound(SoundboardInstance* sound)
 {
-    if (!sound || title == "")
-        return;
-
-    setText(title);
-
     disconnect(this, SIGNAL( clicked() ), 0, 0);
-    disconnect(this, SIGNAL( PlaySound(int) ), 0, 0);
+    disconnect(this, SIGNAL( PlaySound() ), 0, 0);
     if (m_assignment)
         m_assignment->disconnect(this);
-    connect(this,  SIGNAL( clicked()      ), this,  SLOT( SignalPlay() ));
-    connect(this,  SIGNAL( PlaySound(int) ), sound, SLOT( Play(int)    ));
-    connect(sound, SIGNAL( destroyed()    ), this,  SLOT( Reset()      ));
+
+    if (sound == NULL)
+    {
+        Reset();
+        return;
+    }
+
+    setText(sound->Title());
+
+    connect(this,  SIGNAL( clicked()   ), this,  SLOT( SignalPlay() ));
+    connect(this,  SIGNAL( PlaySound() ), sound, SLOT( Play()       ));
+    connect(sound, SIGNAL( Renamed(const QString&, const QString&)  ),
+            this,  SLOT  ( UpdateTitle()                            ));
+    connect(sound, SIGNAL( destroyed() ), this,  SLOT( Reset()      ));
     m_assignment = sound;
 }
 
-InstantSound* InstantCtrlButton::GetSound()
+SoundboardInstance* InstantCtrlButton::Sound()
 {
     return m_assignment;
 }
 
-void InstantCtrlButton::EnableSwapTarget(bool enable)
+void InstantCtrlButton::EnableSwapTarget()
 {
-    m_swapping = enable;
+    m_swapping = true;
+}
+
+void InstantCtrlButton::DisableSwapTarget()
+{
+    m_swapping = false;
 }
 
 void InstantCtrlButton::Reset()
 {
     setText("");
 
-    disconnect(this, SIGNAL( clicked() ), 0, 0);
-    disconnect(this, SIGNAL( PlaySound(int) ), 0, 0);
-    if (m_assignment)
-    {
-        m_assignment->disconnect(this);
-        m_assignment = NULL;
-    }
+    m_assignment = NULL;
     connect(this, SIGNAL( clicked() ), this, SLOT( RequestSound() ));
 
     emit WasReset(m_row, m_col);
-}
-
-void InstantCtrlButton::SetVolume(int vol)
-{
-    if (vol < 0 || vol > 100)
-        return;
-
-    m_volume = vol;
 }
 
 void InstantCtrlButton::mouseReleaseEvent(QMouseEvent* evt)
@@ -107,7 +103,7 @@ void InstantCtrlButton::SignalPlay()
     if (m_swapping)
         emit SwapDestSelected(m_row, m_col);
     else
-        emit PlaySound(m_volume * 100);
+        emit PlaySound();
 }
 
 void InstantCtrlButton::PerformSwap()
@@ -115,5 +111,13 @@ void InstantCtrlButton::PerformSwap()
     if (m_swapping)
         emit SwapDestSelected(m_row, m_col);
     else
-        emit SwapInitiated(m_row, m_col);
+        emit SwapRequested(m_row, m_col);
+}
+
+void InstantCtrlButton::UpdateTitle()
+{
+    if (m_assignment != NULL)
+        setText(m_assignment->Title());
+    else
+        setText("");
 }

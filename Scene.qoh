@@ -1,43 +1,38 @@
 #ifndef SCENE_QOH
 #define SCENE_QOH
 
-#include <QDomElement>
-#include <QMap>
+#include <QList>
 #include <QObject>
 
-#include "QStringMapRefModel.hpp"
+#include "I_TitleCarrier.h"
 
-class QString;
+
 class State;
 
-
-class Scene : public QObject
+class Scene : public QObject, public I_TitleCarrier
 {
     Q_OBJECT
 
 public:
-    Scene(const QDomElement& scene = QDomElement(), QObject* parent = NULL);
+    Scene(const QString& title, QObject* parent = NULL);
     ~Scene();
 
-    QAbstractItemModel* Model();
+    virtual const QString& Title();
+    void SetTitle(const QString& title);
 
-    bool AddState(const QString& stateName, const QDomElement& state = QDomElement());
-    void RemoveState(const QString& stateName);
+    const QList<State*>& StateList();
 
-    State* GetState(const QString& stateName);
-
-    void WriteData(QDomElement& scene);
-
-    void RenameStreamObjects(const QString& title, const QString& newTitle);
-    void RenameSampleObjects(const QString& title, const QString& newTitle);
+    void AddState(State* newState);
 
 signals:
     void Modified();
 
+private slots:
+    void RemoveDeletedState();
+
 private:
-    typedef QMap<QString, State*> StateMap;
-    StateMap                    m_states;
-    QStringMapRefModel<State*>  m_stateModel;
+    QList<State*> m_states;
+    QString m_title;
 
 };
 

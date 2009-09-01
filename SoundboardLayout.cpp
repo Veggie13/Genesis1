@@ -1,6 +1,8 @@
 #include "InstantCtrlButton.qoh"
+#include "QException.h"
 #include "ResizeTableDlg.qoh"
 #include "Soundboard.qoh"
+#include "SoundboardInstance.h"
 
 #include "SoundboardLayout.qoh"
 
@@ -10,7 +12,8 @@ SoundboardLayout::SoundboardLayout(QObject* parent)
     m_resizeDlg(NULL),
     m_curBoard(NULL),
     m_swapRow(0),
-    m_swapCol(0)
+    m_swapCol(0),
+    m_this(NULL)
 {
 }
 
@@ -28,9 +31,9 @@ SoundboardLayout::~SoundboardLayout()
 void SoundboardLayout::setupUiWithButtons(QWidget* w)
 {
     SoundboardUi::setupUi(w);
-    Resize(m_buttonTbl->rowCount(), m_buttonTbl->columnCount());
 
     m_resizeDlg = new ResizeTableDlg(m_buttonTbl->rowCount(), m_buttonTbl->columnCount());
+    Resize(m_buttonTbl->rowCount(), m_buttonTbl->columnCount());
     connect( m_resizeBtn, SIGNAL( clicked()            ),
              m_resizeDlg, SLOT  ( exec()               ) );
     connect( m_resizeDlg, SIGNAL( SizeChanged(int,int) ),
@@ -40,57 +43,62 @@ void SoundboardLayout::setupUiWithButtons(QWidget* w)
              this,                SIGNAL( VolumeChanged(int) ) );
 
     Resize(0,0);
+
+    w->setEnabled(false);
+    m_this = w;
 }
 
 void SoundboardLayout::Associate(Soundboard* sndboard)
 {
     if (m_curBoard)
     {
-        disconnect(this, 0, m_curBoard, 0);
-        disconnect(m_curBoard, 0, this, 0);
+        disconnect(m_curBoard);
+        m_curBoard->disconnect(this);
     }
-    Resize(0, 0);
+    Resize(0,0);
 
     m_curBoard = sndboard;
     if (!sndboard)
-        return;
-
-    Resize(sndboard->GetRowCount(), sndboard->GetColCount());
-
-    for (int row = 0; row < sndboard->GetRowCount(); ++row)
-    for (int col = 0; col < sndboard->GetColCount(); ++col)
     {
-        InstantSound* snd = sndboard->GetEntry(row, col);
-        if (snd)
-            AssignSoundToButton(row, col, sndboard->GetTitle(row, col), snd);
+        m_this->setEnabled(false);
+        return;
     }
 
-    m_sndboardVolumeSld->setValue(sndboard->GetVolume());
+    m_this->setEnabled(true);
+    Resize(sndboard->RowCount(), sndboard->ColCount());
+
+    for (int row = 0; row < sndboard->RowCount(); ++row)
+    for (int col = 0; col < sndboard->ColCount(); ++col)
+    {
+        SoundboardInstance* snd = sndboard->Entry(row, col);
+        if (snd != NULL)
+            AssignSoundToButton(row, col, snd);
+    }
+
+    m_sndboardVolumeSld->setValue(sndboard->Volume());
 
     connect( this,     SIGNAL( VolumeChanged(int)      ),
              sndboard, SLOT  ( SetVolume(int)          ) );
     connect( this,     SIGNAL( SizeChanged(int,int)    ),
              sndboard, SLOT  ( Resize(int,int)         ) );
-    connect( this,     SIGNAL( SpecificSoundRequested(int,int,const QString&)   ),
-             sndboard, SLOT  ( AddEntry(int,int,const QString&)                 ) );
+    connect( this,     SIGNAL( SpecificSoundRequested(int,int,SoundboardInstance*)  ),
+             sndboard, SLOT  ( AddEntry(int,int,SoundboardInstance*)                ) );
+    connect( sndboard, SIGNAL( EntryAdded(int,int,SoundboardInstance*)          ),
+             this,     SLOT  ( AssignSoundToButton(int,int,SoundboardInstance*) ) );
     connect( sndboard, SIGNAL( destroyed()             ),
              this,     SLOT  ( OnSoundboardDestroyed() ) );
 }
 
-bool SoundboardLayout::AssignSoundToButton(
+void SoundboardLayout::AssignSoundToButton(
     int row,
     int col,
-    const QString& title,
-    InstantSound* sound )
+    SoundboardInstance* sound )
 {
     if (row < 0 || row >= m_buttons.size() || col < 0 || col >= m_buttons[row].size())
-        return false;
+        throw QException("Programming Error: "
+                         "Tried to assign sound to a button outside the dimensions!");
 
-    if (m_buttons[row][col]->text() != "")
-        return false;
-
-    m_buttons[row][col]->SetSound(title, sound);
-    return true;
+    m_buttons[row][col]->SetSound(sound);
 }
 
 void SoundboardLayout::Resize(int rows, int cols)
@@ -130,21 +138,24 @@ void SoundboardLayout::Resize(int rows, int cols)
             m_buttons[nRow][nCol] = btn;
             m_buttonTbl->setCellWidget(nRow, nCol, btn);
 
-            btn->SetVolume(m_sndboardVolumeSld->value());
-
-            connect( this, SIGNAL( VolumeChanged(int)           ),
-                     btn,  SLOT  ( SetVolume(int)               ) );
             connect( btn,  SIGNAL( SoundRequested(int,int)      ),
                      this, SIGNAL( SoundRequested(int,int)      ) );
             connect( btn,  SIGNAL( WasReset(int,int)            ),
                      this, SIGNAL( SoundRemoved(int,int)        ) );
-            connect( btn,  SIGNAL( SwapInitiated(int,int)       ),
+            connect( btn,  SIGNAL( SwapRequested(int,int)       ),
+                     this, SIGNAL( SwapInitiated()              ) );
+            connect( btn,  SIGNAL( SwapRequested(int,int)       ),
                      this, SLOT  ( InitiateSwap(int,int)        ) );
             connect( btn,  SIGNAL( SwapDestSelected(int,int)    ),
                      this, SLOT  ( CompleteSwap(int,int)        ) );
+            connect( this, SIGNAL( SwapInitiated()              ),
+                     btn,  SLOT  ( EnableSwapTarget()           ) );
+            connect( this, SIGNAL( SwapCompleted()              ),
+                     btn,  SLOT  ( DisableSwapTarget()          ) );
         }
     }
 
+    m_resizeDlg->SetDimensions(rows, cols);
     emit SizeChanged(rows, cols);
 }
 
@@ -152,41 +163,34 @@ void SoundboardLayout::InitiateSwap(int row, int col)
 {
     m_swapRow = row;
     m_swapCol = col;
-
-    for (int nRow = 0; nRow < m_buttons.size(); ++nRow)
-    for (int nCol = 0; nCol < m_buttons[nRow].size(); ++nCol)
-    {
-        m_buttons[nRow][nCol]->EnableSwapTarget(true);
-    }
 }
 
 void SoundboardLayout::CompleteSwap(int row, int col)
 {
-    for (int nRow = 0; nRow < m_buttons.size(); ++nRow)
-    for (int nCol = 0; nCol < m_buttons[nRow].size(); ++nCol)
-    {
-        m_buttons[nRow][nCol]->EnableSwapTarget(false);
-    }
+    emit SwapCompleted();
 
     if (m_swapRow == row && m_swapCol == col)
         return;
 
-    QString srcTitle = m_buttons[m_swapRow][m_swapCol]->text();
-    QString destTitle = m_buttons[row][col]->text();
+    SoundboardInstance* src = m_buttons[m_swapRow][m_swapCol]->Sound();
+    SoundboardInstance* dest = m_buttons[row][col]->Sound();
 
-    if (srcTitle == destTitle)
+    if (src == dest)
         return;
 
     emit SoundRemoved(m_swapRow, m_swapCol);
     emit SoundRemoved(row, col);
 
-    emit SpecificSoundRequested(m_swapRow, m_swapCol, destTitle);
-    emit SpecificSoundRequested(row, col, srcTitle);
+    emit SpecificSoundRequested(m_swapRow, m_swapCol, dest);
+    emit SpecificSoundRequested(row, col, src);
 
     Associate(m_curBoard);
 }
 
 void SoundboardLayout::OnSoundboardDestroyed()
 {
+    disconnect(m_curBoard);
     m_curBoard = NULL;
+
+    Resize(0,0);
 }
