@@ -222,6 +222,10 @@
 			<Option compile="1" />
 		</Unit>
 		<Unit filename="QException.h" />
+		<Unit filename="QException_mac.cpp">
+			<Option target="Debug_mac" />
+			<Option target="Release_mac" />
+		</Unit>
 		<Unit filename="QException_win.cpp">
 			<Option target="Debug_win" />
 			<Option target="Release_win" />
@@ -324,7 +328,7 @@
 		<Extensions>
 			<code_completion />
 			<debugger>
-				<search_path add="C:\Qt\4.3.0\src" />
+				<search_path add="$(#qt4.src)" />
 			</debugger>
 		</Extensions>
 	</Project>
