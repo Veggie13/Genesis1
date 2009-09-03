@@ -59,6 +59,7 @@ qtcorelib - the name of the QtCore library
             e.g. QtCore4
 qtguilib  - the name of the QtGui library
 qtxmllib  - the name of the QtXml library
+src       - the path to the Qt src folder
 
 The project references these variables in order to generalize the
 project file to work on any system in either platform target.
