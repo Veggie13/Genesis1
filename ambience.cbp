@@ -221,6 +221,8 @@
 		<Unit filename="Project.qoh">
 			<Option compile="1" />
 		</Unit>
+		<Unit filename="ProjectFileAdapter.cpp" />
+		<Unit filename="ProjectFileAdapter.h" />
 		<Unit filename="QException.h" />
 		<Unit filename="QException_mac.cpp">
 			<Option target="Debug_mac" />

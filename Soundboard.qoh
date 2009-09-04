@@ -3,9 +3,9 @@
 
 #include <QMap>
 #include <QObject>
+#include <QPair>
 
 
-template <typename T1, typename T2> class QPair;
 class SoundboardInstance;
 
 class Soundboard : public QObject
