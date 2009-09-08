@@ -4,6 +4,7 @@
 
 #include "A_ImportManager.qoh"
 #include "A_SoundImport.qoh"
+#include "I_ImportTarget.h"
 #include "TitleCarrierListModel.hpp"
 #include "TitleDlgUi.h"
 
@@ -78,7 +79,7 @@ void FileSelectionDlg::Associate(A_ImportManager* mgr)
             SLOT  ( ImportFile(const QString&, const QString&)      ) );
 }
 
-A_SoundImport* FileSelectionDlg::ExecSingleSelection()
+void FileSelectionDlg::ExecSingleSelection(I_ImportTarget* target)
 {
     m_fileList->setSelectionMode(QAbstractItemView::SingleSelection);
 
@@ -87,18 +88,17 @@ A_SoundImport* FileSelectionDlg::ExecSingleSelection()
         QModelIndexList selected =
             m_fileList->selectionModel()->selectedIndexes();
 
-        if (selected.size() < 1)
-            return NULL;
-        else
-            return dynamic_cast<A_SoundImport*>(
+        if (selected.size() == 1)
+        {
+            A_SoundImport* import = dynamic_cast<A_SoundImport*>(
                 selected[0].data(Qt::UserRole).value<I_TitleCarrier*>()
                 );
+            target->AddImport(import);
+        }
     }
-    else
-        return NULL;
 }
 
-QList<A_SoundImport*> FileSelectionDlg::ExecMultiSelection()
+void FileSelectionDlg::ExecMultiSelection(I_ImportTarget* target)
 {
     m_fileList->setSelectionMode(QAbstractItemView::ExtendedSelection);
 
@@ -118,9 +118,14 @@ QList<A_SoundImport*> FileSelectionDlg::ExecMultiSelection()
             if (addend)
                 retlist.append(addend);
         }
-    }
 
-    return retlist;
+        for ( QList<A_SoundImport*>::iterator it = retlist.begin();
+              it != retlist.end();
+              it++ )
+        {
+            target->AddImport(*it);
+        }
+    }
 }
 
 int FileSelectionDlg::ExecNoSelection()

@@ -1,5 +1,6 @@
 #include <QMessageBox>
 
+#include "I_ImportTarget.h"
 #include "MasterCtrl.qoh"
 #include "RandomSound.qoh"
 #include "TitleCarrierListModel.hpp"
@@ -22,7 +23,7 @@ RandomCtrlPanel::RandomCtrlPanel(QWidget* parent)
     m_effectList->setModel(m_randListModel);
 
     connect( m_addBtn,          SIGNAL( clicked()           ),
-             this,              SIGNAL( AddSelected()       ) );
+             this,              SLOT  ( OnAddSelected()     ) );
     connect( m_deleteBtn,       SIGNAL( clicked()           ),
              this,              SLOT  ( OnDeleteSelected()  ) );
     connect( m_selectAllBtn,    SIGNAL( clicked()           ),
@@ -82,10 +83,28 @@ void RandomCtrlPanel::Associate(MasterCtrl* ctrl)
              ctrl,              SLOT  ( SetVolume(int)      ) );
     connect( m_globalMuteChk,   SIGNAL( toggled(bool)       ),
              ctrl,              SLOT  ( SetPaused(bool)     ) );
-    connect( ctrl,              SIGNAL( Modified()          ),
+    connect( ctrl,              SIGNAL( ChildListChanged()  ),
              this,              SLOT  ( UpdateList()        ) );
     connect( ctrl,              SIGNAL( destroyed()         ),
              this,              SLOT  ( RemoveCtrl()        ) );
+}
+
+void RandomCtrlPanel::OnAddSelected()
+{
+    class ImportTarget : public I_ImportTarget
+    {
+        MasterCtrl* m_ctrl;
+    public:
+        ImportTarget(MasterCtrl* ctrl) : m_ctrl(ctrl) { }
+        virtual void AddImport(A_SoundImport* import)
+        {
+            RandomSound* instance = new RandomSound(import);
+            m_ctrl->AddInstance(instance);
+        }
+    } *importTarget = new ImportTarget(m_randCtrl);
+
+    emit AddSelected(importTarget);
+    delete importTarget;
 }
 
 void RandomCtrlPanel::OnDeleteSelected()

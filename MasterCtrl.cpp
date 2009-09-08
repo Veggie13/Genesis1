@@ -134,6 +134,7 @@ void MasterCtrl::AddInstance(A_SoundInstance* newSound)
              newSound,  SLOT  ( SetMasterPaused(bool)       ) );
 
     m_instanceList.append(newSound);
+    emit ChildListChanged();
 
     newSound->SetMasterVolume(m_volume);
     newSound->SetMasterPaused(m_paused);
@@ -152,6 +153,7 @@ void MasterCtrl::RemoveDeletedInstance()
         return;
 
     m_instanceList.removeAt(index);
+    emit ChildListChanged();
     InternalRemoveDeletedInstance(doomed);
     emit Modified();
 }

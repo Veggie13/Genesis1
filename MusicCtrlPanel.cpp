@@ -1,5 +1,6 @@
 #include <QMessageBox>
 
+#include "I_ImportTarget.h"
 #include "MusicCtrl.qoh"
 #include "QException.h"
 #include "StartableSound.qoh"
@@ -23,7 +24,7 @@ MusicCtrlPanel::MusicCtrlPanel(QWidget* parent)
     m_playlistCbo->setModel(m_musicListModel);
 
     connect( m_addBtn,      SIGNAL( clicked()           ),
-             this,          SIGNAL( AddSelected()       ) );
+             this,          SLOT  ( OnAddSelected()     ) );
     connect( m_deleteBtn,   SIGNAL( clicked()           ),
              this,          SLOT  ( OnDeleteSelected()  ) );
     connect( m_playlistCbo, SIGNAL( currentIndexChanged(int) ),
@@ -67,8 +68,8 @@ void MusicCtrlPanel::Associate(MusicCtrl* ctrl)
              this,              SLOT  ( RemoveCtrl()        ) );
     connect( ctrl,              SIGNAL( SongSelected(StartableSound*) ),
              this,              SLOT  ( SetSong(StartableSound*)      ) );
-    connect( ctrl,              SIGNAL( Modified()      ),
-             this,              SLOT  ( UpdateList()    ) );
+    connect( ctrl,              SIGNAL( ChildListChanged()  ),
+             this,              SLOT  ( UpdateList()        ) );
 
     SetSong(ctrl->CurrentSong());
 }
@@ -84,6 +85,24 @@ void MusicCtrlPanel::SetSong(StartableSound* song)
                          "Tried to set song to one not in the playlist!");
 
     m_playlistCbo->setCurrentIndex(songIndex);
+}
+
+void MusicCtrlPanel::OnAddSelected()
+{
+    class ImportTarget : public I_ImportTarget
+    {
+        MusicCtrl* m_ctrl;
+    public:
+        ImportTarget(MusicCtrl* ctrl) : m_ctrl(ctrl) { }
+        virtual void AddImport(A_SoundImport* import)
+        {
+            StartableSound* instance = new StartableSound(import);
+            m_ctrl->AddInstance(instance);
+        }
+    } *importTarget = new ImportTarget(m_musicCtrl);
+
+    emit AddSelected(importTarget);
+    delete importTarget;
 }
 
 void MusicCtrlPanel::OnDeleteSelected()
@@ -123,15 +142,6 @@ void MusicCtrlPanel::ChangeSong(int index)
 
 void MusicCtrlPanel::UpdateList()
 {
-    const QList<A_SoundInstance*>& children = m_musicCtrl->Children();
-    QList<I_TitleCarrier*> titleChildren;
-    for ( QList<A_SoundInstance*>::const_iterator it = children.begin();
-          it != children.end();
-          it++ )
-    {
-        titleChildren.append(*it);
-    }
-
-    if (m_musicListModel->list() != titleChildren)
-        m_musicListModel->setList(children);
+    m_musicListModel->setList(m_musicCtrl->Children());
+    SetSong(m_musicCtrl->CurrentSong());
 }

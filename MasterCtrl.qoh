@@ -35,6 +35,7 @@ signals:
     void Modified();
     void MasterVolumeChanged(int volume);
     void MasterPauseToggled(bool pause);
+    void ChildListChanged();
 
 protected slots:
     void RemoveDeletedInstance();

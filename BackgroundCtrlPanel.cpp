@@ -1,6 +1,7 @@
 #include <QMessageBox>
 
 #include "Background.h"
+#include "I_ImportTarget.h"
 #include "MasterCtrl.qoh"
 #include "TitleCarrierListModel.hpp"
 
@@ -22,7 +23,7 @@ BackgroundCtrlPanel::BackgroundCtrlPanel(QWidget* parent)
     m_effectList->setModel(m_bgListModel);
 
     connect( m_addBtn,          SIGNAL( clicked()           ),
-             this,              SIGNAL( AddSelected()       ) );
+             this,              SLOT  ( OnAddSelected()     ) );
     connect( m_deleteBtn,       SIGNAL( clicked()           ),
              this,              SLOT  ( OnDeleteSelected()  ) );
     connect( m_selectAllBtn,    SIGNAL( clicked()           ),
@@ -78,10 +79,28 @@ void BackgroundCtrlPanel::Associate(MasterCtrl* ctrl)
              ctrl,                  SLOT  ( SetVolume(int)      ) );
     connect( m_backgroundGlobMute,  SIGNAL( toggled(bool)       ),
              ctrl,                  SLOT  ( SetPaused(bool)     ) );
-    connect( ctrl,                  SIGNAL( Modified()          ),
+    connect( ctrl,                  SIGNAL( ChildListChanged()  ),
              this,                  SLOT  ( UpdateList()        ) );
     connect( ctrl,                  SIGNAL( destroyed()         ),
              this,                  SLOT  ( RemoveCtrl()        ) );
+}
+
+void BackgroundCtrlPanel::OnAddSelected()
+{
+    class ImportTarget : public I_ImportTarget
+    {
+        MasterCtrl* m_ctrl;
+    public:
+        ImportTarget(MasterCtrl* ctrl) : m_ctrl(ctrl) { }
+        virtual void AddImport(A_SoundImport* import)
+        {
+            Background* instance = new Background(import);
+            m_ctrl->AddInstance(instance);
+        }
+    } *importTarget = new ImportTarget(m_bgCtrl);
+
+    emit AddSelected(importTarget);
+    delete importTarget;
 }
 
 void BackgroundCtrlPanel::OnDeleteSelected()

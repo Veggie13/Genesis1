@@ -9,6 +9,7 @@
 
 class A_ImportManager;
 class A_SoundImport;
+class I_ImportTarget;
 class TitleCarrierListModel;
 
 class FileSelectionDlg : public QDialog, private Ui::FileSelectionDlgUi
@@ -22,9 +23,9 @@ public:
     void Associate(A_ImportManager* importMgr);
 
 public slots:
-    A_SoundImport*          ExecSingleSelection();
-    QList<A_SoundImport*>   ExecMultiSelection();
-    int                     ExecNoSelection();
+    void ExecSingleSelection(I_ImportTarget* target);
+    void ExecMultiSelection(I_ImportTarget* target);
+    int ExecNoSelection();
 
     virtual void reject();
 

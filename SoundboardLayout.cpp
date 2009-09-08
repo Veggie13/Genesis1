@@ -1,3 +1,4 @@
+#include "I_ImportTarget.h"
 #include "InstantCtrlButton.qoh"
 #include "QException.h"
 #include "ResizeTableDlg.qoh"
@@ -139,7 +140,7 @@ void SoundboardLayout::Resize(int rows, int cols)
             m_buttonTbl->setCellWidget(nRow, nCol, btn);
 
             connect( btn,  SIGNAL( SoundRequested(int,int)      ),
-                     this, SIGNAL( SoundRequested(int,int)      ) );
+                     this, SLOT  ( RequestSound(int,int)        ) );
             connect( btn,  SIGNAL( WasReset(int,int)            ),
                      this, SIGNAL( SoundRemoved(int,int)        ) );
             connect( btn,  SIGNAL( SwapRequested(int,int)       ),
@@ -185,6 +186,27 @@ void SoundboardLayout::CompleteSwap(int row, int col)
     emit SpecificSoundRequested(row, col, src);
 
     Associate(m_curBoard);
+}
+
+void SoundboardLayout::RequestSound(int row, int col)
+{
+    class ImportTarget : public I_ImportTarget
+    {
+        int m_row;
+        int m_col;
+        Soundboard* m_ctrl;
+    public:
+        ImportTarget(int row, int col, Soundboard* ctrl)
+        : m_row(row), m_col(col), m_ctrl(ctrl) { }
+        virtual void AddImport(A_SoundImport* import)
+        {
+            SoundboardInstance* instance = new SoundboardInstance(import);
+            m_ctrl->AddEntry(m_row, m_col, instance);
+        }
+    } *importTarget = new ImportTarget(row, col, m_curBoard);
+
+    emit SoundRequested(importTarget);
+    delete importTarget;
 }
 
 void SoundboardLayout::OnSoundboardDestroyed()

@@ -106,14 +106,14 @@ AmbMainWindow::AmbMainWindow(int argc, char* argv[], QWidget* parent)
     connect( m_sceneState,  SIGNAL( SceneStateSwitched(Scene*, State*) ),
              this,          SLOT  ( SwitchSceneState(Scene*, State*)   ) );
 
-    connect( m_musicCtrl,   SIGNAL( AddSelected()           ),
-             this,          SLOT  ( SelectSong()            ) );
-    connect( m_bgCtrl,      SIGNAL( AddSelected()           ),
-             this,          SLOT  ( SelectBackground()      ) );
-    connect( m_randCtrl,    SIGNAL( AddSelected()           ),
-             this,          SLOT  ( SelectRandom()          ) );
-    connect( m_sndboardObj, SIGNAL( SoundRequested(int,int) ),
-             this,          SLOT  ( SelectInstant(int,int)  ) );
+    connect( m_musicCtrl,       SIGNAL( AddSelected(I_ImportTarget*)            ),
+             m_longFileDlg,     SLOT  ( ExecSingleSelection(I_ImportTarget*)    ) );
+    connect( m_bgCtrl,          SIGNAL( AddSelected(I_ImportTarget*)            ),
+             m_longFileDlg,     SLOT  ( ExecMultiSelection(I_ImportTarget*)     ) );
+    connect( m_randCtrl,        SIGNAL( AddSelected(I_ImportTarget*)            ),
+             m_shortFileDlg,    SLOT  ( ExecMultiSelection(I_ImportTarget*)     ) );
+    connect( m_sndboardObj,     SIGNAL( SoundRequested(I_ImportTarget*)         ),
+             m_shortFileDlg,    SLOT  ( ExecSingleSelection(I_ImportTarget*)    ) );
 
     // Apply settings.
     m_settings = new QSettings(COMPANY_NAME, APP_NAME);
@@ -375,76 +375,6 @@ void AmbMainWindow::ClearModified()
 {
     m_modified = false;
     UpdateAppTitle();
-}
-
-void AmbMainWindow::SelectSong()
-{
-    if (m_curState == NULL)
-        throw QException("Programming Error: "
-                         "Selecting song while not in a State!");
-
-    A_SoundImport* import = m_longFileDlg->ExecSingleSelection();
-    if (import == NULL)
-        return;
-
-    StartableSound* instance = new StartableSound(import);
-    m_curState
-        ->GetMusicController()
-        ->AddInstance(instance);
-}
-
-void AmbMainWindow::SelectBackground()
-{
-    if (m_curState == NULL)
-        throw QException("Programming Error: "
-                         "Selecting a Background while not in a State!");
-
-    QList<A_SoundImport*> imports = m_longFileDlg->ExecMultiSelection();
-
-    for ( QList<A_SoundImport*>::iterator it = imports.begin();
-          it != imports.end();
-          it++ )
-    {
-        Background* instance = new Background(*it);
-        m_curState
-            ->GetBackgroundController()
-            ->AddInstance(instance);
-    }
-}
-
-void AmbMainWindow::SelectRandom()
-{
-    if (m_curState == NULL)
-        throw QException("Programming Error: "
-                         "Selecting a Random while not in a State!");
-
-    QList<A_SoundImport*> imports = m_shortFileDlg->ExecMultiSelection();
-
-    for ( QList<A_SoundImport*>::iterator it = imports.begin();
-          it != imports.end();
-          it++ )
-    {
-        RandomSound* instance = new RandomSound(*it);
-        m_curState
-            ->GetRandomController()
-            ->AddInstance(instance);
-    }
-}
-
-void AmbMainWindow::SelectInstant(int row, int col)
-{
-    if (m_curState == NULL)
-        throw QException("Programming Error: "
-                         "Adding a Soundboard entry while not in a State!");
-
-    A_SoundImport* import = m_shortFileDlg->ExecSingleSelection();
-    if (import == NULL)
-        return;
-
-    SoundboardInstance* instance = new SoundboardInstance(import);
-    m_curState
-        ->GetSoundboard()
-        ->AddEntry(row, col, instance);
 }
 
 void AmbMainWindow::SwitchSceneState(Scene* newScene, State* newState)
