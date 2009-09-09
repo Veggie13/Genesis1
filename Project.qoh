@@ -8,6 +8,7 @@
 class A_ImportManager;
 class SampleImportManager;
 class Scene;
+class State;
 class StreamImportManager;
 
 class Project : public QObject
@@ -25,14 +26,22 @@ public:
 
     void AddScene(Scene* newScene);
 
+    State* CurrentState();
+
+public slots:
+    void SetCurrentState(State* newCurState);
+
 signals:
     void Modified();
+    void CurrentStateChanged(State* newCurState);
 
 private slots:
     void RemoveDeletedScene();
+    void RemoveDeletedCurrentState();
 
 private:
     QList<Scene*> m_scenes;
+    State* m_curState;
 
     StreamImportManager* m_streamMgr;
     SampleImportManager* m_sampleMgr;

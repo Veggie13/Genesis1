@@ -4,6 +4,7 @@
 #include "ResizeTableDlg.qoh"
 #include "Soundboard.qoh"
 #include "SoundboardInstance.h"
+#include "State.qoh"
 
 #include "SoundboardLayout.qoh"
 
@@ -47,6 +48,15 @@ void SoundboardLayout::setupUiWithButtons(QWidget* w)
 
     w->setEnabled(false);
     m_this = w;
+}
+
+void SoundboardLayout::Associate(State* state)
+{
+    Soundboard* sndboard = NULL;
+    if (state)
+        sndboard = state->GetSoundboard();
+
+    Associate(sndboard);
 }
 
 void SoundboardLayout::Associate(Soundboard* sndboard)

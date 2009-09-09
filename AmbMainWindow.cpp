@@ -8,30 +8,21 @@
 #include <QMessageBox>
 #include <QSettings>
 #include <QShowEvent>
-#include <QTimer>
 
 #include "A_ImportManager.qoh"
-#include "A_SoundImport.qoh"
 #include "AboutDlgUi.h"
-#include "Background.h"
 #include "BackgroundCtrlPanel.qoh"
 #include "FileSelectionDlg.qoh"
-#include "MasterCtrl.qoh"
-#include "MusicCtrl.qoh"
 #include "MusicCtrlPanel.qoh"
 #include "OpenOptionsDlg.qoh"
 #include "Project.qoh"
 #include "ProjectFileAdapter.h"
 #include "QException.h"
 #include "RandomCtrlPanel.qoh"
-#include "RandomSound.qoh"
 #include "Scene.qoh"
 #include "SceneEditorDlg.qoh"
 #include "SceneState.qoh"
-#include "Soundboard.qoh"
-#include "SoundboardInstance.h"
 #include "SoundboardLayout.qoh"
-#include "StartableSound.qoh"
 #include "State.qoh"
 
 #include "AmbMainWindow.qoh"
@@ -53,7 +44,6 @@ AmbMainWindow::AmbMainWindow(int argc, char* argv[], QWidget* parent)
     m_project(NULL),
     m_projectPath(""),
     m_modified(false),
-    m_curState(NULL),
     m_sceneEditDlg(NULL),
     m_longFileDlg(NULL),
     m_shortFileDlg(NULL),
@@ -103,9 +93,6 @@ AmbMainWindow::AmbMainWindow(int argc, char* argv[], QWidget* parent)
              this,              SLOT  ( SetCopyLocal(bool) ) );
     connect(m_aboutAction, SIGNAL( triggered() ), this, SLOT( ShowAboutDlg() ));
 
-    connect( m_sceneState,  SIGNAL( SceneStateSwitched(Scene*, State*) ),
-             this,          SLOT  ( SwitchSceneState(Scene*, State*)   ) );
-
     connect( m_musicCtrl,       SIGNAL( AddSelected(I_ImportTarget*)            ),
              m_longFileDlg,     SLOT  ( ExecSingleSelection(I_ImportTarget*)    ) );
     connect( m_bgCtrl,          SIGNAL( AddSelected(I_ImportTarget*)            ),
@@ -143,6 +130,10 @@ void AmbMainWindow::Associate(Project* proj)
     if (m_project != NULL)
     {
         m_project->disconnect(this);
+        m_project->disconnect(m_musicCtrl);
+        m_project->disconnect(m_bgCtrl);
+        m_project->disconnect(m_randCtrl);
+        m_project->disconnect(m_sndboardObj);
         disconnect(m_project);
 
         m_editMenu->setEnabled(false);
@@ -171,6 +162,15 @@ void AmbMainWindow::Associate(Project* proj)
 
         connect(m_project, SIGNAL( Modified() ), this, SLOT( SetModified() ));
         connect(m_project, SIGNAL( destroyed() ), this, SLOT( RemoveProject() ));
+
+        connect(m_project,      SIGNAL( CurrentStateChanged(State*) ),
+                m_musicCtrl,    SLOT  ( Associate(State*)           ) );
+        connect(m_project,      SIGNAL( CurrentStateChanged(State*) ),
+                m_bgCtrl,       SLOT  ( Associate(State*)           ) );
+        connect(m_project,      SIGNAL( CurrentStateChanged(State*) ),
+                m_randCtrl,     SLOT  ( Associate(State*)           ) );
+        connect(m_project,      SIGNAL( CurrentStateChanged(State*) ),
+                m_sndboardObj,  SLOT  ( Associate(State*)           ) );
     }
 
     UpdateAppTitle();
@@ -181,13 +181,7 @@ void AmbMainWindow::RemoveProject()
     m_project = NULL;
     m_projectPath = "";
     m_modified = false;
-    m_curState = NULL;
     UpdateAppTitle();
-}
-
-void AmbMainWindow::RemoveCurrentState()
-{
-    m_curState = NULL;
 }
 
 void AmbMainWindow::closeEvent(QCloseEvent* evt)
@@ -375,81 +369,6 @@ void AmbMainWindow::ClearModified()
 {
     m_modified = false;
     UpdateAppTitle();
-}
-
-void AmbMainWindow::SwitchSceneState(Scene* newScene, State* newState)
-{
-    if (!m_project)
-    {
-        m_curState = NULL;
-        m_musicCtrl->Associate(NULL);
-        m_bgCtrl->Associate(NULL);
-        m_randCtrl->Associate(NULL);
-        return;
-    }
-    if (!newScene)
-    {
-        m_curState = NULL;
-        m_musicCtrl->Associate(NULL);
-        m_bgCtrl->Associate(NULL);
-        m_randCtrl->Associate(NULL);
-        return;
-    }
-    if (!newState)
-    {
-        m_curState = NULL;
-        m_musicCtrl->Associate(NULL);
-        m_bgCtrl->Associate(NULL);
-        m_randCtrl->Associate(NULL);
-        return;
-    }
-    if (newState == m_curState)
-        return;
-
-    bool sharedMusic = false;
-    StartableSound* curSong;
-    QList<A_SoundInstance*> sharedBg;
-    if (m_curState)
-    {
-        MusicCtrl* curMusic = m_curState->GetMusicController();
-        MasterCtrl* curBg = m_curState->GetBackgroundController();
-        MasterCtrl* curRand = m_curState->GetRandomController();
-
-        if (newState)
-        {
-            MusicCtrl* newMusic = newState->GetMusicController();
-            MasterCtrl* newBg = newState->GetBackgroundController();
-
-            sharedMusic = curMusic->SharesCurrentSongWith(*newMusic);
-            sharedBg = curBg->SharedWith(*newBg);
-
-            if (sharedMusic)
-                curSong = curMusic->CurrentSong();
-        }
-
-        curMusic->Suspend();
-        curBg->Suspend();
-        curRand->Suspend();
-    }
-
-    MusicCtrl* newMusic = newState->GetMusicController();
-    MasterCtrl* newBg = newState->GetBackgroundController();
-    MasterCtrl* newRand = newState->GetRandomController();
-    Soundboard* newBoard = newState->GetSoundboard();
-
-    newMusic->Resume();
-    newBg->Resume();
-    newRand->Resume();
-
-    m_musicCtrl->Associate(newMusic);
-    m_bgCtrl->Associate(newBg);
-    m_randCtrl->Associate(newRand);
-    m_sndboardObj->Associate(newBoard);
-
-    m_curState = newState;
-
-    connect(newState,   SIGNAL( destroyed()             ),
-            this,       SLOT  ( RemoveCurrentState()    ) );
 }
 
 void AmbMainWindow::ShowAboutDlg()

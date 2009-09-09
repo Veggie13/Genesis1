@@ -1,17 +1,19 @@
 #include "MasterCtrl.qoh"
 #include "MusicCtrl.qoh"
+#include "Scene.qoh"
 #include "Soundboard.qoh"
 
 #include "State.qoh"
 
 
-State::State(const QString& title, QObject* parent)
+State::State(const QString& title, Scene* parent)
 :   QObject(parent),
     m_music(NULL),
     m_background(NULL),
     m_random(NULL),
     m_sndboard(NULL),
-    m_title(title)
+    m_title(title),
+    m_parent(parent)
 {
     m_music = new MusicCtrl;
     m_background = new MasterCtrl;
@@ -26,6 +28,8 @@ State::State(const QString& title, QObject* parent)
 
 State::~State()
 {
+    emit AboutToDie();
+
     delete m_music;
     delete m_background;
     delete m_random;
@@ -41,6 +45,11 @@ void State::SetTitle(const QString& title)
 {
     m_title = title;
     emit Modified();
+}
+
+Scene* State::ParentScene()
+{
+    return m_parent;
 }
 
 MusicCtrl* State::GetMusicController()

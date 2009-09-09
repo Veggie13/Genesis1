@@ -7,6 +7,7 @@
 #include "I_TitleCarrier.h"
 
 
+class Project;
 class State;
 
 class Scene : public QObject, public I_TitleCarrier
@@ -14,7 +15,7 @@ class Scene : public QObject, public I_TitleCarrier
     Q_OBJECT
 
 public:
-    Scene(const QString& title, QObject* parent = NULL);
+    Scene(const QString& title, Project* parent);
     ~Scene();
 
     virtual const QString& Title();
@@ -33,6 +34,8 @@ private slots:
 private:
     QList<State*> m_states;
     QString m_title;
+
+    Project* m_parent;
 
 };
 

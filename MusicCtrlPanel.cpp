@@ -4,6 +4,7 @@
 #include "MusicCtrl.qoh"
 #include "QException.h"
 #include "StartableSound.qoh"
+#include "State.qoh"
 #include "TitleCarrierListModel.hpp"
 
 #include "MusicCtrlPanel.qoh"
@@ -31,8 +32,12 @@ MusicCtrlPanel::MusicCtrlPanel(QWidget* parent)
              this,          SLOT  ( ChangeSong(int)          ) );
 }
 
-void MusicCtrlPanel::Associate(MusicCtrl* ctrl)
+void MusicCtrlPanel::Associate(State* state)
 {
+    MusicCtrl* ctrl = NULL;
+    if (state)
+        ctrl = state->GetMusicController();
+
     if (ctrl == m_musicCtrl)
         return;
 
@@ -48,6 +53,7 @@ void MusicCtrlPanel::Associate(MusicCtrl* ctrl)
     if (!ctrl)
     {
         setEnabled(false);
+        m_musicListModel->setList( QList<I_TitleCarrier*>() );
         return;
     }
 

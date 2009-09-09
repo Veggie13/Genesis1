@@ -40,6 +40,7 @@ void SceneState::Associate(Project* proj)
     if (m_project)
     {
         m_project->disconnect(this);
+        disconnect(m_project);
         m_sceneName = "";
         m_stateName = "";
     }
@@ -58,24 +59,25 @@ void SceneState::Associate(Project* proj)
 
     connect(proj,   SIGNAL( Modified()      ),
             this,   SLOT  ( UpdateLists()   ) );
+    connect(proj,   SIGNAL( CurrentStateChanged(State*) ),
+            this,   SLOT  ( OnStateChanged(State*)      ) );
     connect(proj,   SIGNAL( destroyed()     ),
             this,   SLOT  ( RemoveProject() ) );
+
+    connect(this,   SIGNAL( StateSwitched(State*)   ),
+            proj,   SLOT  ( SetCurrentState(State*) ) );
 }
 
 void SceneState::OnSwitchSelected()
 {
-    Scene* curScene = dynamic_cast<Scene*>(
-        m_sceneCbo->itemData(m_sceneCbo->currentIndex(), Qt::UserRole)
-            .value<I_TitleCarrier*>()
-        );
     State* curState = dynamic_cast<State*>(
         m_stateCbo->itemData(m_stateCbo->currentIndex(), Qt::UserRole)
             .value<I_TitleCarrier*>()
         );
 
-    m_sceneName = curScene->Title();
+    m_sceneName = curState->ParentScene()->Title();
     m_stateName = curState->Title();
-    emit SceneStateSwitched(curScene, curState);
+    emit StateSwitched(curState);
 }
 
 void SceneState::OnSceneChanged(const QString& sceneName)
@@ -90,6 +92,33 @@ void SceneState::OnSceneChanged(const QString& sceneName)
 
     if (curScene)
         m_stateListModel->setList(curScene->StateList());
+}
+
+void SceneState::OnStateChanged(State* newCurState)
+{
+    State* curState = dynamic_cast<State*>(
+        m_stateCbo->itemData(m_stateCbo->currentIndex(), Qt::UserRole)
+            .value<I_TitleCarrier*>()
+        );
+
+    if (curState == newCurState)
+        return;
+
+    int newCurSceneIndex = -1;
+    if (newCurState)
+    {
+        newCurSceneIndex =
+            m_sceneCbo->findText(newCurState->ParentScene()->Title());
+    }
+    m_sceneCbo->setCurrentIndex(newCurSceneIndex);
+
+    int newCurStateIndex = -1;
+    if (newCurState)
+    {
+        newCurStateIndex =
+            m_stateCbo->findText(newCurState->Title());
+    }
+    m_stateCbo->setCurrentIndex(newCurStateIndex);
 }
 
 void SceneState::UpdateLists()

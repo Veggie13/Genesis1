@@ -1,6 +1,10 @@
 #include "ImportManagers.h"
+#include "MasterCtrl.qoh"
+#include "MusicCtrl.qoh"
 #include "QException.h"
 #include "Scene.qoh"
+#include "StartableSound.qoh"
+#include "State.qoh"
 
 #include "Project.qoh"
 
@@ -8,6 +12,7 @@
 Project::Project(QObject* parent)
 :   QObject(parent),
     m_scenes(),
+    m_curState(NULL),
     m_streamMgr(NULL),
     m_sampleMgr(NULL)
 {
@@ -64,6 +69,66 @@ void Project::AddScene(Scene* newScene)
     emit Modified();
 }
 
+State* Project::CurrentState()
+{
+    return m_curState;
+}
+
+void Project::SetCurrentState(State* newCurState)
+{
+    if (m_curState == newCurState)
+        return;
+
+    if (newCurState && -1 == m_scenes.lastIndexOf(newCurState->ParentScene()))
+        throw QException("Programming Error: "
+                         "Tried to set current state to something not in project.");
+
+    bool sharedMusic = false;
+    StartableSound* curSong;
+    QList<A_SoundInstance*> sharedBg;
+    if (m_curState)
+    {
+        MusicCtrl* curMusic = m_curState->GetMusicController();
+        MasterCtrl* curBg = m_curState->GetBackgroundController();
+        MasterCtrl* curRand = m_curState->GetRandomController();
+
+        if (newCurState)
+        {
+            MusicCtrl* newMusic = newCurState->GetMusicController();
+            MasterCtrl* newBg = newCurState->GetBackgroundController();
+
+            sharedMusic = curMusic->SharesCurrentSongWith(*newMusic);
+            sharedBg = curBg->SharedWith(*newBg);
+
+            if (sharedMusic)
+                curSong = curMusic->CurrentSong();
+        }
+
+        curMusic->Suspend();
+        curBg->Suspend();
+        curRand->Suspend();
+
+        m_curState->disconnect(this);
+    }
+
+    if (newCurState)
+    {
+        connect(newCurState,    SIGNAL( AboutToDie()                ),
+                this,           SLOT  ( RemoveDeletedCurrentState() ) );
+
+        MusicCtrl* newMusic = newCurState->GetMusicController();
+        MasterCtrl* newBg = newCurState->GetBackgroundController();
+        MasterCtrl* newRand = newCurState->GetRandomController();
+
+        newMusic->Resume();
+        newBg->Resume();
+        newRand->Resume();
+    }
+
+    m_curState = newCurState;
+    emit CurrentStateChanged(newCurState);
+}
+
 void Project::RemoveDeletedScene()
 {
     Scene* doomed = reinterpret_cast<Scene*>(sender());
@@ -76,4 +141,9 @@ void Project::RemoveDeletedScene()
 
     m_scenes.removeAt(index);
     emit Modified();
+}
+
+void Project::RemoveDeletedCurrentState()
+{
+    SetCurrentState(NULL);
 }

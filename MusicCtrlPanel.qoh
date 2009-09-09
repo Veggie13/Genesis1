@@ -9,6 +9,7 @@
 class I_ImportTarget;
 class MusicCtrl;
 class StartableSound;
+class State;
 class TitleCarrierListModel;
 
 class MusicCtrlPanel : public QLabel, private Ui::MusicCtrlUi
@@ -18,9 +19,9 @@ class MusicCtrlPanel : public QLabel, private Ui::MusicCtrlUi
 public:
     MusicCtrlPanel(QWidget* parent = NULL);
 
-    void Associate(MusicCtrl* ctrl);
-
 public slots:
+    void Associate(State* state);
+
     void SetSong(StartableSound* song);
 
 signals:

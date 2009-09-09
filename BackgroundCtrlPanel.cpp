@@ -3,6 +3,7 @@
 #include "Background.h"
 #include "I_ImportTarget.h"
 #include "MasterCtrl.qoh"
+#include "State.qoh"
 #include "TitleCarrierListModel.hpp"
 
 #include "BackgroundCtrlPanel.qoh"
@@ -41,8 +42,12 @@ BackgroundCtrlPanel::~BackgroundCtrlPanel()
     delete m_bgListModel;
 }
 
-void BackgroundCtrlPanel::Associate(MasterCtrl* ctrl)
+void BackgroundCtrlPanel::Associate(State* state)
 {
+    MasterCtrl* ctrl = NULL;
+    if (state)
+        ctrl = state->GetBackgroundController();
+
     if (ctrl == m_bgCtrl)
         return;
 
@@ -65,6 +70,7 @@ void BackgroundCtrlPanel::Associate(MasterCtrl* ctrl)
         m_backgroundGlobMute->setChecked(false);
         m_selectionVolSld->setValue(0);
         m_selectionMuteChk->setChecked(false);
+        m_bgListModel->setList( QList<I_TitleCarrier*>() );
         return;
     }
 

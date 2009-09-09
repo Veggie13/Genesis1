@@ -1,13 +1,15 @@
+#include "Project.qoh"
 #include "QException.h"
 #include "State.qoh"
 
 #include "Scene.qoh"
 
 
-Scene::Scene(const QString& title, QObject* parent)
+Scene::Scene(const QString& title, Project* parent)
 :   QObject(parent),
     m_states(),
-    m_title(title)
+    m_title(title),
+    m_parent(parent)
 {
 }
 
@@ -68,5 +70,6 @@ void Scene::RemoveDeletedState()
     int size = m_states.size();
     m_states.removeAt(index);
     size = m_states.size();
+
     emit Modified();
 }

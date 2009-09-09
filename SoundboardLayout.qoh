@@ -11,6 +11,7 @@ class InstantCtrlButton;
 class ResizeTableDlg;
 class Soundboard;
 class SoundboardInstance;
+class State;
 
 class SoundboardLayout : public QObject, public Ui::SoundboardUi
 {
@@ -21,9 +22,9 @@ public:
     virtual ~SoundboardLayout();
     void setupUiWithButtons(QWidget* w);
 
-    void Associate(Soundboard* sndboard);
-
 public slots:
+    void Associate(State* state);
+
     void Resize(int rows, int cols);
     void AssignSoundToButton(int row, int col, SoundboardInstance* sound);
 
@@ -43,6 +44,9 @@ private slots:
     void OnSoundboardDestroyed();
 
 private:
+    void Associate(Soundboard* sndboard);
+
+
     typedef QVector<InstantCtrlButton*> ButtonRow;
     typedef QVector<ButtonRow> ButtonTable;
     ButtonTable m_buttons;

@@ -8,6 +8,7 @@
 
 class I_ImportTarget;
 class MasterCtrl;
+class State;
 class TitleCarrierListModel;
 
 class BackgroundCtrlPanel : public QLabel, private Ui::BackgroundCtrlUi
@@ -18,7 +19,8 @@ public:
     BackgroundCtrlPanel(QWidget* parent = NULL);
     virtual ~BackgroundCtrlPanel();
 
-    void Associate(MasterCtrl* ctrl);
+public slots:
+    void Associate(State* state);
 
 signals:
     void AddSelected(I_ImportTarget* target);

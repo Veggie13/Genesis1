@@ -191,7 +191,7 @@ void ProjectFileAdapter::LoadProjectBody(Project* proj, const QDomElement& proje
 
         QString sceneTitle = scene.attribute(TITLE_ATTR, "");
 
-        Scene* newScene = new Scene(sceneTitle);
+        Scene* newScene = new Scene(sceneTitle, proj);
         proj->AddScene(newScene);
         LoadScene(proj, newScene, scene);
     }
@@ -211,7 +211,7 @@ void ProjectFileAdapter::LoadScene(
             throw std::runtime_error("Improperly formatted Scene data");
 
         QString stateTitle = state.attribute(TITLE_ATTR, "");
-        State* newState = new State(stateTitle);
+        State* newState = new State(stateTitle, newScene);
         newScene->AddState(newState);
         LoadState(proj, newState, state);
     }

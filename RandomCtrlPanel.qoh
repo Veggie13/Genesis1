@@ -8,6 +8,7 @@
 
 class I_ImportTarget;
 class MasterCtrl;
+class State;
 class TitleCarrierListModel;
 
 class RandomCtrlPanel : public QLabel, private Ui::RandomCtrlUi
@@ -17,7 +18,8 @@ class RandomCtrlPanel : public QLabel, private Ui::RandomCtrlUi
 public:
     RandomCtrlPanel(QWidget* parent = NULL);
 
-    void Associate(MasterCtrl* ctrl);
+public slots:
+    void Associate(State* state);
 
 signals:
     void AddSelected(I_ImportTarget* target);

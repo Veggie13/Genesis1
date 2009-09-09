@@ -104,7 +104,7 @@ void SceneEditorDlg::AddScene()
             continue;
         }
 
-        m_project->AddScene( new Scene(newName) );
+        m_project->AddScene( new Scene(newName, m_project) );
 
         m_sceneListModel->setList(m_project->SceneList());
         m_sceneCbo->setCurrentIndex(m_sceneCbo->findText(newName));
@@ -157,7 +157,7 @@ void SceneEditorDlg::AddState()
             continue;
         }
 
-        curScene->AddState( new State(newName) );
+        curScene->AddState( new State(newName, curScene) );
 
         QModelIndex newItem;
         found = false;

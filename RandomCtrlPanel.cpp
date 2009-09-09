@@ -3,6 +3,7 @@
 #include "I_ImportTarget.h"
 #include "MasterCtrl.qoh"
 #include "RandomSound.qoh"
+#include "State.qoh"
 #include "TitleCarrierListModel.hpp"
 
 #include "RandomCtrlPanel.qoh"
@@ -36,8 +37,12 @@ RandomCtrlPanel::RandomCtrlPanel(QWidget* parent)
              SLOT( UpdateSelectionControls() ) );
 }
 
-void RandomCtrlPanel::Associate(MasterCtrl* ctrl)
+void RandomCtrlPanel::Associate(State* state)
 {
+    MasterCtrl* ctrl = NULL;
+    if (state)
+        ctrl = state->GetRandomController();
+
     if (m_randCtrl == ctrl)
         return;
 
@@ -66,6 +71,7 @@ void RandomCtrlPanel::Associate(MasterCtrl* ctrl)
         m_selectionPerValSpn->setValue(0.0);
         m_selectionPerTypeCbo->setEditText("");
         m_selectionMuteChk->setChecked(false);
+        m_randListModel->setList( QList<I_TitleCarrier*>() );
         return;
     }
 

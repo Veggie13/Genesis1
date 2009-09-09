@@ -21,11 +21,12 @@ public:
     void Associate(Project* proj);
 
 signals:
-    void SceneStateSwitched(Scene* scene, State* state);
+    void StateSwitched(State* state);
 
 protected slots:
     void OnSwitchSelected();
     void OnSceneChanged(const QString& sceneName);
+    void OnStateChanged(State* newCurState);
     void UpdateLists();
     void RemoveProject();
 
