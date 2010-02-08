@@ -10,12 +10,15 @@
 
 const int PopupToolMainWindow::HOVER_HEIGHT = 40;
 const int PopupToolMainWindow::HOVER_MAX_WIDTH = 100;
+const int PopupToolMainWindow::FADE_TIME = 500;
 
 PopupToolMainWindow::PopupToolMainWindow(QWidget* parent, Qt::WindowFlags flags)
 :   QMainWindow(parent, flags),
     m_hoverArea(NULL),
-    m_mainArea(NULL)
+    m_mainArea(NULL),
+    m_fadeTarget(NULL)
 {
+    connect(&m_fadeTimer, SIGNAL( timeout() ), this, SLOT( fade() ));
 }
 
 void PopupToolMainWindow::addPopupWidget(const QString& name, QWidget* popup)
@@ -70,8 +73,17 @@ bool PopupToolMainWindow::eventFilter(QObject* obj, QEvent* event)
         bool inside = popup->frameGeometry().contains(pt);
         if (!inside)
         {
-            popup->removeEventFilter(this);
-            popup->hide();
+            m_fadeTarget = popup;
+            m_fadeTimer.start(FADE_TIME);
+        }
+    }
+    else if ( event->type() == QEvent::Enter )
+    {
+        QWidget* popup = dynamic_cast<QWidget*>(obj);
+        if (popup == m_fadeTarget)
+        {
+            m_fadeTimer.stop();
+            m_fadeTarget = NULL;
         }
     }
 
@@ -96,16 +108,30 @@ void PopupToolMainWindow::beginHover(const QString& name)
         throw QException("Programming Error: "
                          "Began popup hover over invalid name!");
 
-    HoverLabel* label = m_hovers[name];
-    QWidget* popup = finder.value();
-    popup->show();
-    QPoint hoverPoint =
-        mapFromGlobal(label->mapToGlobal(label->rect().bottomLeft()));
-    QPoint areaPoint =
-        mapFromGlobal(m_hoverArea->mapToGlobal(m_hoverArea->rect().bottomLeft()));
-    popup->move(areaPoint.x(), hoverPoint.y());
-    popup->resize(m_hoverArea->width(), popup->minimumHeight());
-    popup->raise();
+    m_fadeTimer.stop();
+    for ( QMap<QString, QWidget*>::iterator it = m_popups.begin();
+          it != m_popups.end();
+          it++ )
+    {
+        QString curName = it.key();
+        QWidget* popup = it.value();
+        if (curName == name)
+        {
+            HoverLabel* label = m_hovers[name];
+            popup->show();
+            QPoint hoverPoint =
+                mapFromGlobal(label->mapToGlobal(label->rect().bottomLeft()));
+            QPoint areaPoint =
+                mapFromGlobal(m_hoverArea->mapToGlobal(m_hoverArea->rect().bottomLeft()));
+            popup->move(areaPoint.x(), hoverPoint.y());
+            popup->resize(m_hoverArea->width(), popup->minimumHeight());
+            popup->raise();
+        }
+        else
+        {
+            popup->hide();
+        }
+    }
 }
 
 void PopupToolMainWindow::endHover(const QString& name)
@@ -123,7 +149,18 @@ void PopupToolMainWindow::endHover(const QString& name)
     }
     else
     {
-        popup->hide();
+        m_fadeTarget = popup;
+        m_fadeTimer.start(FADE_TIME);
+    }
+}
+
+void PopupToolMainWindow::fade()
+{
+    if (m_fadeTarget != NULL)
+    {
+        m_fadeTarget->removeEventFilter(this);
+        m_fadeTarget->hide();
+        m_fadeTarget = NULL;
     }
 }
 

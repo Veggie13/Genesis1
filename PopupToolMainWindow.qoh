@@ -4,6 +4,7 @@
 #include <QMainWindow>
 #include <QMap>
 #include <QStringList>
+#include <QTimer>
 
 
 class HoverLabel;
@@ -27,6 +28,7 @@ protected:
 private slots:
     void beginHover(const QString& name);
     void endHover(const QString& name);
+    void fade();
 
 private:
     void arrangeHoverWidgets();
@@ -37,10 +39,13 @@ private:
     QMap<QString, QWidget*>     m_popups;
     QMap<QString, HoverLabel*>  m_hovers;
     QStringList                 m_names;
+    QTimer                      m_fadeTimer;
+    QWidget*                    m_fadeTarget;
 
 
     static const int HOVER_HEIGHT;
     static const int HOVER_MAX_WIDTH;
+    static const int FADE_TIME;
 
 };
 
