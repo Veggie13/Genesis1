@@ -8,6 +8,7 @@
 #include "A_ImportManager.qoh"
 #include "A_SoundImport.qoh"
 #include "A_SoundInstance.qoh"
+#include "AmbienceVersion.h"
 #include "Background.h"
 #include "MasterCtrl.qoh"
 #include "MusicCtrl.qoh"
@@ -50,6 +51,7 @@ const char ProjectFileAdapter::NUM_ROWS_ATTR[] = "rows";
 const char ProjectFileAdapter::NUM_COLS_ATTR[] = "cols";
 const char ProjectFileAdapter::ROW_ATTR[] = "row";
 const char ProjectFileAdapter::COL_ATTR[] = "col";
+const char ProjectFileAdapter::VERSION_ATTR[] = "ver";
 
 Project* ProjectFileAdapter::CreateProjectFromFile(QFile& loadFile)
 {
@@ -70,7 +72,6 @@ Project* ProjectFileAdapter::CreateProjectFromFile(QFile& loadFile)
 
 void ProjectFileAdapter::SaveProjectToFile(
     Project* project,
-    const QString& version,
     QFile& file )
 {
     if (!file.open(QIODevice::WriteOnly))
@@ -79,7 +80,7 @@ void ProjectFileAdapter::SaveProjectToFile(
     }
 
     QDomDocument doc(DOC_TYPE);
-    SaveToElement(doc, project, version);
+    SaveToElement(doc, project);
     file.write(doc.toString().toAscii());
     file.close();
 }
@@ -88,6 +89,10 @@ Project* ProjectFileAdapter::LoadFromElement(const QString& filename, const QDom
 {
     if (root.tagName() != ROOT_NAME)
         throw std::runtime_error("Not an Ambience file.");
+
+    AmbienceVersion fileVersion(root.attribute(VERSION_ATTR, ""));
+    if (!fileVersion.IsValid() || fileVersion > AmbienceVersion::CURRENT_VERSION)
+        throw std::runtime_error("Unsupported file version.");
 
     QDomElement longImports;
     QDomElement shortImports;
@@ -421,11 +426,10 @@ void ProjectFileAdapter::LoadSoundboardData(
 
 void ProjectFileAdapter::SaveToElement(
     QDomDocument& doc,
-    Project* proj,
-    const QString& version )
+    Project* proj )
 {
-    QDomElement root = doc.createElement("ambience");
-    root.setAttribute("ver", version);
+    QDomElement root = doc.createElement(ROOT_NAME);
+    root.setAttribute(VERSION_ATTR, AmbienceVersion::CURRENT_VERSION.GetVersionString());
 
     SaveStreamImportList(root, proj->StreamManager());
     SaveSampleImportList(root, proj->SampleManager());
@@ -437,7 +441,7 @@ void ProjectFileAdapter::SaveToElement(
 void ProjectFileAdapter::SaveStreamImportList(QDomElement& parent, A_ImportManager* mgr)
 {
     QDomDocument doc = parent.ownerDocument();
-    QDomElement limports = doc.createElement("limports");
+    QDomElement limports = doc.createElement(LONG_IMPORT_TAG);
 
     SaveImportList(limports, mgr);
 
@@ -447,7 +451,7 @@ void ProjectFileAdapter::SaveStreamImportList(QDomElement& parent, A_ImportManag
 void ProjectFileAdapter::SaveSampleImportList(QDomElement& parent, A_ImportManager* mgr)
 {
     QDomDocument doc = parent.ownerDocument();
-    QDomElement simports = doc.createElement("simports");
+    QDomElement simports = doc.createElement(SHORT_IMPORT_TAG);
 
     SaveImportList(simports, mgr);
 
@@ -457,17 +461,17 @@ void ProjectFileAdapter::SaveSampleImportList(QDomElement& parent, A_ImportManag
 void ProjectFileAdapter::SaveImport(QDomElement& parent, A_SoundImport* import)
 {
     QDomDocument doc = parent.ownerDocument();
-    QDomElement file = doc.createElement("file");
+    QDomElement file = doc.createElement(FILE_TAG);
 
-    file.setAttribute("title", import->Title());
-    file.setAttribute("path", import->Filename());
+    file.setAttribute(TITLE_ATTR, import->Title());
+    file.setAttribute(PATH_ATTR, import->Filename());
 
     parent.appendChild(file);
 }
 
 void ProjectFileAdapter::SaveImportList(QDomElement& element, A_ImportManager* mgr)
 {
-    element.setAttribute("copyLocal", (int)mgr->IsCopyLocalOn());
+    element.setAttribute(COPY_LOCAL_ATTR, (int)mgr->IsCopyLocalOn());
 
     const QList<A_SoundImport*>& importList = mgr->ImportList();
     for ( QList<A_SoundImport*>::const_iterator it = importList.begin();
@@ -481,7 +485,7 @@ void ProjectFileAdapter::SaveImportList(QDomElement& element, A_ImportManager* m
 void ProjectFileAdapter::SaveProjectBody(QDomElement& parent, Project* proj)
 {
     QDomDocument doc = parent.ownerDocument();
-    QDomElement project = doc.createElement("project");
+    QDomElement project = doc.createElement(PROJECT_TAG);
 
     const QList<Scene*>& sceneList = proj->SceneList();
     for ( QList<Scene*>::const_iterator it = sceneList.begin();
@@ -497,9 +501,9 @@ void ProjectFileAdapter::SaveProjectBody(QDomElement& parent, Project* proj)
 void ProjectFileAdapter::SaveScene(QDomElement& parent, Scene* scene)
 {
     QDomDocument doc = parent.ownerDocument();
-    QDomElement sceneEl = doc.createElement("scene");
+    QDomElement sceneEl = doc.createElement(SCENE_TAG);
 
-    sceneEl.setAttribute("title", scene->Title());
+    sceneEl.setAttribute(TITLE_ATTR, scene->Title());
 
     const QList<State*>& stateList = scene->StateList();
     for ( QList<State*>::const_iterator it = stateList.begin();
@@ -515,9 +519,9 @@ void ProjectFileAdapter::SaveScene(QDomElement& parent, Scene* scene)
 void ProjectFileAdapter::SaveState(QDomElement& parent, State* state)
 {
     QDomDocument doc = parent.ownerDocument();
-    QDomElement stateEl = doc.createElement("state");
+    QDomElement stateEl = doc.createElement(STATE_TAG);
 
-    stateEl.setAttribute("title", state->Title());
+    stateEl.setAttribute(TITLE_ATTR, state->Title());
 
     SaveMusicData(stateEl, state->GetMusicController());
     SaveBackgroundData(stateEl, state->GetBackgroundController());
@@ -530,10 +534,10 @@ void ProjectFileAdapter::SaveState(QDomElement& parent, State* state)
 void ProjectFileAdapter::SaveMusicData(QDomElement& parent, MusicCtrl* musicCtrl)
 {
     QDomDocument doc = parent.ownerDocument();
-    QDomElement music = doc.createElement("music");
+    QDomElement music = doc.createElement(MUSIC_TAG);
 
-    music.setAttribute("vol", QString("%1").arg(musicCtrl->Volume()));
-    music.setAttribute("mute", QString("%1").arg((int)musicCtrl->IsPaused()));
+    music.setAttribute(VOLUME_ATTR, QString("%1").arg(musicCtrl->Volume()));
+    music.setAttribute(PAUSE_ATTR, QString("%1").arg((int)musicCtrl->IsPaused()));
 
     const QList<A_SoundInstance*>& songList = musicCtrl->Children();
     for ( QList<A_SoundInstance*>::const_iterator it = songList.begin();
@@ -549,10 +553,10 @@ void ProjectFileAdapter::SaveMusicData(QDomElement& parent, MusicCtrl* musicCtrl
 void ProjectFileAdapter::SaveBackgroundData(QDomElement& parent, MasterCtrl* bgCtrl)
 {
     QDomDocument doc = parent.ownerDocument();
-    QDomElement background = doc.createElement("background");
+    QDomElement background = doc.createElement(BACKGROUND_TAG);
 
-    background.setAttribute("vol", QString("%1").arg(bgCtrl->Volume()));
-    background.setAttribute("mute", QString("%1").arg((int)bgCtrl->IsPaused()));
+    background.setAttribute(VOLUME_ATTR, QString("%1").arg(bgCtrl->Volume()));
+    background.setAttribute(PAUSE_ATTR, QString("%1").arg((int)bgCtrl->IsPaused()));
 
     const QList<A_SoundInstance*>& soundList = bgCtrl->Children();
     for ( QList<A_SoundInstance*>::const_iterator it = soundList.begin();
@@ -568,10 +572,10 @@ void ProjectFileAdapter::SaveBackgroundData(QDomElement& parent, MasterCtrl* bgC
 void ProjectFileAdapter::SaveRandomData(QDomElement& parent, MasterCtrl* randCtrl)
 {
     QDomDocument doc = parent.ownerDocument();
-    QDomElement random = doc.createElement("random");
+    QDomElement random = doc.createElement(RANDOM_TAG);
 
-    random.setAttribute("vol", QString("%1").arg(randCtrl->Volume()));
-    random.setAttribute("mute", QString("%1").arg((int)randCtrl->IsPaused()));
+    random.setAttribute(VOLUME_ATTR, QString("%1").arg(randCtrl->Volume()));
+    random.setAttribute(PAUSE_ATTR, QString("%1").arg((int)randCtrl->IsPaused()));
 
     const QList<A_SoundInstance*>& effectList = randCtrl->Children();
     for ( QList<A_SoundInstance*>::const_iterator it = effectList.begin();
@@ -587,11 +591,11 @@ void ProjectFileAdapter::SaveRandomData(QDomElement& parent, MasterCtrl* randCtr
 void ProjectFileAdapter::SaveSoundboardData(QDomElement& parent, Soundboard* sndboard)
 {
     QDomDocument doc = parent.ownerDocument();
-    QDomElement soundboard = doc.createElement("soundboard");
+    QDomElement soundboard = doc.createElement(SOUNDBOARD_TAG);
 
-    soundboard.setAttribute("vol", QString("%1").arg(sndboard->Volume()));
-    soundboard.setAttribute("rows", QString("%1").arg(sndboard->RowCount()));
-    soundboard.setAttribute("cols", QString("%1").arg(sndboard->ColCount()));
+    soundboard.setAttribute(VOLUME_ATTR, QString("%1").arg(sndboard->Volume()));
+    soundboard.setAttribute(NUM_ROWS_ATTR, QString("%1").arg(sndboard->RowCount()));
+    soundboard.setAttribute(NUM_COLS_ATTR, QString("%1").arg(sndboard->ColCount()));
 
     const Soundboard::SoundGrid& soundGrid = sndboard->GetSoundGrid();
     for ( Soundboard::SoundGrid::const_iterator it = soundGrid.begin();
@@ -607,9 +611,9 @@ void ProjectFileAdapter::SaveSoundboardData(QDomElement& parent, Soundboard* snd
 void ProjectFileAdapter::SaveSong(QDomElement& parent, A_SoundInstance* instance)
 {
     QDomDocument doc = parent.ownerDocument();
-    QDomElement song = doc.createElement("song");
+    QDomElement song = doc.createElement(SONG_TAG);
 
-    song.setAttribute("title", instance->Title());
+    song.setAttribute(TITLE_ATTR, instance->Title());
 
     parent.appendChild(song);
 }
@@ -617,15 +621,15 @@ void ProjectFileAdapter::SaveSong(QDomElement& parent, A_SoundInstance* instance
 void ProjectFileAdapter::SaveBackground(QDomElement& parent, A_SoundInstance* instance)
 {
     QDomDocument doc = parent.ownerDocument();
-    QDomElement sound = doc.createElement("sound");
+    QDomElement sound = doc.createElement(BACKGROUND_INSTANCE_TAG);
 
-    sound.setAttribute("title", instance->Title());
+    sound.setAttribute(TITLE_ATTR, instance->Title());
     sound.setAttribute(
-        "vol",
+        VOLUME_ATTR,
         QString("%1")
             .arg( instance->InstanceVolume() ) );
     sound.setAttribute(
-        "mute",
+        PAUSE_ATTR,
         QString("%1")
             .arg( (int)instance->IsInstancePaused() ) );
 
@@ -635,27 +639,27 @@ void ProjectFileAdapter::SaveBackground(QDomElement& parent, A_SoundInstance* in
 void ProjectFileAdapter::SaveRandomSound(QDomElement& parent, RandomSound* instance)
 {
     QDomDocument doc = parent.ownerDocument();
-    QDomElement effect = doc.createElement("effect");
+    QDomElement effect = doc.createElement(RANDOM_INSTANCE_TAG);
 
-    effect.setAttribute("title", instance->Title());
+    effect.setAttribute(TITLE_ATTR, instance->Title());
     effect.setAttribute(
-        "vol",
+        VOLUME_ATTR,
         QString("%1")
             .arg( instance->InstanceVolume() ) );
     effect.setAttribute(
-        "per",
+        PERIOD_ATTR,
         QString("%1")
             .arg( instance->Period() ) );
     effect.setAttribute(
-        "perType",
+        PERIOD_TYPE_ATTR,
         QString("%1")
             .arg( (int)instance->GetPeriodType() ) );
     effect.setAttribute(
-        "var",
+        VARIANCE_ATTR,
         QString("%1")
             .arg( instance->Variance() ) );
     effect.setAttribute(
-        "mute",
+        PAUSE_ATTR,
         QString("%1")
             .arg( (int)instance->IsInstancePaused() ) );
 
@@ -667,11 +671,11 @@ void ProjectFileAdapter::SaveSoundboardEffect(
     Soundboard::SoundGrid::const_iterator soundGridIt )
 {
     QDomDocument doc = parent.ownerDocument();
-    QDomElement effect = doc.createElement("effect");
+    QDomElement effect = doc.createElement(SOUNDBOARD_INSTANCE_TAG);
 
-    effect.setAttribute("row", QString("%1").arg(soundGridIt.key().first));
-    effect.setAttribute("col", QString("%1").arg(soundGridIt.key().second));
-    effect.setAttribute("title", soundGridIt.value()->Title());
+    effect.setAttribute(ROW_ATTR, QString("%1").arg(soundGridIt.key().first));
+    effect.setAttribute(COL_ATTR, QString("%1").arg(soundGridIt.key().second));
+    effect.setAttribute(TITLE_ATTR, soundGridIt.value()->Title());
 
     parent.appendChild(effect);
 }

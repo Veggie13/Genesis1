@@ -92,12 +92,10 @@ private:
     QWidget* m_tempFrame;
 
 
-    static const char           VERSION_FORMAT[];
     static const unsigned int   VERSION_CODE;
     static const char           APP_NAME[];
     static const char           COMPANY_NAME[];
     static const int            RECENT_FILES_LIST_MAX;
-    static QString VersionString();
     static QString ProjectTitle(const QString& filename);
 
 };

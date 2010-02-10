@@ -8,9 +8,13 @@
 #include <QMessageBox>
 #include <QSettings>
 #include <QShowEvent>
+#ifndef _DEBUG
+#include <QTimer>
+#endif
 
 #include "A_ImportManager.qoh"
 #include "AboutDlgUi.h"
+#include "AmbienceVersion.h"
 #include "BackgroundCtrlPanel.qoh"
 #include "FileSelectionDlg.qoh"
 #include "MusicCtrlPanel.qoh"
@@ -28,7 +32,6 @@
 #include "AmbMainWindow.qoh"
 
 
-const char          AmbMainWindow::VERSION_FORMAT[]         = "%1.%2 rev %3%4";
 const unsigned int  AmbMainWindow::VERSION_CODE             = 0x01020001;
 const char          AmbMainWindow::APP_NAME[]               = "Ambience Sound Studio";
 const char          AmbMainWindow::COMPANY_NAME[]           = "MeiCor Gaming";
@@ -351,7 +354,7 @@ void AmbMainWindow::SaveProject(const QString& filename)
 {
     QFile saveFile(filename);
     ProjectFileAdapter adapter;
-    adapter.SaveProjectToFile(m_project, VersionString(), saveFile);
+    adapter.SaveProjectToFile(m_project, saveFile);
 
     m_projectPath = filename;
     ClearModified();
@@ -378,7 +381,12 @@ void AmbMainWindow::ShowAboutDlg()
     dlgLayout.setupUi(&dlg);
 
     QString text = dlgLayout.m_text->text();
-    text.replace("%product_string%", QString("%1 (%2)").arg(APP_NAME).arg(VersionString()));
+    text.replace(
+        "%product_string%",
+        QString("%1 (%2)")
+            .arg(APP_NAME)
+            .arg( AmbienceVersion::CURRENT_VERSION.GetVersionString() )
+        );
     dlgLayout.m_text->setText(text);
 
     dlg.exec();
@@ -509,7 +517,7 @@ void AmbMainWindow::UpdateAppTitle()
     QString title = APP_NAME;
 #ifdef _DEBUG
     title += " (";
-    title += VersionString();
+    title += AmbienceVersion::CURRENT_VERSION.GetVersionString();
     title += ")";
 #endif
     title += " - ";
@@ -522,18 +530,6 @@ void AmbMainWindow::UpdateAppTitle()
         title += "*";
 
     setWindowTitle(title);
-}
-
-QString AmbMainWindow::VersionString()
-{
-    unsigned int MM = (VERSION_CODE >> 24) & 0xFF;
-    unsigned int Mm = (VERSION_CODE >> 16) & 0xFF;
-    unsigned int mm = (VERSION_CODE >> 8 ) & 0xFF;
-    bool beta       = (VERSION_CODE & 0xFF);
-
-    return QString(VERSION_FORMAT)
-        .arg(MM).arg(Mm).arg(mm, 2, 10, QLatin1Char('0'))
-        .arg(beta?" beta":"");
 }
 
 QString AmbMainWindow::ProjectTitle(const QString& filename)

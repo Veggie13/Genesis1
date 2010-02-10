@@ -21,7 +21,7 @@ class ProjectFileAdapter
 {
 public:
     Project* CreateProjectFromFile(QFile& loadFile);
-    void SaveProjectToFile(Project* project, const QString& version, QFile& file);
+    void SaveProjectToFile(Project* project, QFile& file);
 
 private:
     Project* LoadFromElement(const QString& filename, const QDomElement& root);
@@ -57,7 +57,7 @@ private:
         State* parent,
         const QDomElement& sndboardData );
 
-    void SaveToElement(QDomDocument& doc, Project* proj, const QString& version);
+    void SaveToElement(QDomDocument& doc, Project* proj);
     void SaveStreamImportList(QDomElement& parent, A_ImportManager* mgr);
     void SaveSampleImportList(QDomElement& parent, A_ImportManager* mgr);
     void SaveImport(QDomElement& parent, A_SoundImport* import);
@@ -106,6 +106,7 @@ private:
     static const char NUM_COLS_ATTR[];
     static const char ROW_ATTR[];
     static const char COL_ATTR[];
+    static const char VERSION_ATTR[];
 
 };
 

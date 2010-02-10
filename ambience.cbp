@@ -26,8 +26,8 @@
 					<Add directory="$(#debug_help.lib)" />
 				</Linker>
 				<Environment>
-					<Variable name="platform" value="win" />
 					<Variable name="targetName" value="Debug" />
+					<Variable name="platform" value="win" />
 				</Environment>
 			</Target>
 			<Target title="Release_win">
@@ -49,8 +49,8 @@
 					<Add directory="$(#debug_help.lib)" />
 				</Linker>
 				<Environment>
-					<Variable name="platform" value="win" />
 					<Variable name="targetName" value="Release" />
+					<Variable name="platform" value="win" />
 				</Environment>
 			</Target>
 			<Target title="Debug_mac">
@@ -90,11 +90,11 @@
 			</Target>
 			<Environment>
 				<Variable name="bassLibDir" value="external\BASS_2.4\$(platform)" />
-				<Variable name="objectDir" value="obj\$(platform)\$(targetName)\" />
 				<Variable name="bassCppInc" value="external\bass_cpp\include" />
-				<Variable name="outputDir" value="bin\$(platform)\$(targetName)\ambience" />
+				<Variable name="objectDir" value="obj\$(platform)\$(targetName)\" />
 				<Variable name="bassCppLibDir" value="external\bass_cpp\lib\$(platform)" />
 				<Variable name="bassInc" value="external\BASS_2.4\c" />
+				<Variable name="outputDir" value="bin\$(platform)\$(targetName)\ambience" />
 			</Environment>
 		</Build>
 		<Compiler>
@@ -150,6 +150,8 @@
 		</Unit>
 		<Unit filename="AmbienceApplication.cpp" />
 		<Unit filename="AmbienceApplication.h" />
+		<Unit filename="AmbienceVersion.cpp" />
+		<Unit filename="AmbienceVersion.h" />
 		<Unit filename="Background.cpp" />
 		<Unit filename="Background.h" />
 		<Unit filename="BackgroundCtrlPanel.cpp" />
