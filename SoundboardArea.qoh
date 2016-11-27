@@ -1,0 +1,37 @@
+#ifndef SOUNDBOARDAREA_QOH
+#define SOUNDBOARDAREA_QOH
+
+#include <QObject>
+#include <QList>
+
+#include "SoundboardAreaUi.h"
+
+
+class Project;
+class Scene;
+class Soundboard;
+
+class SoundboardArea : public QObject, private Ui::SoundboardAreaUi
+{
+    Q_OBJECT
+
+public:
+    SoundboardArea(QObject* parent = NULL);
+
+    void setupUi(QWidget* widget);
+
+    void AssociateWithProject(Project* project);
+    void AssociateWithScene(Scene* scene);
+
+private:
+    void addSoundboard(QTabWidget* tabs, Soundboard* sndBoard);
+
+    Project*    m_curProject;
+    Scene*      m_curScene;
+
+    QList<QWidget*> m_generalTabWidgets;
+    QList<QWidget*> m_sceneTabWidgets;
+
+};
+
+#endif
