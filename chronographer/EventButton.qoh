@@ -1,0 +1,23 @@
+#pragma once
+
+#include <QPushButton>
+
+#include "CustomEvent.h"
+
+
+class EventButton : public QPushButton
+{
+    Q_OBJECT
+public:
+    EventButton( CustomEvent::Factory* factory, QWidget* parent = NULL );
+
+signals:
+    void Clicked( CustomEvent::Factory* factory );
+
+private slots:
+    void OnClick();
+
+private:
+    CustomEvent::Factory* _factory;
+
+};

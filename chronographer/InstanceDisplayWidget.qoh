@@ -1,0 +1,16 @@
+#pragma once
+
+#include <QLabel>
+
+
+class ACharacterPropertyInstance;
+
+class InstanceDisplayWidget : public QLabel
+{
+    Q_OBJECT
+public:
+    InstanceDisplayWidget( ACharacterPropertyInstance* inst, QWidget* parent = NULL );
+
+private:
+    ACharacterPropertyInstance* _inst;
+};

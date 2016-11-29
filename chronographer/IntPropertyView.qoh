@@ -1,0 +1,32 @@
+#pragma once
+
+#include "ACharacterPropertyView.qoh"
+#include "IntPropertyUi.h"
+
+
+class IntPropertyInstance;
+
+class IntPropertyView :
+    public ACharacterPropertyView,
+    private Ui::IntPropertyUi
+{
+    Q_OBJECT
+public:
+    IntPropertyView( QWidget* parent, IntPropertyInstance* pAssoc );
+
+    virtual void InitData();
+    virtual QString Display() const;
+
+protected slots:
+    void PlusManipulate();
+    void MinusManipulate();
+    void ValueManipulate();
+
+protected:
+    virtual bool eventFilter( QObject* watched, QEvent* event );
+    virtual void focusInEvent( QFocusEvent* event );
+
+private:
+    IntPropertyInstance* _pAssoc;
+
+};

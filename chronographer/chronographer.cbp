@@ -1,0 +1,487 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6" />
+	<Project>
+		<Option title="chronographer" />
+		<Option pch_mode="2" />
+		<Option compiler="gcc" />
+		<Build>
+			<Target title="Debug">
+				<Option output="bin\Debug\chronographer" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj\Debug\" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-g" />
+				</Compiler>
+			</Target>
+			<Target title="SerialSessionTest">
+				<Option output="bin\Debug\chronographer" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj\Debug\" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-g" />
+				</Compiler>
+			</Target>
+			<Target title="PropertyChangeEventTest">
+				<Option output="bin\Debug\chronographer" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj\Debug\" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-g" />
+				</Compiler>
+			</Target>
+			<Target title="DropTableTest">
+				<Option output="bin\Debug\chronographer" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj\Debug\" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-g" />
+				</Compiler>
+			</Target>
+			<Target title="PanningViewWidgetTest">
+				<Option output="bin\Debug\chronographer" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj\Debug\" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-g" />
+				</Compiler>
+			</Target>
+		</Build>
+		<Compiler>
+			<Add option="-Wall" />
+			<Add directory="$(#qt4.include)" />
+			<Add directory="$(#qt4.QtCoreDir)" />
+			<Add directory="$(#qt4.QtGuiDir)" />
+			<Add directory="$(#qt4.QtXmlDir)" />
+		</Compiler>
+		<Linker>
+			<Add library="$(#qt4.QtCoreLib)" />
+			<Add library="$(#qt4.QtGuiLib)" />
+			<Add library="$(#qt4.QtXmlLib)" />
+			<Add directory="$(#qt4.lib)" />
+		</Linker>
+		<Unit filename="ACharacterProperty.cpp">
+			<Option target="Debug" />
+			<Option target="SerialSessionTest" />
+			<Option target="PropertyChangeEventTest" />
+			<Option target="DropTableTest" />
+		</Unit>
+		<Unit filename="ACharacterProperty.h">
+			<Option target="Debug" />
+			<Option target="SerialSessionTest" />
+			<Option target="PropertyChangeEventTest" />
+			<Option target="DropTableTest" />
+		</Unit>
+		<Unit filename="ACharacterPropertyInstance.h">
+			<Option target="Debug" />
+			<Option target="SerialSessionTest" />
+			<Option target="PropertyChangeEventTest" />
+			<Option target="DropTableTest" />
+		</Unit>
+		<Unit filename="ACharacterPropertyView.qoh">
+			<Option compile="1" />
+			<Option target="Debug" />
+			<Option target="SerialSessionTest" />
+			<Option target="PropertyChangeEventTest" />
+			<Option target="DropTableTest" />
+		</Unit>
+		<Unit filename="ASessionEvent.cpp">
+			<Option target="Debug" />
+			<Option target="SerialSessionTest" />
+			<Option target="PropertyChangeEventTest" />
+			<Option target="DropTableTest" />
+		</Unit>
+		<Unit filename="ASessionEvent.h">
+			<Option target="Debug" />
+			<Option target="SerialSessionTest" />
+			<Option target="PropertyChangeEventTest" />
+			<Option target="DropTableTest" />
+		</Unit>
+		<Unit filename="BasicEvents.cpp">
+			<Option target="Debug" />
+			<Option target="SerialSessionTest" />
+			<Option target="PropertyChangeEventTest" />
+			<Option target="DropTableTest" />
+		</Unit>
+		<Unit filename="BasicEvents.h">
+			<Option target="Debug" />
+			<Option target="SerialSessionTest" />
+			<Option target="PropertyChangeEventTest" />
+			<Option target="DropTableTest" />
+		</Unit>
+		<Unit filename="Character.cpp">
+			<Option target="Debug" />
+			<Option target="SerialSessionTest" />
+			<Option target="PropertyChangeEventTest" />
+			<Option target="DropTableTest" />
+		</Unit>
+		<Unit filename="Character.h">
+			<Option target="Debug" />
+			<Option target="SerialSessionTest" />
+			<Option target="PropertyChangeEventTest" />
+			<Option target="DropTableTest" />
+		</Unit>
+		<Unit filename="CharacterLabel.cpp">
+			<Option target="Debug" />
+			<Option target="SerialSessionTest" />
+			<Option target="PropertyChangeEventTest" />
+			<Option target="DropTableTest" />
+		</Unit>
+		<Unit filename="CharacterLabel.qoh">
+			<Option compile="1" />
+			<Option target="Debug" />
+			<Option target="SerialSessionTest" />
+			<Option target="PropertyChangeEventTest" />
+			<Option target="DropTableTest" />
+		</Unit>
+		<Unit filename="CharacterSwitchEvent.cpp" />
+		<Unit filename="CharacterSwitchEvent.h" />
+		<Unit filename="ChronoProject.cpp">
+			<Option target="Debug" />
+			<Option target="SerialSessionTest" />
+			<Option target="PropertyChangeEventTest" />
+			<Option target="DropTableTest" />
+		</Unit>
+		<Unit filename="ChronoProject.qoh">
+			<Option compilerVar="CC" />
+			<Option compile="1" />
+			<Option target="Debug" />
+			<Option target="SerialSessionTest" />
+			<Option target="PropertyChangeEventTest" />
+			<Option target="DropTableTest" />
+		</Unit>
+		<Unit filename="ChronoWindow.cpp">
+			<Option target="Debug" />
+			<Option target="SerialSessionTest" />
+			<Option target="PropertyChangeEventTest" />
+			<Option target="DropTableTest" />
+		</Unit>
+		<Unit filename="ChronoWindow.qoh">
+			<Option compile="1" />
+			<Option target="Debug" />
+			<Option target="SerialSessionTest" />
+			<Option target="PropertyChangeEventTest" />
+			<Option target="DropTableTest" />
+		</Unit>
+		<Unit filename="ChronoWindowUi.ui">
+			<Option compile="1" />
+			<Option weight="0" />
+			<Option target="Debug" />
+			<Option target="SerialSessionTest" />
+			<Option target="PropertyChangeEventTest" />
+			<Option target="DropTableTest" />
+		</Unit>
+		<Unit filename="CustomEvent.cpp">
+			<Option target="Debug" />
+			<Option target="SerialSessionTest" />
+			<Option target="PropertyChangeEventTest" />
+			<Option target="DropTableTest" />
+		</Unit>
+		<Unit filename="CustomEvent.h">
+			<Option target="Debug" />
+			<Option target="SerialSessionTest" />
+			<Option target="PropertyChangeEventTest" />
+			<Option target="DropTableTest" />
+		</Unit>
+		<Unit filename="Defs.h">
+			<Option target="Debug" />
+			<Option target="SerialSessionTest" />
+			<Option target="PropertyChangeEventTest" />
+			<Option target="DropTableTest" />
+		</Unit>
+		<Unit filename="DraggableLabel.cpp">
+			<Option target="Debug" />
+			<Option target="SerialSessionTest" />
+			<Option target="PropertyChangeEventTest" />
+			<Option target="DropTableTest" />
+		</Unit>
+		<Unit filename="DraggableLabel.h">
+			<Option target="Debug" />
+			<Option target="SerialSessionTest" />
+			<Option target="PropertyChangeEventTest" />
+			<Option target="DropTableTest" />
+		</Unit>
+		<Unit filename="DropTableTest.cpp">
+			<Option target="DropTableTest" />
+		</Unit>
+		<Unit filename="DropTableWidget.cpp">
+			<Option target="Debug" />
+			<Option target="SerialSessionTest" />
+			<Option target="PropertyChangeEventTest" />
+			<Option target="DropTableTest" />
+		</Unit>
+		<Unit filename="DropTableWidget.qoh">
+			<Option compile="1" />
+			<Option target="Debug" />
+			<Option target="DropTableTest" />
+		</Unit>
+		<Unit filename="EventButton.cpp">
+			<Option target="Debug" />
+			<Option target="SerialSessionTest" />
+			<Option target="PropertyChangeEventTest" />
+			<Option target="DropTableTest" />
+		</Unit>
+		<Unit filename="EventButton.qoh">
+			<Option compile="1" />
+			<Option target="Debug" />
+			<Option target="SerialSessionTest" />
+			<Option target="PropertyChangeEventTest" />
+			<Option target="DropTableTest" />
+		</Unit>
+		<Unit filename="IDeserializer.h">
+			<Option target="Debug" />
+			<Option target="SerialSessionTest" />
+			<Option target="PropertyChangeEventTest" />
+			<Option target="DropTableTest" />
+		</Unit>
+		<Unit filename="ISerializable.h">
+			<Option target="Debug" />
+			<Option target="SerialSessionTest" />
+			<Option target="PropertyChangeEventTest" />
+			<Option target="DropTableTest" />
+		</Unit>
+		<Unit filename="ISerializer.h">
+			<Option target="Debug" />
+			<Option target="SerialSessionTest" />
+			<Option target="PropertyChangeEventTest" />
+			<Option target="DropTableTest" />
+		</Unit>
+		<Unit filename="InitiativeDlgUi.ui">
+			<Option compile="1" />
+			<Option weight="0" />
+			<Option target="Debug" />
+			<Option target="SerialSessionTest" />
+			<Option target="PropertyChangeEventTest" />
+			<Option target="DropTableTest" />
+		</Unit>
+		<Unit filename="InitiativeOrderDlg.cpp">
+			<Option target="Debug" />
+			<Option target="SerialSessionTest" />
+			<Option target="PropertyChangeEventTest" />
+			<Option target="DropTableTest" />
+		</Unit>
+		<Unit filename="InitiativeOrderDlg.qoh">
+			<Option compile="1" />
+			<Option target="Debug" />
+			<Option target="SerialSessionTest" />
+			<Option target="PropertyChangeEventTest" />
+			<Option target="DropTableTest" />
+		</Unit>
+		<Unit filename="InitiativeOrderDlgUi.ui">
+			<Option compile="1" />
+			<Option weight="0" />
+			<Option target="Debug" />
+			<Option target="SerialSessionTest" />
+			<Option target="PropertyChangeEventTest" />
+			<Option target="DropTableTest" />
+		</Unit>
+		<Unit filename="InstanceDisplayWidget.cpp">
+			<Option target="Debug" />
+			<Option target="SerialSessionTest" />
+			<Option target="PropertyChangeEventTest" />
+			<Option target="DropTableTest" />
+		</Unit>
+		<Unit filename="InstanceDisplayWidget.qoh">
+			<Option compile="1" />
+			<Option target="Debug" />
+			<Option target="SerialSessionTest" />
+			<Option target="PropertyChangeEventTest" />
+			<Option target="DropTableTest" />
+		</Unit>
+		<Unit filename="IntProperty.cpp">
+			<Option target="Debug" />
+			<Option target="SerialSessionTest" />
+			<Option target="PropertyChangeEventTest" />
+			<Option target="DropTableTest" />
+		</Unit>
+		<Unit filename="IntProperty.h">
+			<Option target="Debug" />
+			<Option target="SerialSessionTest" />
+			<Option target="PropertyChangeEventTest" />
+			<Option target="DropTableTest" />
+		</Unit>
+		<Unit filename="IntPropertyChangeEvent.cpp">
+			<Option target="Debug" />
+			<Option target="SerialSessionTest" />
+			<Option target="PropertyChangeEventTest" />
+			<Option target="DropTableTest" />
+		</Unit>
+		<Unit filename="IntPropertyChangeEvent.h">
+			<Option target="Debug" />
+			<Option target="SerialSessionTest" />
+			<Option target="PropertyChangeEventTest" />
+			<Option target="DropTableTest" />
+		</Unit>
+		<Unit filename="IntPropertyInstance.cpp">
+			<Option target="Debug" />
+			<Option target="SerialSessionTest" />
+			<Option target="PropertyChangeEventTest" />
+			<Option target="DropTableTest" />
+		</Unit>
+		<Unit filename="IntPropertyInstance.h">
+			<Option target="Debug" />
+			<Option target="SerialSessionTest" />
+			<Option target="PropertyChangeEventTest" />
+			<Option target="DropTableTest" />
+		</Unit>
+		<Unit filename="IntPropertyUi.ui">
+			<Option compile="1" />
+			<Option weight="0" />
+			<Option target="Debug" />
+			<Option target="SerialSessionTest" />
+			<Option target="PropertyChangeEventTest" />
+			<Option target="DropTableTest" />
+		</Unit>
+		<Unit filename="IntPropertyView.cpp">
+			<Option target="Debug" />
+			<Option target="SerialSessionTest" />
+			<Option target="PropertyChangeEventTest" />
+			<Option target="DropTableTest" />
+		</Unit>
+		<Unit filename="IntPropertyView.qoh">
+			<Option compile="1" />
+			<Option target="Debug" />
+			<Option target="SerialSessionTest" />
+			<Option target="PropertyChangeEventTest" />
+			<Option target="DropTableTest" />
+		</Unit>
+		<Unit filename="MakeNoteDlgUi.ui">
+			<Option compile="1" />
+			<Option weight="0" />
+			<Option target="Debug" />
+			<Option target="SerialSessionTest" />
+			<Option target="PropertyChangeEventTest" />
+			<Option target="DropTableTest" />
+		</Unit>
+		<Unit filename="NoteEvent.cpp">
+			<Option target="Debug" />
+			<Option target="SerialSessionTest" />
+			<Option target="PropertyChangeEventTest" />
+			<Option target="DropTableTest" />
+		</Unit>
+		<Unit filename="NoteEvent.h">
+			<Option target="Debug" />
+			<Option target="SerialSessionTest" />
+			<Option target="PropertyChangeEventTest" />
+			<Option target="DropTableTest" />
+		</Unit>
+		<Unit filename="PanningViewWidget.cpp" />
+		<Unit filename="PanningViewWidget.h">
+			<Option target="Debug" />
+			<Option target="SerialSessionTest" />
+			<Option target="PropertyChangeEventTest" />
+			<Option target="DropTableTest" />
+		</Unit>
+		<Unit filename="PanningViewWidgetTest.cpp">
+			<Option target="PanningViewWidgetTest" />
+		</Unit>
+		<Unit filename="ProjectSetupView.cpp">
+			<Option target="Debug" />
+			<Option target="SerialSessionTest" />
+			<Option target="PropertyChangeEventTest" />
+			<Option target="DropTableTest" />
+		</Unit>
+		<Unit filename="ProjectSetupView.qoh">
+			<Option compile="1" />
+			<Option target="Debug" />
+			<Option target="SerialSessionTest" />
+			<Option target="PropertyChangeEventTest" />
+			<Option target="DropTableTest" />
+		</Unit>
+		<Unit filename="ProjectSetupViewUi.ui">
+			<Option compile="1" />
+			<Option weight="0" />
+			<Option target="Debug" />
+			<Option target="SerialSessionTest" />
+			<Option target="PropertyChangeEventTest" />
+			<Option target="DropTableTest" />
+		</Unit>
+		<Unit filename="PropertyChangeEventTest.cpp">
+			<Option target="PropertyChangeEventTest" />
+		</Unit>
+		<Unit filename="PropertyTableItemDelegate.cpp">
+			<Option target="Debug" />
+			<Option target="SerialSessionTest" />
+			<Option target="PropertyChangeEventTest" />
+			<Option target="DropTableTest" />
+		</Unit>
+		<Unit filename="PropertyTableItemDelegate.qoh">
+			<Option compilerVar="CC" />
+			<Option compile="1" />
+			<Option target="Debug" />
+			<Option target="SerialSessionTest" />
+			<Option target="PropertyChangeEventTest" />
+			<Option target="DropTableTest" />
+		</Unit>
+		<Unit filename="SerialSessionTest.cpp">
+			<Option target="SerialSessionTest" />
+		</Unit>
+		<Unit filename="Session.cpp">
+			<Option target="Debug" />
+			<Option target="SerialSessionTest" />
+			<Option target="PropertyChangeEventTest" />
+			<Option target="DropTableTest" />
+		</Unit>
+		<Unit filename="Session.h">
+			<Option target="Debug" />
+			<Option target="SerialSessionTest" />
+			<Option target="PropertyChangeEventTest" />
+			<Option target="DropTableTest" />
+		</Unit>
+		<Unit filename="SessionView.cpp">
+			<Option target="Debug" />
+			<Option target="SerialSessionTest" />
+			<Option target="PropertyChangeEventTest" />
+			<Option target="DropTableTest" />
+		</Unit>
+		<Unit filename="SessionView.qoh">
+			<Option compile="1" />
+			<Option target="Debug" />
+			<Option target="SerialSessionTest" />
+			<Option target="PropertyChangeEventTest" />
+			<Option target="DropTableTest" />
+		</Unit>
+		<Unit filename="SessionViewUi.ui">
+			<Option compile="1" />
+			<Option weight="0" />
+			<Option target="Debug" />
+			<Option target="SerialSessionTest" />
+			<Option target="PropertyChangeEventTest" />
+			<Option target="DropTableTest" />
+		</Unit>
+		<Unit filename="Test.ui">
+			<Option compile="1" />
+			<Option weight="0" />
+			<Option target="DropTableTest" />
+		</Unit>
+		<Unit filename="XmlSerialDocument.cpp" />
+		<Unit filename="XmlSerialDocument.h" />
+		<Unit filename="XmlSerialElement.cpp">
+			<Option target="Debug" />
+			<Option target="SerialSessionTest" />
+			<Option target="PropertyChangeEventTest" />
+			<Option target="DropTableTest" />
+		</Unit>
+		<Unit filename="XmlSerialElement.h">
+			<Option target="Debug" />
+			<Option target="SerialSessionTest" />
+			<Option target="PropertyChangeEventTest" />
+			<Option target="DropTableTest" />
+		</Unit>
+		<Unit filename="main.cpp">
+			<Option target="Debug" />
+			<Option target="DropTableTest" />
+		</Unit>
+		<Extensions>
+			<code_completion />
+			<debugger>
+				<search_path add="$(#qt4.src)" />
+			</debugger>
+		</Extensions>
+	</Project>
+</CodeBlocks_project_file>

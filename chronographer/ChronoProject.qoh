@@ -1,0 +1,54 @@
+#pragma once
+
+#include <QObject>
+#include <QStringList>
+
+#include "CustomEvent.h"
+#include "ISerializable.h"
+
+
+class ACharacterProperty;
+class Character;
+class Session;
+
+class ChronoProject :
+    public QObject,
+    public ISerializable
+{
+    Q_OBJECT
+public:
+    ChronoProject() { }
+    ChronoProject( const IDeserializer* source ) { Deserialize(source); }
+    ~ChronoProject();
+
+    QStringList Characters() const;
+    void AddCharacter( const QString& name );
+    void RemoveCharacter( const QString& name );
+    void RenameCharacter( const QString& name, const QString& newName );
+
+    enum PropertyType { Value, Flag, Text };
+    QStringList Properties() const;
+    void AddProperty( PropertyType type, const QString& name );
+    void RemoveProperty( const QString& name );
+
+    QStringList CustomEvents() const;
+    void AddCustomEvent( const QString& name );
+    void RemoveCustomEvent( const QString& name );
+
+    Session* CreateSession() const;
+
+signals:
+    void Modified();
+
+
+public:
+    virtual void Serialize( ISerializer* dest ) const;
+
+protected:
+    virtual void Deserialize( const IDeserializer* source );
+
+private:
+    QList<Character*> _characters;
+    QList<ACharacterProperty*> _properties;
+    QList<CustomEvent::Factory*> _customEventFactories;
+};

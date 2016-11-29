@@ -1,0 +1,61 @@
+#pragma once
+
+#include <QMap>
+#include <QWidget>
+
+#include "CustomEvent.h"
+
+#include "SessionViewUi.h"
+
+
+class CharacterLabel;
+class EventButton;
+class QPushButton;
+class Session;
+
+class SessionView :
+    public QWidget,
+    private Ui::SessionViewUi
+{
+    Q_OBJECT
+public:
+    SessionView( Session* session, QWidget* parent = NULL );
+
+    void InsertInitiative( const QString& name, int position = -2 );
+    void InsertEventButton( CustomEvent::Factory* factory, int position = -4 );
+    void InsertEventButton( QPushButton* btn, int position = -4 );
+
+    virtual bool eventFilter( QObject* obj, QEvent* event );
+
+signals:
+    void Finished();
+
+protected:
+    virtual void showEvent( QShowEvent* event );
+
+private slots:
+    void StartStop();
+    void TogglePause();
+    void MakeNote();
+
+    void PostEvent( CustomEvent::Factory* factory );
+
+    void SwitchCharacter();
+    void DelayAction();
+    void RestoreAction();
+
+private:
+    bool _firstLayout;
+    int _idealWidth;
+    QFrame* _frmEvents;
+    QPushButton* _btnStartStop;
+    QPushButton* _btnPause;
+    QPushButton* _btnNote;
+    QList<EventButton*> _eventButtons;
+
+    Session* _session;
+    bool _started;
+
+    CharacterLabel* _curCharacter;
+
+};

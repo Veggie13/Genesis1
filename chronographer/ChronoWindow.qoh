@@ -1,0 +1,51 @@
+#pragma once
+
+#include <QMainWindow>
+#include <QString>
+#include <QTime>
+
+#include "ChronoWindowUi.h"
+
+
+class ChronoProject;
+class ProjectSetupView;
+class Session;
+class SessionView;
+
+class ChronoWindow :
+    public QMainWindow,
+    private Ui::ChronoWindowUi
+{
+    Q_OBJECT
+public:
+    ChronoWindow();
+    virtual ~ChronoWindow();
+
+public slots:
+    void NewProject();
+    void LoadProject();
+    void SaveProject();
+    void SaveProjectAs();
+
+    void BeginSession();
+    void EndSession();
+
+protected:
+    virtual void closeEvent( QCloseEvent* event );
+
+private slots:
+    void OnModified();
+
+private:
+    bool CheckSaveAndClean();
+
+    bool _modifiedFlag;
+    ChronoProject* _project;
+    QString _projectFilename;
+
+    Session* _session;
+    QTime _sessionStart;
+
+    ProjectSetupView* _setupView;
+    SessionView* _sessionView;
+};

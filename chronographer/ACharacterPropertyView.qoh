@@ -1,0 +1,26 @@
+#pragma once
+
+#include <QWidget>
+
+
+class Character;
+
+class ACharacterPropertyView : public QWidget
+{
+    Q_OBJECT
+public:
+    ACharacterPropertyView( QWidget* parent = NULL ): QWidget(parent), _source(NULL) { }
+    virtual ~ACharacterPropertyView() { }
+
+    virtual void InitData() = 0;
+    virtual QString Display() const = 0;
+
+    void SetSource( Character* source ) { _source = source; }
+
+signals:
+    void dataSubmitted( const QString& data );
+
+protected:
+    Character* _source;
+
+};

@@ -1,0 +1,41 @@
+#pragma once
+
+#include <QItemDelegate>
+
+
+class Session;
+
+class PropertyTableItemDelegate : public QItemDelegate
+{
+    Q_OBJECT
+public:
+    PropertyTableItemDelegate( Session* session );
+
+    void SetNextSource( const QString& name );
+
+
+    virtual QWidget* createEditor(
+        QWidget* parent,
+        const QStyleOptionViewItem& option,
+        const QModelIndex& index ) const;
+
+    virtual void setEditorData(
+        QWidget* editor,
+        const QModelIndex& index ) const;
+
+    virtual void setModelData(
+        QWidget* editor,
+        QAbstractItemModel* model,
+        const QModelIndex& index ) const;
+
+protected:
+    virtual bool eventFilter( QObject* watched, QEvent* event );
+
+private slots:
+    void editorDataSubmitted();
+
+private:
+    Session* _session;
+    mutable QString _nextSource;
+
+};

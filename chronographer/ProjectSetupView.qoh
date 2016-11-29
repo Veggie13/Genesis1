@@ -1,0 +1,40 @@
+#pragma once
+
+#include <QWidget>
+
+#include "ProjectSetupViewUi.h"
+
+
+class ChronoProject;
+
+class ProjectSetupView :
+    public QWidget,
+    private Ui::ProjectSetupViewUi
+{
+    Q_OBJECT
+public:
+    ProjectSetupView( ChronoProject* project, QWidget* parent = NULL );
+
+private slots:
+    void AddCharacter();
+    void RemoveCharacter();
+    void EditCharacter();
+    void UpdateCharacterAddState();
+    void UpdateCharacterSelectionState(const QItemSelection&, const QItemSelection&);
+
+    void AddProperty();
+    void RemoveProperty();
+    void EditProperty();
+    void UpdatePropertyAddState();
+    void UpdatePropertySelectionState(const QItemSelection&, const QItemSelection&);
+
+    void AddCustomEvent();
+    void RemoveCustomEvent();
+    void EditCustomEvent();
+    void UpdateCustomEventAddState();
+    void UpdateCustomEventSelectionState(const QItemSelection&, const QItemSelection&);
+
+private:
+    ChronoProject* _project;
+
+};

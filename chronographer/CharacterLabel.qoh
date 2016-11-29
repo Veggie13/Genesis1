@@ -1,0 +1,24 @@
+#pragma once
+
+#include "DraggableLabel.h"
+
+
+class CharacterLabel : public DraggableLabel
+{
+    Q_OBJECT
+public:
+    CharacterLabel( const QString& name, QWidget* parent = NULL );
+
+    void Click();
+
+    void SetDepressed( bool depress );
+
+signals:
+    void Clicked();
+    void DoubleRightClicked();
+
+protected:
+    virtual void mouseReleaseEvent( QMouseEvent* event );
+    virtual void mouseDoubleClickEvent( QMouseEvent* event );
+
+};

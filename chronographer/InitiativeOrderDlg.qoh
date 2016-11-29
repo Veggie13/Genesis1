@@ -1,0 +1,22 @@
+#pragma once
+
+#include <QDialog>
+
+#include "InitiativeOrderDlgUi.h"
+
+
+class InitiativeOrderDlg :
+    public QDialog,
+    private Ui::InitiativeOrderDlgUi
+{
+    Q_OBJECT
+public:
+    InitiativeOrderDlg( const QStringList& names, QWidget* parent = NULL );
+
+    QStringList Order() const;
+
+private slots:
+    void MoveUp();
+    void MoveDown();
+
+};

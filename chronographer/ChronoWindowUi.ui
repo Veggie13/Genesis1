@@ -1,0 +1,96 @@
+<ui version="4.0" >
+ <class>ChronoWindowUi</class>
+ <widget class="QMainWindow" name="ChronoWindowUi" >
+  <property name="geometry" >
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>800</width>
+    <height>600</height>
+   </rect>
+  </property>
+  <property name="windowTitle" >
+   <string>Chronographer</string>
+  </property>
+  <widget class="QWidget" name="centralwidget" />
+  <widget class="QMenuBar" name="menubar" >
+   <property name="geometry" >
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>800</width>
+     <height>19</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menu_File" >
+    <property name="title" >
+     <string>&amp;File</string>
+    </property>
+    <addaction name="_actFileNew" />
+    <addaction name="_actFileLoad" />
+    <addaction name="_actFileSave" />
+    <addaction name="_actFileSaveAs" />
+    <addaction name="separator" />
+    <addaction name="_actFileExit" />
+   </widget>
+   <widget class="QMenu" name="_mnuProject" >
+    <property name="title" >
+     <string>&amp;Project</string>
+    </property>
+    <addaction name="_actProjectBeginSession" />
+   </widget>
+   <addaction name="menu_File" />
+   <addaction name="_mnuProject" />
+  </widget>
+  <widget class="QStatusBar" name="statusbar" />
+  <action name="_actFileNew" >
+   <property name="text" >
+    <string>&amp;New</string>
+   </property>
+  </action>
+  <action name="_actFileLoad" >
+   <property name="text" >
+    <string>&amp;Open Project</string>
+   </property>
+  </action>
+  <action name="_actFileSave" >
+   <property name="text" >
+    <string>&amp;Save Project</string>
+   </property>
+  </action>
+  <action name="_actFileSaveAs" >
+   <property name="text" >
+    <string>Save Project &amp;As...</string>
+   </property>
+  </action>
+  <action name="_actFileExit" >
+   <property name="text" >
+    <string>E&amp;xit</string>
+   </property>
+  </action>
+  <action name="_actProjectBeginSession" >
+   <property name="text" >
+    <string>Begin &amp;Session</string>
+   </property>
+  </action>
+ </widget>
+ <resources/>
+ <connections>
+  <connection>
+   <sender>_actFileExit</sender>
+   <signal>triggered()</signal>
+   <receiver>ChronoWindowUi</receiver>
+   <slot>close()</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>399</x>
+     <y>299</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+</ui>
