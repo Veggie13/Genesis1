@@ -1,0 +1,51 @@
+#ifndef RANDOMSOUND_QOH
+#define RANDOMSOUND_QOH
+
+#include "A_SoundInstance.qoh"
+
+
+class QTimer;
+
+class RandomSound : public A_SoundInstance
+{
+    Q_OBJECT
+
+public:
+    enum PeriodType {MULT = 0, TIME = 1};
+    static const PeriodType PeriodTypes[];
+
+    RandomSound(A_SoundImport* import, QObject* parent=NULL);
+    virtual ~RandomSound();
+
+    double Period();
+    PeriodType GetPeriodType();
+    int Variance();
+
+public slots:
+    void SetPeriod(double per);
+    void SetPeriodType(PeriodType type);
+    void SetVariance(int var);
+
+protected:
+    virtual void InternalSuspend();
+    virtual void InternalResume();
+
+    virtual void UpdateImportVolume();
+    virtual void UpdateImportPause();
+
+private slots:
+    void PlaySound();
+
+private:
+    bool IsPeriodValid(double per);
+    int TimerLength();
+
+    double m_period;
+    PeriodType m_periodType;
+    int m_variance;
+
+    QTimer* m_timer;
+
+};
+
+#endif

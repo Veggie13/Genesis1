@@ -1,8 +1,0 @@
-<RCC>
-    <qresource prefix="/images" >
-        <file alias="genesis_splash.png">images/genesis_splash.png</file>
-        <file alias="genesis_med.png">images/genesis_med.png</file>
-        <file alias="genesis_zoom_ico.png">images/genesis_zoom_ico.png</file>
-        <file alias="genesis_zoom_sm.png">images/genesis_zoom_sm.png</file>
-    </qresource>
-</RCC>

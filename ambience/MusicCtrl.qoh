@@ -1,0 +1,36 @@
+#ifndef MUSICCTRL_QOH
+#define MUSICCTRL_QOH
+
+#include "MasterCtrl.qoh"
+
+
+class StartableSound;
+
+class MusicCtrl : public MasterCtrl
+{
+    Q_OBJECT
+
+public:
+    MusicCtrl(QObject* parent = NULL);
+
+    bool SharesCurrentSongWith(const MusicCtrl& other);
+    StartableSound* CurrentSong();
+
+signals:
+    void SongSelected(StartableSound* song);
+
+public slots:
+    void SetCurrentSong(StartableSound* song);
+    void SelectRandomSong();
+
+protected:
+    virtual void InternalResume();
+    virtual void InternalAddInstance(A_SoundInstance* newSound);
+    virtual void InternalRemoveDeletedInstance(A_SoundInstance* doomed);
+
+private:
+    StartableSound* m_curSong;
+
+};
+
+#endif

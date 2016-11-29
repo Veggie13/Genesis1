@@ -1,0 +1,62 @@
+#ifndef A_IMPORTMANAGER_QOH
+#define A_IMPORTMANAGER_QOH
+
+#include <QMap>
+#include <QObject>
+#include <QStringList>
+
+
+class A_SoundImport;
+
+class A_ImportManager : public QObject
+{
+    Q_OBJECT
+
+public:
+    A_ImportManager();
+    virtual ~A_ImportManager();
+
+    const QList<A_SoundImport*>& ImportList();
+    const QStringList& TitleList();
+    const QStringList& FileList();
+
+    A_SoundImport* GetImport(const QString& title);
+
+    void SetProjectPath(const QString& path);
+    const QString& ProjectPath();
+
+    bool IsCopyLocalOn();
+
+public slots:
+    A_SoundImport* ImportFile(const QString& title, const QString& filename);
+    void SetCopyLocal(bool copy);
+
+signals:
+    void Modified();
+    void CopyLocalActivated(const QList<A_SoundImport*>& external);
+
+protected:
+    virtual A_SoundImport* InternalImport(
+        const QString& title,
+        const QString& filename ) = 0;
+
+private slots:
+    void OnImportDeleted();
+    void Rename(const QString& oldTitle, const QString& newTitle);
+    void ChangeFile(const QString& oldFilename, const QString& newFilename);
+
+private:
+    QList<A_SoundImport*>   m_importList;
+    QStringList             m_titleList;
+    QStringList             m_fileList;
+
+    QMap<QString, A_SoundImport*> m_importMap;
+
+    bool    m_copyLocal;
+    QString m_projectPath;
+
+    static int g_refCount;
+
+};
+
+#endif

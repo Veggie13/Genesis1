@@ -1,0 +1,44 @@
+#ifndef SCENESTATE_QOH
+#define SCENESTATE_QOH
+
+#include <QLabel>
+
+#include "SceneStateUi.h"
+
+
+class Project;
+class Scene;
+class State;
+class TitleCarrierListModel;
+
+class SceneState : public QLabel, private Ui::SceneStateUi
+{
+    Q_OBJECT
+
+public:
+    SceneState(QWidget* parent = NULL);
+
+    void Associate(Project* proj);
+
+signals:
+    void StateSwitched(State* state);
+
+protected slots:
+    void OnSwitchSelected();
+    void OnSceneChanged(const QString& sceneName);
+    void OnStateChanged(State* newCurState);
+    void UpdateLists();
+    void RemoveProject();
+
+private:
+    Project* m_project;
+
+    TitleCarrierListModel*  m_sceneListModel;
+    TitleCarrierListModel*  m_stateListModel;
+
+    QString m_sceneName;
+    QString m_stateName;
+
+};
+
+#endif

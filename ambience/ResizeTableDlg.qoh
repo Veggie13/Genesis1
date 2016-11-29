@@ -1,0 +1,32 @@
+#ifndef RESIZETABLEDLG_QOH
+#define RESIZETABLEDLG_QOH
+
+#include <QDialog>
+
+#include "ResizeTableDlgUi.h"
+
+
+class ResizeTableDlg : public QDialog, private Ui::ResizeTableDlgUi
+{
+    Q_OBJECT
+
+public:
+    ResizeTableDlg(int rows, int cols, QWidget* parent=NULL);
+    virtual ~ResizeTableDlg();
+
+    void SetDimensions(int rows, int cols);
+
+public slots:
+    virtual void accept();
+    virtual void reject();
+
+signals:
+    void SizeChanged(int rows, int cols);
+
+private:
+    int m_rows;
+    int m_cols;
+
+};
+
+#endif

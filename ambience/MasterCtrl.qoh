@@ -1,0 +1,58 @@
+#ifndef MASTERCTRL_QOH
+#define MASTERCTRL_QOH
+
+#include <QList>
+#include <QObject>
+
+
+class A_SoundInstance;
+
+class MasterCtrl : public QObject
+{
+    Q_OBJECT
+
+public:
+    MasterCtrl(QObject* parent = NULL);
+    virtual ~MasterCtrl();
+
+    const QList<A_SoundInstance*>& Children();
+    QList<A_SoundInstance*> SharedWith(const MasterCtrl& other);
+
+    int  Volume();
+    bool IsPaused();
+
+    void Suspend();
+    void Resume();
+    bool IsActive();
+
+public slots:
+    void SetVolume(int vol);
+    void SetPaused(bool pause);
+
+    void AddInstance(A_SoundInstance* newSound);
+
+signals:
+    void Modified();
+    void MasterVolumeChanged(int volume);
+    void MasterPauseToggled(bool pause);
+    void ChildListChanged();
+
+protected slots:
+    void RemoveDeletedInstance();
+
+protected:
+    virtual void InternalSuspend();
+    virtual void InternalResume();
+    virtual void InternalAddInstance(A_SoundInstance* newSound);
+    virtual void InternalRemoveDeletedInstance(A_SoundInstance* doomed);
+
+    QList<A_SoundInstance*> m_instanceList;
+
+private:
+    int  m_volume;
+    bool m_paused;
+    bool m_active;
+
+};
+
+#endif

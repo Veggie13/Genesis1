@@ -1,0 +1,64 @@
+#ifndef FILESELECTIONDLG_QOH
+#define FILESELECTIONDLG_QOH
+
+#include <QDialog>
+#include <QStringList>
+
+#include "FileSelectionDlgUi.h"
+
+
+class A_ImportManager;
+class A_SoundImport;
+class I_ImportTarget;
+class TitleCarrierListModel;
+
+class FileSelectionDlg : public QDialog, private Ui::FileSelectionDlgUi
+{
+    Q_OBJECT
+
+public:
+    FileSelectionDlg(QWidget* parent=NULL);
+    virtual ~FileSelectionDlg();
+
+    void Associate(A_ImportManager* importMgr);
+
+public slots:
+    void ExecSingleSelection(I_ImportTarget* target);
+    void ExecMultiSelection(I_ImportTarget* target);
+    int ExecNoSelection();
+
+    virtual void reject();
+
+    void RequestCopyLocal(QList<A_SoundImport*> externalFiles);
+
+signals:
+    void ImportRequested(const QString& title, const QString& filename);
+
+protected:
+    virtual void showEvent(QShowEvent* evt);
+
+private slots:
+    void ImportFiles();
+    void DeleteSelectedFiles();
+    void RenameSelectedFiles();
+    void ReimportSelectedFiles();
+
+    void UpdateSelectionButtons();
+    void UpdateList();
+    void RemoveMgr();
+
+private:
+    void GetFileList(QStringList& fileList);
+    void GetFilename(QString& filename);
+    void FilterFileList(QStringList& fileList);
+    bool GetTitleForFile(const QString& filename, QString& title);
+    bool ShowTitleDlg(const QString& filename, QString& title);
+    bool CopyFileToLocalPath(const QString& filename, QString& newFilename);
+
+
+    A_ImportManager*        m_importMgr;
+    TitleCarrierListModel*  m_importListModel;
+
+};
+
+#endif

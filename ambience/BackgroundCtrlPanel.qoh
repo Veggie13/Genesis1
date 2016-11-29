@@ -1,0 +1,41 @@
+#ifndef BACKGROUNDCTRLPANEL_QOH
+#define BACKGROUNDCTRLPANEL_QOH
+
+#include <QLabel>
+
+#include "BackgroundCtrlUi.h"
+
+
+class I_ImportTarget;
+class MasterCtrl;
+class State;
+class TitleCarrierListModel;
+
+class BackgroundCtrlPanel : public QLabel, private Ui::BackgroundCtrlUi
+{
+    Q_OBJECT
+
+public:
+    BackgroundCtrlPanel(QWidget* parent = NULL);
+    virtual ~BackgroundCtrlPanel();
+
+public slots:
+    void Associate(State* state);
+
+signals:
+    void AddSelected(I_ImportTarget* target);
+
+protected slots:
+    void OnAddSelected();
+    void OnDeleteSelected();
+    void RemoveCtrl();
+    void UpdateSelectionControls();
+    void UpdateList();
+
+private:
+    MasterCtrl*             m_bgCtrl;
+    TitleCarrierListModel*  m_bgListModel;
+
+};
+
+#endif

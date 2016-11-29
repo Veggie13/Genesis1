@@ -1,0 +1,103 @@
+#ifndef AMBMAINWINDOW_QOH
+#define AMBMAINWINDOW_QOH
+
+#include <QMap>
+#include <QStringList>
+
+#include "PopupToolMainWindow.qoh"
+#include "Soundboard.qoh"
+
+#include "AmbMainWindowUi.h"
+
+
+class BackgroundCtrlPanel;
+class FileSelectionDlg;
+class MusicCtrlPanel;
+class QHBoxLayout;
+class QSettings;
+class Project;
+class RandomCtrlPanel;
+class Scene;
+class SceneEditorDlg;
+class SceneState;
+class SoundboardLayout;
+class State;
+
+class AmbMainWindow : public PopupToolMainWindow, private Ui::AmbMainWindowUi
+{
+    Q_OBJECT
+
+public:
+    AmbMainWindow(int argc, char* argv[], QWidget* parent=NULL);
+    virtual ~AmbMainWindow();
+
+protected:
+    void Associate(Project* proj);
+
+protected slots:
+    void RemoveProject();
+
+    virtual void closeEvent(QCloseEvent* evt);
+    virtual void showEvent(QShowEvent* evt);
+
+    void OnStartup();
+
+    void Load();
+    void LoadRecent();
+    void Save();
+    void SaveAs();
+
+    void NewProject();
+    void LoadProject(const QString& filename);
+    void SaveProject(const QString& filename);
+
+    void SetModified();
+    void ClearModified();
+
+    void ShowAboutDlg();
+
+    void SetCopyLocal(bool copy);
+
+private:
+    void AddToRecentProjectList(const QString& filename);
+    void PutRecentProjectListOnMenu();
+    void LoadAndApplySettings();
+
+    void PersistLocalPath();
+
+    bool CheckModified();
+    void UpdateAppTitle();
+
+
+    SceneState*             m_sceneState;
+    MusicCtrlPanel*         m_musicCtrl;
+    BackgroundCtrlPanel*    m_bgCtrl;
+    RandomCtrlPanel*        m_randCtrl;
+    SoundboardLayout*       m_sndboardObj;
+
+    Project*    m_project;
+    QString     m_projectPath;
+    bool        m_modified;
+
+    SceneEditorDlg*     m_sceneEditDlg;
+    FileSelectionDlg*   m_longFileDlg;
+    FileSelectionDlg*   m_shortFileDlg;
+
+    bool m_starting;
+
+    QSettings*              m_settings;
+    QStringList             m_recentFilesList;
+    QMap<QAction*, QString> m_recentFilesMap;
+
+    QWidget* m_tempFrame;
+
+
+    static const unsigned int   VERSION_CODE;
+    static const char           APP_NAME[];
+    static const char           COMPANY_NAME[];
+    static const int            RECENT_FILES_LIST_MAX;
+    static QString ProjectTitle(const QString& filename);
+
+};
+
+#endif
