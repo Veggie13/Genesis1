@@ -3,6 +3,8 @@
 #include "MusicCtrl.qoh"
 #include "QException.h"
 #include "Scene.qoh"
+#include "Soundboard.qoh"
+#include "SoundboardManager.qoh"
 #include "StartableSound.qoh"
 #include "State.qoh"
 
@@ -13,14 +15,18 @@ Project::Project(QObject* parent)
 :   QObject(parent),
     m_scenes(),
     m_curState(NULL),
+    m_soundboards(),
     m_streamMgr(NULL),
-    m_sampleMgr(NULL)
+    m_sampleMgr(NULL),
+    m_sndboardMgr(NULL)
 {
     m_streamMgr = new StreamImportManager;
     m_sampleMgr = new SampleImportManager;
+    m_sndboardMgr = new SoundboardManager;
 
     connect(m_streamMgr, SIGNAL( Modified() ), this, SIGNAL( Modified() ));
     connect(m_sampleMgr, SIGNAL( Modified() ), this, SIGNAL( Modified() ));
+    connect(m_sndboardMgr, SIGNAL( Modified() ), this, SIGNAL( Modified() ));
 }
 
 Project::~Project()
@@ -32,13 +38,26 @@ Project::~Project()
         delete (*it);
     }
 
+    QList<Soundboard*>::iterator it2;
+    for (it2 = m_soundboards.begin(); it2 != m_soundboards.end(); it2++)
+    {
+        (*it2)->disconnect(this);
+        delete (*it2);
+    }
+
     delete m_streamMgr;
     delete m_sampleMgr;
+    delete m_sndboardMgr;
 }
 
 const QList<Scene*>& Project::SceneList()
 {
     return m_scenes;
+}
+
+const QList<Soundboard*>& Project::SoundboardList()
+{
+    return m_soundboards;
 }
 
 A_ImportManager* Project::StreamManager()
@@ -49,6 +68,11 @@ A_ImportManager* Project::StreamManager()
 A_ImportManager* Project::SampleManager()
 {
     return m_sampleMgr;
+}
+
+SoundboardManager* Project::GeneralSoundboardManager()
+{
+    return m_sndboardMgr;
 }
 
 void Project::AddScene(Scene* newScene)
@@ -66,6 +90,24 @@ void Project::AddScene(Scene* newScene)
     connect(newScene, SIGNAL( destroyed() ), this, SLOT  ( RemoveDeletedScene() ));
 
     m_scenes.append(newScene);
+    emit Modified();
+}
+
+void Project::AddSoundboard(Soundboard* newBoard)
+{
+    if (newBoard == NULL)
+        throw QException("Programming Error: "
+                         "Tried to add NULL Soundboard!");
+
+    int index = m_soundboards.lastIndexOf(newBoard);
+    if (-1 != index)
+        throw QException("Programming Error: "
+                         "Tried to add a Soundboard that was already present!");
+
+    connect(newBoard, SIGNAL( Modified()  ), this, SIGNAL( Modified()                ));
+    connect(newBoard, SIGNAL( destroyed() ), this, SLOT  ( RemoveDeletedSoundboard() ));
+
+    m_soundboards.append(newBoard);
     emit Modified();
 }
 
@@ -146,4 +188,18 @@ void Project::RemoveDeletedScene()
 void Project::RemoveDeletedCurrentState()
 {
     SetCurrentState(NULL);
+}
+
+void Project::RemoveDeletedSoundboard()
+{
+    Soundboard* doomed = reinterpret_cast<Soundboard*>(sender());
+    if (doomed == NULL)
+        return;
+
+    int index = m_soundboards.lastIndexOf(doomed);
+    if (-1 == index)
+        return;
+
+    m_soundboards.removeAt(index);
+    emit Modified();
 }

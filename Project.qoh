@@ -8,6 +8,8 @@
 class A_ImportManager;
 class SampleImportManager;
 class Scene;
+class Soundboard;
+class SoundboardManager;
 class State;
 class StreamImportManager;
 
@@ -19,12 +21,16 @@ public:
     Project(QObject* parent = NULL);
     ~Project();
 
-    const QList<Scene*>& SceneList();
+    const QList<Scene*>&        SceneList();
+    const QList<Soundboard*>&   SoundboardList();
 
     A_ImportManager* StreamManager();
     A_ImportManager* SampleManager();
 
+    SoundboardManager* GeneralSoundboardManager();
+
     void AddScene(Scene* newScene);
+    void AddSoundboard(Soundboard* newBoard);
 
     State* CurrentState();
 
@@ -37,14 +43,19 @@ signals:
 
 private slots:
     void RemoveDeletedScene();
+    void RemoveDeletedSoundboard();
     void RemoveDeletedCurrentState();
 
 private:
     QList<Scene*> m_scenes;
     State* m_curState;
 
+    QList<Soundboard*> m_soundboards;
+
     StreamImportManager* m_streamMgr;
     SampleImportManager* m_sampleMgr;
+
+    SoundboardManager* m_sndboardMgr;
 
 };
 
